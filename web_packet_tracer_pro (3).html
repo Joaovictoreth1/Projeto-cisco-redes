@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Packet Tracer Pro</title>
+    <!-- Tailwind CSS for rapid, modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Styles & Scrollbars */
+        body { margin: 0; overflow: hidden; user-select: none; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Workspace Grid Background */
+        #workspace {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(#e2e8f0 1px, transparent 1px),
+                linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+            cursor: crosshair;
+        }
+
+        /* Device Nodes */
+        .device {
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            transition: filter 0.2s;
+        }
+        .device.selected {
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8));
+        }
+        .device.ping-src {
+            filter: drop-shadow(0 0 10px rgba(234, 179, 8, 0.9));
+        }
+        .device:active {
+            cursor: grabbing !important;
+        }
+        .device-icon {
+            width: 48px;
+            height: 48px;
+            transition: transform 0.1s;
+        }
+        .device:hover .device-icon {
+            transform: scale(1.1);
+        }
+        .device-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 2px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            pointer-events: none;
+            white-space: nowrap;
+            color: #334155;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .device-ip-label {
+            font-size: 9px;
+            color: #64748b;
+            font-family: monospace;
+            background: rgba(255,255,255,0.8);
+            padding: 0 4px;
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        /* Cables */
+        .link-line {
+            stroke: #0f172a;
+            stroke-width: 2.5;
+            transition: stroke 0.3s, stroke-width 0.3s;
+            pointer-events: stroke;
+            cursor: pointer;
+        }
+        .link-line:hover {
+            stroke: #ef4444;
+            stroke-width: 4;
+        }
+        .link-dot {
+            fill: #22c55e; /* Green for up */
+            stroke: #fff;
+            stroke-width: 1;
+        }
+
+        /* Drawing Line Animation */
+        #drawing-line {
+            stroke: #3b82f6;
+            stroke-width: 2;
+            stroke-dasharray: 6,6;
+            animation: dash 1s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -12; }
+        }
+
+        /* Packet Animation */
+        .packet {
+            position: absolute;
+            width: 24px;
+            height: 18px;
+            background-color: #3b82f6;
+            border: 2px solid #1e3a8a;
+            border-radius: 3px;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: left 0.5s linear, top 0.5s linear;
+        }
+        .packet::after {
+            content: '✉';
+            font-size: 12px;
+        }
+        .packet.return { background-color: #10b981; border-color: #047857; }
+
+        /* Tools */
+        .tool-active {
+            background-color: #dbeafe !important;
+            color: #1d4ed8 !important;
+            border: 1px solid #bfdbfe;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Terminal */
+        .cli-container { background-color: #000; color: #4ade80; font-family: 'Courier New', Courier, monospace; }
+        .cli-input { background: transparent; border: none; outline: none; color: #4ade80; flex: 1; width: 100%; }
+    </style>
+</head>
+
+<body class="flex flex-col h-screen text-slate-800">
+
+    <!-- Header / Menu Bar -->
+    <header class="h-12 bg-slate-800 text-white flex items-center justify-between px-4 z-40 shadow-md">
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-2">
+                <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <span class="font-bold text-lg tracking-wide">Web Packet Tracer <span class="text-sky-400">PRO</span></span>
+            </div>
+            <nav class="hidden md:flex space-x-4 text-sm text-slate-300">
+                <button class="hover:text-white transition">File</button>
+                <button class="hover:text-white transition">Edit</button>
+                <button class="hover:text-white transition">Options</button>
+                <button class="hover:text-white transition">View</button>
+                <button class="hover:text-white transition">Tools</button>
+                <button class="hover:text-white transition">Extensions</button>
+                <button class="hover:text-white transition">Help</button>
+            </nav>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="saveTopology()" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg> Save
+            </button>
+            <button onclick="loadTopology()" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> Load
+            </button>
+            <button onclick="clearWorkspace()" class="bg-red-900 hover:bg-red-800 border border-red-700 text-red-100 px-3 py-1.5 rounded text-xs font-semibold transition ml-2">
+                Clear All
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Toolbar -->
+    <div class="h-10 bg-slate-100 border-b border-slate-300 flex items-center px-4 space-x-2 z-30 shadow-sm">
+        <button onclick="setTool('pointer')" id="tool-pointer" class="tool-btn tool-active p-1.5 rounded bg-white border border-transparent hover:border-slate-300 transition text-slate-600" title="Select (Esc)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+        </button>
+        <button onclick="setTool('delete')" id="tool-delete" class="tool-btn p-1.5 rounded bg-white border border-transparent hover:border-slate-300 transition text-red-500" title="Delete (Del)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+        </button>
+        <div class="w-px h-6 bg-slate-300 mx-2"></div>
+        <button onclick="setTool('cable')" id="tool-cable" class="tool-btn p-1.5 rounded bg-white border border-transparent hover:border-slate-300 transition text-orange-500" title="Connect (C)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+        </button>
+        <div class="w-px h-6 bg-slate-300 mx-2"></div>
+        <button onclick="setTool('ping')" id="tool-ping" class="tool-btn p-1.5 rounded bg-white border border-transparent hover:border-slate-300 transition text-yellow-600" title="Add Simple PDU (P)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        </button>
+        <span id="tool-status" class="ml-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Mode: Select Device</span>
+    </div>
+
+    <!-- Middle Area (Workspace & Right Panel) -->
+    <div class="flex flex-1 overflow-hidden relative">
+        
+        <!-- Workspace Canvas -->
+        <main id="workspace" class="flex-1 relative overflow-auto shadow-inner">
+            <!-- SVG Layer for Cables -->
+            <svg id="cables-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10"></svg>
+            <svg id="drawing-cable" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10 hidden">
+                <line id="drawing-line" x1="0" y1="0" x2="0" y2="0" />
+            </svg>
+            <!-- HTML Layer for Devices -->
+            <div id="devices-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-20"></div>
+            <!-- HTML Layer for Packet Animation -->
+            <div id="packets-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-30"></div>
+        </main>
+
+        <!-- Right Properties Panel -->
+        <aside id="properties-panel" class="w-80 bg-white border-l border-slate-300 flex flex-col shadow-2xl z-40 transition-transform duration-300 transform translate-x-full absolute right-0 top-0 h-full">
+            
+            <!-- Panel Header -->
+            <div class="h-12 bg-slate-700 text-white flex items-center justify-between px-4 shrink-0">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="font-semibold text-sm tracking-wide" id="prop-header-title">Properties</span>
+                </div>
+                <button onclick="closeProperties()" class="hover:text-red-400 transition rounded-full p-1 hover:bg-slate-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="flex border-b border-slate-200 text-xs font-bold text-slate-500 bg-slate-100 shrink-0">
+                <button class="flex-1 py-2.5 hover:bg-white bg-white border-b-2 border-blue-500 text-blue-600 transition" id="tab-btn-config" onclick="switchTab('config')">Config</button>
+                <button class="flex-1 py-2.5 hover:bg-white border-b-2 border-transparent transition" id="tab-btn-cli" onclick="switchTab('cli')">Desktop / CLI</button>
+            </div>
+
+            <!-- Config Tab Content -->
+            <div id="tab-config" class="p-5 flex-1 overflow-y-auto bg-white">
+                <div class="flex items-center justify-center mb-6 h-16" id="prop-big-icon"></div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Display Name</label>
+                        <input type="text" id="prop-name" class="w-full border border-slate-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" onchange="updateDeviceProp('name')">
+                    </div>
+                    
+                    <!-- Gateway (End Devices only) -->
+                    <div id="prop-gateway-container">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 mt-4">Default Gateway</label>
+                        <input type="text" id="prop-gateway" class="w-full border border-slate-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono" placeholder="0.0.0.0" onchange="updateDeviceProp('gateway')">
+                    </div>
+
+                    <hr class="my-4 border-slate-200">
+
+                    <!-- Interface Selector -->
+                    <div id="prop-interface-container">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Interface</label>
+                        <select id="prop-interface-sel" class="w-full border border-slate-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500 bg-slate-50 font-semibold" onchange="loadInterfaceProps()">
+                        </select>
+                    </div>
+
+                    <!-- IP & Mask -->
+                    <div id="prop-ip-mask-container">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 mt-3">IP Address</label>
+                        <input type="text" id="prop-ip" class="w-full border border-slate-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono" placeholder="0.0.0.0" onchange="updateDeviceProp('ip')">
+                        
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 mt-3">Subnet Mask</label>
+                        <input type="text" id="prop-mask" class="w-full border border-slate-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono" placeholder="0.0.0.0" onchange="updateDeviceProp('mask')">
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">MAC Address (Hardware)</label>
+                        <input type="text" id="prop-mac" class="w-full border-none bg-slate-100 rounded px-3 py-2 text-xs text-slate-500 font-mono" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLI Tab Content -->
+            <div id="tab-cli" class="flex-1 cli-container p-3 hidden flex-col relative">
+                <div id="cli-output" class="whitespace-pre-wrap flex-1 break-words overflow-y-auto text-[13px] leading-relaxed pb-8"></div>
+                <div class="flex items-center mt-1 shrink-0 absolute bottom-3 left-3 right-3 bg-black">
+                    <span id="cli-prompt" class="font-bold">C:\></span>
+                    <input type="text" id="cli-input" class="cli-input ml-2 text-[13px]" onkeydown="handleCliInput(event)" autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </aside>
+
+        <!-- Simulation PDU Log (Bottom Right) -->
+        <div id="pdu-panel" class="absolute bottom-4 right-4 w-72 bg-white border border-slate-200 shadow-xl rounded-md flex flex-col z-30">
+            <div class="bg-slate-100 px-3 py-2 text-xs font-bold uppercase tracking-wider border-b border-slate-200 flex justify-between items-center text-slate-600 rounded-t-md">
+                <span>Simulation Events</span>
+                <button onclick="clearPdus()" class="hover:text-red-500 transition font-normal lowercase bg-white border border-slate-300 px-2 py-0.5 rounded">clear</button>
+            </div>
+            <div id="pdu-list" class="h-32 overflow-y-auto text-[11px] p-2 space-y-1">
+                <div class="text-slate-400 text-center italic mt-10">No events logged.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Equipment Box -->
+    <footer class="h-32 bg-white border-t border-slate-300 flex z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] shrink-0">
+        
+        <!-- Category Selection (Left) -->
+        <div class="w-24 bg-slate-100 border-r border-slate-300 flex flex-col shrink-0">
+            <button onclick="selectCategory('routers')" class="flex-1 hover:bg-slate-200 flex items-center justify-center border-b border-slate-300 transition" id="cat-routers" title="Routers">
+                <!-- Router Icon -->
+                <svg class="w-8 h-8 text-rose-600" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="40" ry="40" fill="currentColor"/><path d="M50 25 L 50 75 M 30 40 L 50 25 L 70 40 M 30 60 L 50 75 L 70 60" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/></svg>
+            </button>
+            <button onclick="selectCategory('switches')" class="flex-1 hover:bg-slate-200 flex items-center justify-center border-b border-slate-300 transition" id="cat-switches" title="Switches">
+                <!-- Switch Icon -->
+                <svg class="w-8 h-8 text-emerald-500" viewBox="0 0 100 100"><rect x="15" y="30" width="70" height="40" rx="6" fill="currentColor"/><path d="M30 45h40M30 55h40" stroke="white" stroke-width="5" stroke-linecap="round"/><circle cx="20" cy="50" r="3" fill="white"/><circle cx="80" cy="50" r="3" fill="white"/></svg>
+            </button>
+            <button onclick="selectCategory('end_devices')" class="flex-1 hover:bg-slate-200 flex items-center justify-center border-b border-slate-300 bg-slate-300 transition shadow-inner" id="cat-end_devices" title="End Devices">
+                <!-- PC Icon -->
+                <svg class="w-7 h-7 text-sky-600" viewBox="0 0 24 24" fill="currentColor"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2H0c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2h-4zM4 5h16v11H4V5z"/></svg>
+            </button>
+            <button onclick="selectCategory('connections')" class="flex-1 hover:bg-slate-200 flex items-center justify-center transition" id="cat-connections" title="Connections">
+                <!-- Cable Icon -->
+                <svg class="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </button>
+        </div>
+        
+        <!-- Specific Devices in Category (Right) -->
+        <div class="flex-1 p-4 flex gap-6 overflow-x-auto items-center bg-white" id="equipment-list">
+            <!-- Populated dynamically via JS -->
+        </div>
+    </footer>
+
+    <script>
+        // --- Core Data Structures & Definitions ---
+        const ICONS = {
+            router: `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md"><ellipse cx="50" cy="50" rx="42" ry="42" fill="#e11d48" stroke="#9f1239" stroke-width="3"/><path d="M50 25 L 50 75 M 30 40 L 50 25 L 70 40 M 30 60 L 50 75 L 70 60" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`,
+            switch: `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md"><rect x="10" y="30" width="80" height="40" rx="6" fill="#10b981" stroke="#047857" stroke-width="3"/><path d="M25 45h20M55 45h20M25 55h20M55 55h20" stroke="white" stroke-width="3" stroke-linecap="round"/><circle cx="15" cy="50" r="2" fill="white"/><circle cx="85" cy="50" r="2" fill="white"/></svg>`,
+            pc: `<svg viewBox="0 0 24 24" class="w-full h-full text-sky-500 drop-shadow-md" fill="currentColor"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2H0c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2h-4zM4 5h16v11H4V5z"/></svg>`,
+            laptop: `<svg viewBox="0 0 24 24" class="w-full h-full text-indigo-500 drop-shadow-md" fill="currentColor"><path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>`,
+            server: `<svg viewBox="0 0 24 24" class="w-full h-full text-slate-700 drop-shadow-md" fill="currentColor"><path d="M2 4c0-1.1.9-2 2-2h16c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2v-4zm2 2h1v1H4v-1zm3 0h1v1H7v-1z"/></svg>`,
+            cable: `<svg viewBox="0 0 24 24" class="w-full h-full text-amber-500 drop-shadow-md" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`
+        };
+
+        const CATEGORIES = {
+            routers: [ 
+                { id: '2811', name: '2811', label: '2811 Router', type: 'router' },
+                { id: '2911', name: '2911', label: '2911 Router', type: 'router' }
+            ],
+            switches: [ 
+                { id: '2960', name: '2960', label: '2960-24TT', type: 'switch' } 
+            ],
+            end_devices: [
+                { id: 'pc', name: 'PC', label: 'PC-PT', type: 'pc' },
+                { id: 'laptop', name: 'Laptop', label: 'Laptop-PT', type: 'laptop' },
+                { id: 'server', name: 'Server', label: 'Server-PT', type: 'server' }
+            ],
+            connections: [
+                { id: 'copper_straight', name: 'Straight', label: 'Copper Straight-Through', type: 'cable' }
+            ]
+        };
+
+        // --- State Variables ---
+        let devices = [];
+        let links = [];
+        let deviceCounter = 1;
+        let selectedTool = 'pointer'; // pointer, delete, cable, ping
+        let currentCategory = 'end_devices';
+        let itemToPlace = null; // object from CATEGORIES when clicking workspace
+        
+        let activeDevice = null; // Device open in properties
+        let draggingDevice = null; // Device being dragged physically
+        let cableSourceDevice = null; // For cable drawing
+        let pingSourceDevice = null; // For ping tool
+
+        const workspace = document.getElementById('workspace');
+        const devicesLayer = document.getElementById('devices-layer');
+        const cablesLayer = document.getElementById('cables-layer');
+        const drawingCableSvg = document.getElementById('drawing-cable');
+        const drawingLine = document.getElementById('drawing-line');
+        const toolStatus = document.getElementById('tool-status');
+
+        // --- Helper: Networking Logic ---
+        function generateMAC() {
+            return "00:" + Array.from({length:5}, () => Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join(':');
+        }
+
+        function ipToLong(ip) {
+            if(!ip) return 0;
+            const parts = ip.split('.');
+            if(parts.length !== 4) return 0;
+            return parts.reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+        }
+
+        function isSameSubnet(ip1, mask1, ip2, mask2) {
+            if(!ip1 || !mask1 || !ip2 || !mask2) return false;
+            let i1 = ipToLong(ip1);
+            let m1 = ipToLong(mask1);
+            let i2 = ipToLong(ip2);
+            let m2 = ipToLong(mask2);
+            // Strict check: masks must match and network portions must match
+            return (m1 === m2) && ((i1 & m1) === (i2 & m2));
+        }
+
+        // --- Device Classes ---
+        class NetworkDevice {
+            constructor(typeStr, namePref, x, y) {
+                this.id = 'dev_' + Date.now() + '_' + deviceCounter++;
+                this.typeStr = typeStr; // pc, router, etc.
+                this.name = namePref + (deviceCounter - 1);
+                this.x = x;
+                this.y = y;
+                this.mac = generateMAC();
+                this.cliHistory = [`\nCisco IOS Software, C${typeStr.toUpperCase()} Software\nCopyright (c) 1986-2023 by Cisco Systems, Inc.\nCompiled Sun 16-Aug-26\n\nDevice ${this.name} initialized.\n`];
+            }
+            get isLayer3() { return ['pc', 'laptop', 'server', 'router'].includes(this.typeStr); }
+        }
+
+        class EndDevice extends NetworkDevice {
+            constructor(typeStr, namePref, x, y) {
+                super(typeStr, namePref, x, y);
+                this.interfaces = [{ name: 'FastEthernet0', ip: '', mask: '', mac: this.mac }];
+                this.gateway = '';
+                this.prompt = 'C:\\> ';
+            }
+        }
+
+        class Router extends NetworkDevice {
+            constructor(typeStr, namePref, x, y) {
+                super(typeStr, namePref, x, y);
+                this.interfaces = [
+                    { name: 'FastEthernet0/0', ip: '', mask: '', mac: generateMAC() },
+                    { name: 'FastEthernet0/1', ip: '', mask: '', mac: generateMAC() }
+                ];
+                this.prompt = this.name + '>';
+            }
+        }
+
+        class Switch extends NetworkDevice {
+            constructor(typeStr, namePref, x, y) {
+                super(typeStr, namePref, x, y);
+                this.interfaces = Array.from({length: 24}, (_, i) => ({ name: `Fa0/${i+1}`, mac: generateMAC() }));
+                this.prompt = this.name + '>';
+            }
+        }
+
+        // --- STREAMING_CHUNK:Lógica de UI e Renderização (Workspace, Drag & Drop)... ---
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.w-24 button').forEach(b => b.classList.remove('bg-slate-300', 'shadow-inner'));
+            document.getElementById('cat-' + cat).classList.add('bg-slate-300', 'shadow-inner');
+            renderEquipmentList();
+        }
+
+        function renderEquipmentList() {
+            const list = document.getElementById('equipment-list');
+            list.innerHTML = '';
+            CATEGORIES[currentCategory].forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'equipment-item flex flex-col items-center justify-center w-20 h-20 bg-slate-50 border border-slate-200 rounded hover:bg-slate-100 hover:shadow transition shrink-0';
+                btn.innerHTML = `<div class="w-10 h-10 mb-1">${ICONS[item.type] || ICONS.cable}</div><span class="text-[10px] font-bold text-slate-600 text-center leading-tight">${item.label}</span>`;
+                btn.onclick = () => {
+                    if(selectedTool !== 'pointer') setTool('pointer');
+                    itemToPlace = item;
+                    document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-2', 'ring-blue-500'));
+                    btn.classList.add('ring-2', 'ring-blue-500');
+                    toolStatus.innerText = `Mode: Placing ${item.label}`;
+                    workspace.style.cursor = 'crosshair';
+                };
+                list.appendChild(btn);
+            });
+        }
+
+        function setTool(tool) {
+            selectedTool = tool;
+            itemToPlace = null;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
+            document.getElementById('tool-' + tool).classList.add('tool-active');
+            document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-2', 'ring-blue-500'));
+            
+            cableSourceDevice = null;
+            pingSourceDevice = null;
+            drawingCableSvg.classList.add('hidden');
+            
+            devices.forEach(d => {
+                const el = document.getElementById(d.id);
+                if(el) el.classList.remove('ping-src');
+            });
+
+            if(tool === 'pointer') { toolStatus.innerText = 'Mode: Select / Move'; workspace.style.cursor = 'default'; }
+            if(tool === 'delete') { toolStatus.innerText = 'Mode: Delete (Click object)'; workspace.style.cursor = 'crosshair'; }
+            if(tool === 'cable') { toolStatus.innerText = 'Mode: Connect (Click source then dest)'; workspace.style.cursor = 'crosshair'; }
+            if(tool === 'ping') { toolStatus.innerText = 'Mode: Simple PDU (Click source then dest)'; workspace.style.cursor = 'crosshair'; }
+        }
+
+        // Global Event Listeners
+        window.addEventListener('keydown', e => {
+            if(e.key === 'Escape') setTool('pointer');
+            if(e.key === 'Delete') setTool('delete');
+            if(e.key.toLowerCase() === 'c') setTool('cable');
+            if(e.key.toLowerCase() === 'p') setTool('ping');
+        });
+
+        workspace.addEventListener('click', e => {
+            // Ignore clicks on devices/links (handled by their own events via propagation stop)
+            if(e.target.closest('.device') || e.target.classList.contains('link-line')) return;
+
+            if (itemToPlace) {
+                const rect = workspace.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                let newDev;
+                if(['pc', 'laptop', 'server'].includes(itemToPlace.type)) {
+                    newDev = new EndDevice(itemToPlace.type, itemToPlace.name, x, y);
+                } else if (itemToPlace.type === 'router') {
+                    newDev = new Router(itemToPlace.type, itemToPlace.name, x, y);
+                } else if (itemToPlace.type === 'switch') {
+                    newDev = new Switch(itemToPlace.type, itemToPlace.name, x, y);
+                }
+
+                if(newDev) {
+                    devices.push(newDev);
+                    renderDevice(newDev);
+                }
+                
+                // Keep tool active to place multiple, but let's reset to pointer for UX similar to PT unless shift is held (simplified here)
+                itemToPlace = null;
+                document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-2', 'ring-blue-500'));
+                setTool('pointer');
+            } else if (selectedTool === 'pointer') {
+                closeProperties();
+                devices.forEach(d => document.getElementById(d.id)?.classList.remove('selected'));
+                activeDevice = null;
+            } else if (selectedTool === 'cable' && cableSourceDevice) {
+                // Cancel cable drawing
+                cableSourceDevice = null;
+                drawingCableSvg.classList.add('hidden');
+                toolStatus.innerText = 'Mode: Connect (Click source then dest)';
+            } else if (selectedTool === 'ping' && pingSourceDevice) {
+                pingSourceDevice = null;
+                devices.forEach(d => document.getElementById(d.id)?.classList.remove('ping-src'));
+                toolStatus.innerText = 'Mode: Simple PDU (Click source then dest)';
+            }
+        });
+
+        workspace.addEventListener('mousemove', e => {
+            const rect = workspace.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (draggingDevice && selectedTool === 'pointer') {
+                // Clamp to workspace
+                draggingDevice.x = Math.max(30, Math.min(mouseX, rect.width - 30));
+                draggingDevice.y = Math.max(30, Math.min(mouseY, rect.height - 30));
+                const el = document.getElementById(draggingDevice.id);
+                el.style.left = draggingDevice.x + 'px';
+                el.style.top = draggingDevice.y + 'px';
+                drawLinks();
+            }
+
+            if (selectedTool === 'cable' && cableSourceDevice) {
+                drawingLine.setAttribute('x2', mouseX);
+                drawingLine.setAttribute('y2', mouseY);
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            draggingDevice = null;
+        });
+
+        // --- STREAMING_CHUNK:Lógica de Dispositivos e Cabos (Criação, Interação)... ---
+        function renderDevice(dev) {
+            const el = document.createElement('div');
+            el.className = 'device';
+            el.id = dev.id;
+            el.style.left = dev.x + 'px';
+            el.style.top = dev.y + 'px';
+
+            el.innerHTML = `
+                <div class="device-icon">${ICONS[dev.typeStr]}</div>
+                <div class="device-label">${dev.name}</div>
+                ${dev.isLayer3 && dev.interfaces[0].ip ? `<div class="device-ip-label mt-1">${dev.interfaces[0].ip}</div>` : ''}
+            `;
+
+            el.addEventListener('mousedown', e => {
+                if(selectedTool === 'pointer') {
+                    draggingDevice = dev;
+                }
+            });
+
+            el.addEventListener('click', e => {
+                e.stopPropagation();
+                handleDeviceClick(dev, el);
+            });
+
+            devicesLayer.appendChild(el);
+        }
+
+        function updateDeviceDOM(dev) {
+            const el = document.getElementById(dev.id);
+            if(!el) return;
+            el.querySelector('.device-label').innerText = dev.name;
+            
+            let ipLabel = el.querySelector('.device-ip-label');
+            // Try to get primary IP to display
+            let primaryIp = dev.isLayer3 ? (dev.interfaces[0].ip || (dev.interfaces[1] && dev.interfaces[1].ip) || '') : '';
+            
+            if(primaryIp) {
+                if(ipLabel) ipLabel.innerText = primaryIp;
+                else el.innerHTML += `<div class="device-ip-label mt-1">${primaryIp}</div>`;
+            } else if (ipLabel) {
+                ipLabel.remove();
+            }
+        }
+
+        function handleDeviceClick(dev, el) {
+            if (selectedTool === 'pointer') {
+                devices.forEach(d => document.getElementById(d.id)?.classList.remove('selected'));
+                el.classList.add('selected');
+                openProperties(dev);
+            } 
+            else if (selectedTool === 'delete') {
+                deleteDevice(dev);
+            }
+            else if (selectedTool === 'cable') {
+                if (!cableSourceDevice) {
+                    cableSourceDevice = dev;
+                    drawingCableSvg.classList.remove('hidden');
+                    drawingLine.setAttribute('x1', dev.x);
+                    drawingLine.setAttribute('y1', dev.y);
+                    drawingLine.setAttribute('x2', dev.x);
+                    drawingLine.setAttribute('y2', dev.y);
+                    toolStatus.innerText = `Connecting ${dev.name} to...`;
+                } else {
+                    if (cableSourceDevice.id !== dev.id) {
+                        createLink(cableSourceDevice, dev);
+                    }
+                    cableSourceDevice = null;
+                    drawingCableSvg.classList.add('hidden');
+                    setTool('pointer');
+                }
+            }
+            else if (selectedTool === 'ping') {
+                if (!pingSourceDevice) {
+                    // Origin must be a PC/Laptop/Server
+                    if(['pc', 'laptop', 'server'].includes(dev.typeStr)) {
+                        pingSourceDevice = dev;
+                        el.classList.add('ping-src');
+                        toolStatus.innerText = `Pinging from ${dev.name} to...`;
+                    } else {
+                        addPduLog('System', '', 'Error', 'Ping source must be an End Device.');
+                    }
+                } else {
+                    if (pingSourceDevice.id !== dev.id && ['pc', 'laptop', 'server', 'router'].includes(dev.typeStr)) {
+                        let targetIp = dev.interfaces[0].ip;
+                        if(dev.typeStr === 'router') {
+                            // If router, try to find an IP that is configured
+                            let validInt = dev.interfaces.find(i => i.ip !== '');
+                            targetIp = validInt ? validInt.ip : '';
+                        }
+                        
+                        if(!targetIp) {
+                            addPduLog(pingSourceDevice.name, dev.name, 'Error', 'Target has no IP.');
+                        } else {
+                            // Open CLI of source to show ping
+                            openProperties(pingSourceDevice);
+                            switchTab('cli');
+                            executePing(pingSourceDevice, targetIp, dev);
+                        }
+                    }
+                    pingSourceDevice.element = document.getElementById(pingSourceDevice.id);
+                    if(pingSourceDevice.element) pingSourceDevice.element.classList.remove('ping-src');
+                    pingSourceDevice = null;
+                    setTool('pointer');
+                }
+            }
+        }
+
+        function createLink(dev1, dev2) {
+            // Check if link already exists
+            const exists = links.some(l => 
+                (l.sourceId === dev1.id && l.targetId === dev2.id) ||
+                (l.sourceId === dev2.id && l.targetId === dev1.id)
+            );
+            if(exists) return;
+
+            links.push({ id: 'link_' + Date.now(), sourceId: dev1.id, targetId: dev2.id });
+            drawLinks();
+        }
+
+        function drawLinks() {
+            cablesLayer.innerHTML = '';
+            links.forEach(l => {
+                const s = devices.find(d => d.id === l.sourceId);
+                const t = devices.find(d => d.id === l.targetId);
+                if(s && t) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', s.x);
+                    line.setAttribute('y1', s.y);
+                    line.setAttribute('x2', t.x);
+                    line.setAttribute('y2', t.y);
+                    line.classList.add('link-line');
+                    
+                    line.addEventListener('click', e => {
+                        e.stopPropagation();
+                        if(selectedTool === 'delete') {
+                            links = links.filter(lk => lk.id !== l.id);
+                            drawLinks();
+                            setTool('pointer');
+                        }
+                    });
+
+                    cablesLayer.appendChild(line);
+
+                    // Add status dots (Green)
+                    const dotS = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dotS.setAttribute('cx', s.x + (t.x - s.x) * 0.15);
+                    dotS.setAttribute('cy', s.y + (t.y - s.y) * 0.15);
+                    dotS.setAttribute('r', 3.5);
+                    dotS.classList.add('link-dot');
+                    
+                    const dotT = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dotT.setAttribute('cx', t.x + (s.x - t.x) * 0.15);
+                    dotT.setAttribute('cy', t.y + (s.y - t.y) * 0.15);
+                    dotT.setAttribute('r', 3.5);
+                    dotT.classList.add('link-dot');
+
+                    cablesLayer.appendChild(dotS);
+                    cablesLayer.appendChild(dotT);
+                }
+            });
+        }
+
+        function deleteDevice(dev) {
+            if(activeDevice && activeDevice.id === dev.id) closeProperties();
+            document.getElementById(dev.id).remove();
+            devices = devices.filter(d => d.id !== dev.id);
+            links = links.filter(l => l.sourceId !== dev.id && l.targetId !== dev.id);
+            drawLinks();
+            setTool('pointer');
+        }
+
+        function clearWorkspace() {
+            if(confirm("Are you sure you want to clear the workspace?")) {
+                devicesLayer.innerHTML = '';
+                cablesLayer.innerHTML = '';
+                document.getElementById('packets-layer').innerHTML = '';
+                devices = [];
+                links = [];
+                deviceCounter = 1;
+                closeProperties();
+                document.getElementById('pdu-list').innerHTML = '<div class="text-slate-400 text-center italic mt-10">No events logged.</div>';
+            }
+        }
+
+        // --- STREAMING_CHUNK:Lógica do Painel de Propriedades e CLI... ---
+        const panel = document.getElementById('properties-panel');
+        const tabConfig = document.getElementById('tab-config');
+        const tabCli = document.getElementById('tab-cli');
+        const btnConfig = document.getElementById('tab-btn-config');
+        const btnCli = document.getElementById('tab-btn-cli');
+        const cliOutput = document.getElementById('cli-output');
+        const cliPrompt = document.getElementById('cli-prompt');
+        const cliInput = document.getElementById('cli-input');
+
+        function openProperties(dev) {
+            activeDevice = dev;
+            document.getElementById('prop-header-title').innerText = dev.name;
+            document.getElementById('prop-big-icon').innerHTML = `<div class="w-16 h-16">${ICONS[dev.typeStr]}</div>`;
+            
+            document.getElementById('prop-name').value = dev.name;
+            document.getElementById('prop-mac').value = dev.interfaces[0].mac;
+
+            const gwCont = document.getElementById('prop-gateway-container');
+            const intCont = document.getElementById('prop-interface-container');
+            const ipMaskCont = document.getElementById('prop-ip-mask-container');
+
+            // Reset UI
+            gwCont.classList.add('hidden');
+            intCont.classList.add('hidden');
+            ipMaskCont.classList.remove('hidden');
+
+            if (['pc', 'laptop', 'server'].includes(dev.typeStr)) {
+                gwCont.classList.remove('hidden');
+                document.getElementById('prop-gateway').value = dev.gateway || '';
+                document.getElementById('prop-ip').value = dev.interfaces[0].ip || '';
+                document.getElementById('prop-mask').value = dev.interfaces[0].mask || '';
+                document.getElementById('prop-ip').disabled = false;
+                document.getElementById('prop-mask').disabled = false;
+            } 
+            else if (dev.typeStr === 'router') {
+                intCont.classList.remove('hidden');
+                const sel = document.getElementById('prop-interface-sel');
+                sel.innerHTML = '';
+                dev.interfaces.forEach((intf, idx) => {
+                    sel.innerHTML += `<option value="${idx}">${intf.name}</option>`;
+                });
+                loadInterfaceProps(); // Loads IP/Mask for selected interface
+            }
+            else if (dev.typeStr === 'switch') {
+                // Switches are layer 2, disable IP configs in GUI for simplicity
+                ipMaskCont.classList.add('hidden');
+            }
+
+            // Load CLI History
+            renderCli();
+
+            panel.classList.remove('translate-x-full');
+            switchTab('config');
+        }
+
+        function loadInterfaceProps() {
+            if(!activeDevice || activeDevice.typeStr !== 'router') return;
+            const idx = document.getElementById('prop-interface-sel').value;
+            const intf = activeDevice.interfaces[idx];
+            document.getElementById('prop-ip').value = intf.ip || '';
+            document.getElementById('prop-mask').value = intf.mask || '';
+            document.getElementById('prop-mac').value = intf.mac || '';
+        }
+
+        function closeProperties() {
+            panel.classList.add('translate-x-full');
+            activeDevice = null;
+        }
+
+        function switchTab(tab) {
+            if(tab === 'config') {
+                tabConfig.classList.remove('hidden');
+                tabCli.classList.remove('flex'); tabCli.classList.add('hidden');
+                btnConfig.classList.add('border-blue-500', 'text-blue-600'); btnConfig.classList.remove('border-transparent');
+                btnCli.classList.remove('border-blue-500', 'text-blue-600'); btnCli.classList.add('border-transparent');
+            } else {
+                tabConfig.classList.add('hidden');
+                tabCli.classList.remove('hidden'); tabCli.classList.add('flex');
+                btnCli.classList.add('border-blue-500', 'text-blue-600'); btnCli.classList.remove('border-transparent');
+                btnConfig.classList.remove('border-blue-500', 'text-blue-600'); btnConfig.classList.add('border-transparent');
+                cliInput.focus();
+                cliOutput.scrollTop = cliOutput.scrollHeight;
+            }
+        }
+
+        function updateDeviceProp(prop) {
+            if(!activeDevice) return;
+            if(prop === 'name') {
+                let newName = document.getElementById('prop-name').value.trim();
+                if(newName) {
+                    activeDevice.name = newName;
+                    // Update prompt if it's router/switch
+                    if(activeDevice.prompt.includes('>')) activeDevice.prompt = newName + '>';
+                    else if(activeDevice.prompt.includes('#')) activeDevice.prompt = newName + '#';
+                    else if(activeDevice.prompt.includes('(config)')) activeDevice.prompt = newName + '(config)#';
+                    document.getElementById('prop-header-title').innerText = newName;
+                }
+            } else if(prop === 'gateway') {
+                activeDevice.gateway = document.getElementById('prop-gateway').value.trim();
+            } else if(prop === 'ip' || prop === 'mask') {
+                let val = document.getElementById('prop-' + prop).value.trim();
+                if(['pc', 'laptop', 'server'].includes(activeDevice.typeStr)) {
+                    activeDevice.interfaces[0][prop] = val;
+                } else if(activeDevice.typeStr === 'router') {
+                    const idx = document.getElementById('prop-interface-sel').value;
+                    activeDevice.interfaces[idx][prop] = val;
+                }
+            }
+            updateDeviceDOM(activeDevice);
+            renderCli(); // Update prompt if name changed
+        }
+
+        function printCli(text) {
+            if(!activeDevice) return;
+            activeDevice.cliHistory.push(text);
+            renderCli();
+        }
+
+        function renderCli() {
+            if(!activeDevice) return;
+            cliOutput.textContent = activeDevice.cliHistory.join('\n');
+            cliPrompt.innerText = activeDevice.prompt;
+            cliOutput.scrollTop = cliOutput.scrollHeight;
+        }
+
+        function handleCliInput(e) {
+            if(e.key === 'Enter') {
+                let cmd = e.target.value.trim();
+                e.target.value = '';
+                printCli(activeDevice.prompt + cmd);
+                processCommand(activeDevice, cmd);
+            }
+        }
+
+        function processCommand(device, cmd) {
+            if(!cmd) return;
+            let args = cmd.split(' ').filter(x=>x);
+            let base = args[0].toLowerCase();
+            
+            if (['pc', 'laptop', 'server'].includes(device.typeStr)) {
+                if(base === 'ping') {
+                    if(args.length < 2) { printCli("Usage: ping <ip_address>"); return; }
+                    executePing(device, args[1], null);
+                } else if (base === 'ipconfig') {
+                    let i = device.interfaces[0];
+                    printCli(`\nFastEthernet0 Connection:\n   IP Address................: ${i.ip || '0.0.0.0'}\n   Subnet Mask...............: ${i.mask || '0.0.0.0'}\n   Default Gateway...........: ${device.gateway || '0.0.0.0'}\n`);
+                } else if (base === 'arp') {
+                    printCli("\nInterface: " + (device.interfaces[0].ip || '0.0.0.0') + "\n  Internet Address      Physical Address      Type\n  (Simulated ARP cache is empty)\n");
+                } else if (base === 'clear' || base === 'cls') {
+                    device.cliHistory = [];
+                    renderCli();
+                } else {
+                    printCli(`'${base}' is not recognized as an internal or external command.`);
+                }
+            } 
+            else if (['router', 'switch'].includes(device.typeStr)) {
+                // Simplified IOS
+                if (base === 'enable' || base === 'en') {
+                    device.prompt = device.name + '#';
+                } else if (base === 'disable') {
+                    device.prompt = device.name + '>';
+                } else if ((base === 'configure' || base === 'conf') && (args[1] === 'terminal' || args[1] === 't')) {
+                    if(device.prompt.includes('#')) device.prompt = device.name + '(config)#';
+                    else printCli('% Incomplete command or permission denied.');
+                } else if (base === 'exit') {
+                    if(device.prompt.includes('(config)')) device.prompt = device.name + '#';
+                    else device.prompt = device.name + '>';
+                } else if (base === 'show' || base === 'sh') {
+                    if(args[1] === 'ip' && args[2] === 'route') {
+                        printCli("Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP\n       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area\n\nGateway of last resort is not set\n");
+                        let found = false;
+                        device.interfaces.forEach(i => {
+                            if(i.ip && i.mask) {
+                                printCli(`C    ${getNetworkStr(i.ip, i.mask)} is directly connected, ${i.name}`);
+                                found = true;
+                            }
+                        });
+                        if(!found) printCli("Routing table is empty.");
+                    } else if (args[1] === 'running-config' || args[1] === 'run') {
+                        printCli(`Building configuration...\n\nCurrent configuration : 1024 bytes\n!\nhostname ${device.name}\n!\n`);
+                        device.interfaces.forEach(i => {
+                            printCli(`interface ${i.name}\n ${i.ip ? 'ip address ' + i.ip + ' ' + i.mask : 'no ip address'}\n duplex auto\n speed auto\n!`);
+                        });
+                        printCli("end\n");
+                    } else {
+                        printCli(`% Invalid input detected at '^' marker.`);
+                    }
+                } else {
+                    printCli(`% Unknown command or computer name, or unable to find computer address`);
+                }
+                renderCli();
+            }
+        }
+
+        function getNetworkStr(ip, mask) {
+            let i = ip.split('.').map(Number);
+            let m = mask.split('.').map(Number);
+            let net = i.map((oct, idx) => oct & m[idx]).join('.');
+            // simple CIDR calc
+            let cidr = m.reduce((acc, val) => acc + val.toString(2).split('1').length - 1, 0);
+            return `${net}/${cidr}`;
+        }
+
+
+        // --- STREAMING_CHUNK:Lógica de Roteamento, Algoritmo BFS e Animação de PING... ---
+
+        // Get adjacent devices connected by a cable
+        function getPhysicalNeighbors(deviceId) {
+            let n = [];
+            links.forEach(l => {
+                if(l.sourceId === deviceId) n.push(l.targetId);
+                if(l.targetId === deviceId) n.push(l.sourceId);
+            });
+            return n.map(id => devices.find(d => d.id === id));
+        }
+
+        // Find all devices reachable at Layer 2 (crossing switches only)
+        function getBroadcastDomain(startDev) {
+            let q = [startDev];
+            let visited = new Set([startDev.id]);
+            let domain = [];
+
+            while(q.length > 0) {
+                let curr = q.shift();
+                domain.push(curr);
+                
+                // If it's a switch, we traverse through it
+                // If it's a router or end device, we stop traversing (it's the edge of BD)
+                if (curr.typeStr === 'switch' || curr.id === startDev.id) {
+                    let neighbors = getPhysicalNeighbors(curr.id);
+                    for(let n of neighbors) {
+                        if(!visited.has(n.id)) {
+                            visited.add(n.id);
+                            q.push(n);
+                        }
+                    }
+                }
+            }
+            return domain;
+        }
+
+        // Returns physical path [dev1, switch1, destDev] if found in Layer 2
+        function findLayer2Path(startDev, targetDev) {
+            let q = [{ dev: startDev, path: [startDev] }];
+            let visited = new Set([startDev.id]);
+
+            while(q.length > 0) {
+                let {dev, path} = q.shift();
+                if(dev.id === targetDev.id) return path;
+
+                if (dev.typeStr === 'switch' || dev.id === startDev.id) {
+                    let neighbors = getPhysicalNeighbors(dev.id);
+                    for(let n of neighbors) {
+                        if(!visited.has(n.id)) {
+                            visited.add(n.id);
+                            q.push({ dev: n, path: [...path, n] });
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Complex Routing Logic for Ping
+        function traceRouteLogic(srcDevice, targetIp) {
+            let srcIp = srcDevice.interfaces[0].ip;
+            let srcMask = srcDevice.interfaces[0].mask;
+            
+            // 1. Is Target in the same Subnet?
+            if (isSameSubnet(srcIp, srcMask, targetIp, srcMask)) {
+                // Find target device in network
+                let targetDev = devices.find(d => {
+                    if(['pc','laptop','server'].includes(d.typeStr) && d.interfaces[0].ip === targetIp) return true;
+                    if(d.typeStr === 'router' && d.interfaces.some(i => i.ip === targetIp)) return true;
+                    return false;
+                });
+                
+                if(!targetDev) return { success: false, error: "Request timed out." };
+                
+                let path = findLayer2Path(srcDevice, targetDev);
+                if(path) return { success: true, path: path };
+                else return { success: false, error: "Destination host unreachable." };
+            } 
+            // 2. Different Subnet -> Requires Gateway
+            else {
+                let gwIp = srcDevice.gateway;
+                if(!gwIp) return { success: false, error: "Ping transmit failed. General failure." };
+
+                // Find router acting as gateway in broadcast domain
+                let bd = getBroadcastDomain(srcDevice);
+                let router = bd.find(d => d.typeStr === 'router' && d.interfaces.some(i => i.ip === gwIp));
+                
+                if(!router) return { success: false, error: "Reply from " + srcIp + ": Destination host unreachable." };
+
+                // We reached the router. Can router reach destination? (Checking directly connected networks)
+                // Which interface of router is in the target subnet?
+                let outIntf = router.interfaces.find(i => i.ip && isSameSubnet(i.ip, i.mask, targetIp, i.mask));
+                if(!outIntf) return { success: false, error: "Reply from " + gwIp + ": Destination net unreachable." };
+
+                // Find target device globally
+                let targetDev = devices.find(d => {
+                    if(['pc','laptop','server'].includes(d.typeStr) && d.interfaces[0].ip === targetIp) return true;
+                    if(d.typeStr === 'router' && d.interfaces.some(i => i.ip === targetIp)) return true;
+                    return false;
+                });
+
+                if(!targetDev) return { success: false, error: "Request timed out." };
+
+                // Find path from Router to Target in that specific broadcast domain
+                let path2 = findLayer2Path(router, targetDev);
+                if(!path2) return { success: false, error: "Request timed out." };
+
+                let path1 = findLayer2Path(srcDevice, router);
+                
+                // Combine paths (remove duplicate router node)
+                let fullPath = path1.concat(path2.slice(1));
+                return { success: true, path: fullPath };
+            }
+        }
+
+        async function executePing(source, targetIp, targetDevObj) {
+            let destName = targetIp;
+            if(targetDevObj) destName = targetDevObj.name; // If triggered via UI tool
+
+            printCli(`\nPinging ${targetIp} with 32 bytes of data:\n`);
+            
+            if(!source.interfaces[0].ip) {
+                printCli("PING: transmit failed. General failure.");
+                addPduLog(source.name, destName, 'ICMP', 'Failed (No IP)');
+                return;
+            }
+
+            let result = traceRouteLogic(source, targetIp);
+            let successes = 0;
+
+            for(let i=0; i<4; i++) {
+                // Wait for processing
+                await new Promise(r => setTimeout(r, 600));
+                
+                if(result.success) {
+                    // Start Animation
+                    animatePacket(result.path);
+                    // Wait for animation to finish (path.length * 500ms * 2 for return)
+                    let animTime = (result.path.length - 1) * 500 * 2;
+                    await new Promise(r => setTimeout(r, animTime + 200));
+                    
+                    printCli(`Reply from ${targetIp}: bytes=32 time=${Math.floor(Math.random()*15)+1}ms TTL=127`);
+                    successes++;
+                    if(i===0) addPduLog(source.name, targetIp, 'ICMP', 'Successful');
+                } else {
+                    printCli(result.error);
+                    if(i===0) addPduLog(source.name, targetIp, 'ICMP', 'Failed');
+                }
+            }
+
+            printCli(`\nPing statistics for ${targetIp}:`);
+            printCli(`    Packets: Sent = 4, Received = ${successes}, Lost = ${4 - successes} (${(4-successes)*25}% loss)\n`);
+        }
+
+        function animatePacket(path) {
+            if(path.length < 2) return;
+            const pktLayer = document.getElementById('packets-layer');
+            const pkt = document.createElement('div');
+            pkt.className = 'packet';
+            
+            pkt.style.left = path[0].x + 'px';
+            pkt.style.top = path[0].y + 'px';
+            pktLayer.appendChild(pkt);
+
+            let step = 1;
+            let goingBack = false;
+
+            function move() {
+                if(!goingBack && step >= path.length) {
+                    // Turn around
+                    goingBack = true;
+                    step = path.length - 2;
+                    pkt.classList.add('return');
+                }
+                if(goingBack && step < 0) {
+                    // Done
+                    pkt.remove();
+                    return;
+                }
+
+                let nextNode = path[step];
+                pkt.style.left = nextNode.x + 'px';
+                pkt.style.top = nextNode.y + 'px';
+
+                if(goingBack) step--;
+                else step++;
+
+                setTimeout(move, 500);
+            }
+            // Small delay before start
+            setTimeout(move, 50);
+        }
+
+        // --- PDU Logger ---
+        function addPduLog(src, dest, type, status) {
+            document.getElementById('pdu-panel').classList.remove('hidden');
+            const list = document.getElementById('pdu-list');
+            if(list.innerHTML.includes('No events')) list.innerHTML = '';
+            
+            let color = status === 'Successful' ? 'text-emerald-600' : 'text-red-500';
+            
+            let html = `
+                <div class="border border-slate-200 rounded p-1 bg-slate-50 flex items-center justify-between mb-1">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-700">${type}</span>
+                        <span class="text-[10px] text-slate-500">${src} ➔ ${dest}</span>
+                    </div>
+                    <span class="font-bold ${color}">${status}</span>
+                </div>
+            `;
+            list.insertAdjacentHTML('afterbegin', html);
+        }
+
+        function clearPdus() {
+            document.getElementById('pdu-list').innerHTML = '<div class="text-slate-400 text-center italic mt-10">No events logged.</div>';
+        }
+
+        // --- Save / Load (localStorage) ---
+        function saveTopology() {
+            const data = { devices, links, deviceCounter };
+            localStorage.setItem('wpt_save', JSON.stringify(data));
+            alert('Topology Saved successfully!');
+        }
+
+        function loadTopology() {
+            const dataStr = localStorage.getItem('wpt_save');
+            if(!dataStr) { alert('No saved topology found.'); return; }
+            
+            clearWorkspace();
+            try {
+                const data = JSON.parse(dataStr);
+                deviceCounter = data.deviceCounter;
+                
+                // Reconstruct classes
+                data.devices.forEach(d => {
+                    let newDev;
+                    if(['pc','laptop','server'].includes(d.typeStr)) {
+                        newDev = new EndDevice(d.typeStr, 'x', d.x, d.y);
+                    } else if(d.typeStr === 'router') {
+                        newDev = new Router(d.typeStr, 'x', d.x, d.y);
+                    } else if(d.typeStr === 'switch') {
+                        newDev = new Switch(d.typeStr, 'x', d.x, d.y);
+                    }
+                    Object.assign(newDev, d);
+                    devices.push(newDev);
+                    renderDevice(newDev);
+                    updateDeviceDOM(newDev);
+                });
+
+                data.links.forEach(l => {
+                    links.push(l);
+                });
+                drawLinks();
+                
+            } catch(e) {
+                console.error(e);
+                alert("Failed to load topology.");
+            }
+        }
+
+        // --- Init ---
+        window.onload = () => {
+            selectCategory('end_devices');
+            
+            // Add initial lab setup
+            let pc1 = new EndDevice('pc', 'PC', 150, 200); pc1.interfaces[0].ip = '192.168.1.10'; pc1.interfaces[0].mask = '255.255.255.0'; pc1.gateway = '192.168.1.1';
+            let sw1 = new Switch('switch', 'Switch', 350, 200);
+            let r1 = new Router('router', 'Router', 550, 200); r1.interfaces[0].ip = '192.168.1.1'; r1.interfaces[0].mask = '255.255.255.0'; r1.interfaces[1].ip = '10.0.0.1'; r1.interfaces[1].mask = '255.255.255.0';
+            let sw2 = new Switch('switch', 'Switch', 750, 200);
+            let svr = new EndDevice('server', 'Server', 950, 200); svr.interfaces[0].ip = '10.0.0.100'; svr.interfaces[0].mask = '255.255.255.0'; svr.gateway = '10.0.0.1';
+
+            [pc1, sw1, r1, sw2, svr].forEach(d => { devices.push(d); renderDevice(d); updateDeviceDOM(d); });
+            
+            links.push({ id: 'l1', sourceId: pc1.id, targetId: sw1.id });
+            links.push({ id: 'l2', sourceId: sw1.id, targetId: r1.id });
+            links.push({ id: 'l3', sourceId: r1.id, targetId: sw2.id });
+            links.push({ id: 'l4', sourceId: sw2.id, targetId: svr.id });
+            drawLinks();
+        };
+    </script>
+</body>
+</html>
