@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Packet Tracer Pro | SwitchLab Edition</title>
+    
+    <!-- Load Tailwind CSS via CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load modern fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     
+    <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -18,16 +22,20 @@
                     },
                     colors: {
                         workspace: {
-                            bg: '#09090b', // zinc-950
-                            grid: '#27272a', // zinc-800
+                            bg: '#09090b', // Deep zinc for workspace
+                            grid: '#27272a', // Subtle grid lines
                         },
                         brand: {
                             50: '#f0f9ff',
                             100: '#e0f2fe',
-                            500: '#0ea5e9',
+                            400: '#38bdf8',
+                            500: '#0ea5e9', // Primary brand color
                             600: '#0284c7',
                             900: '#0c4a6e',
                         }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 3s linear infinite',
                     }
                 }
             }
@@ -35,29 +43,33 @@
     </script>
 
     <style>
+        /* Base styles and reset */
         body { 
             margin: 0; 
-            overflow: hidden; 
-            user-select: none; 
+            overflow: hidden; /* Prevent page scrolling, app handles its own scroll */
+            user-select: none; /* Prevent text selection while dragging elements */
             background-color: #09090b; 
             color: #f4f4f5;
         }
 
-        /* Custom Scrollbar for modern look */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        /* Custom Scrollbar for a sleek look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; border: 2px solid #18181b; }
         ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb { border-color: transparent; background-clip: padding-box; }
 
+        /* Workspace Background Pattern */
         #workspace {
             background-color: theme('colors.workspace.bg');
-            background-image: 
-                radial-gradient(circle at 1px 1px, theme('colors.workspace.grid') 1px, transparent 0);
+            background-image: radial-gradient(circle at 1px 1px, theme('colors.workspace.grid') 1px, transparent 0);
             background-size: 24px 24px;
-            background-position: -12px -12px; /* Center dots */
+            background-position: -12px -12px;
             cursor: default;
         }
 
+        /* Network Device Base Styling */
         .device {
             position: absolute;
             width: 72px;
@@ -66,185 +78,214 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%); /* Center origin on coordinates */
             z-index: 20;
-            transition: filter 0.2s ease, transform 0.1s ease;
+            transition: filter 0.2s ease;
         }
-        .device.selected {
-            filter: drop-shadow(0 0 16px rgba(14, 165, 233, 0.4));
-        }
-        .device.ping-src {
-            filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.5));
-        }
+        
+        /* Device Visual States */
+        .device.selected { filter: drop-shadow(0 0 20px rgba(14, 165, 233, 0.6)); z-index: 25; }
+        .device.ping-src { filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.6)); z-index: 25; }
+        .device.cable-src { filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.6)); z-index: 25; }
+        
         .device:active {
             cursor: grabbing !important;
-            transform: translate(-50%, -50%) scale(0.95);
+            transform: translate(-50%, -50%) scale(0.95); /* Slight press effect */
         }
+
+        /* Device Icons */
         .device-icon {
             width: 48px;
             height: 48px;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            color: #a1a1aa; /* zinc-400 default */
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
+            color: #a1a1aa; /* Default subdued color */
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
         }
         .device:hover .device-icon {
-            transform: scale(1.1);
-            color: #f4f4f5; /* zinc-100 on hover */
+            transform: scale(1.15) translateY(-2px);
+            color: #f4f4f5; /* Brighten on hover */
         }
+
+        /* Device Labels */
         .device-label {
             font-size: 11px;
-            font-weight: 500;
-            margin-top: 6px;
-            background: #18181b; /* zinc-900 */
-            padding: 2px 8px;
-            border-radius: 6px;
-            border: 1px solid #27272a; /* zinc-800 */
-            pointer-events: none;
+            font-weight: 600;
+            margin-top: 8px;
+            background: rgba(24, 24, 27, 0.8);
+            padding: 2px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(63, 63, 70, 0.6);
+            pointer-events: none; /* Let clicks pass through to device container */
             white-space: nowrap;
-            color: #d4d4d8; /* zinc-300 */
+            color: #e4e4e7;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
+            transition: all 0.2s;
         }
+        
         .device-ip-label {
             font-size: 10px;
-            color: #0ea5e9; /* brand-500 */
+            color: #38bdf8;
             font-family: 'JetBrains Mono', monospace;
-            background: rgba(14, 165, 233, 0.1);
-            padding: 1px 6px;
-            border-radius: 4px;
+            background: rgba(14, 165, 233, 0.15);
+            padding: 1px 8px;
+            border-radius: 6px;
             pointer-events: none;
             margin-top: 4px;
-            border: 1px solid rgba(14, 165, 233, 0.2);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            backdrop-filter: blur(2px);
         }
 
-        .link-line {
-            stroke: #52525b; /* zinc-600 */
-            stroke-width: 2.5;
-            transition: stroke 0.3s, stroke-width 0.3s;
+        /* Cables / Links */
+        .link-group { cursor: pointer; }
+        .link-hit-area {
+            /* Invisible thicker stroke makes clicking lines easier */
+            stroke: transparent;
+            stroke-width: 15;
+            fill: none;
             pointer-events: stroke;
-            cursor: pointer;
         }
-        .link-line:hover {
-            stroke: #ef4444; /* red-500 for delete action */
-            stroke-width: 4;
+        .link-line {
+            stroke: #52525b;
+            stroke-width: 2.5;
+            transition: stroke 0.3s, stroke-width 0.2s, filter 0.3s;
+            pointer-events: none;
+        }
+        .link-group:hover .link-line {
+            stroke: #ef4444; /* Red to indicate destructible on hover */
+            stroke-width: 3.5;
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
         }
         .link-dot {
-            fill: #10b981; /* emerald-500 */
-            stroke: #09090b; /* bg */
+            fill: #10b981; /* Green link light */
+            stroke: #09090b;
             stroke-width: 1.5;
-            filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.4));
+            filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6));
+            pointer-events: none;
         }
 
+        /* Active Drawing Cable */
         #drawing-line {
-            stroke: #0ea5e9;
+            stroke: #f59e0b; /* Amber */
             stroke-width: 2.5;
             stroke-dasharray: 8,8;
             animation: dash 0.8s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4));
         }
-        @keyframes dash {
-            to { stroke-dashoffset: -16; }
-        }
+        @keyframes dash { to { stroke-dashoffset: -16; } }
 
+        /* Packet Animation */
         .packet {
             position: absolute;
-            width: 12px;
-            height: 12px;
-            background-color: #0ea5e9;
+            width: 14px;
+            height: 14px;
+            background-color: #a855f7; /* Purple for ICMP */
             border-radius: 50%;
             transform: translate(-50%, -50%);
             z-index: 30;
-            box-shadow: 0 0 12px #0ea5e9, 0 0 24px #0ea5e9;
-            transition: left 0.5s linear, top 0.5s linear;
+            box-shadow: 0 0 12px #a855f7, 0 0 24px #a855f7;
+            /* Transition handles the actual movement between coordinates */
+            transition: left 0.5s linear, top 0.5s linear, background-color 0.2s, box-shadow 0.2s;
+            pointer-events: none;
         }
         .packet.return { 
-            background-color: #10b981;
+            background-color: #10b981; /* Green for reply */
             box-shadow: 0 0 12px #10b981, 0 0 24px #10b981;
         }
 
+        /* UI Toolbar Utilities */
         .tool-active {
-            background-color: #27272a !important; /* zinc-800 */
-            color: #f4f4f5 !important; /* zinc-100 */
-            border-color: #3f3f46 !important; /* zinc-700 */
+            background-color: #27272a !important;
+            color: #f4f4f5 !important;
+            border-color: #3f3f46 !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
 
+        /* Command Line Interface */
         .cli-container { 
-            background-color: #000000; 
-            color: #a3e635; /* lime-400 */
+            background-color: #050505; 
+            color: #a3e635; /* Hacker green */
             font-family: 'JetBrains Mono', monospace; 
-            text-shadow: 0 0 4px rgba(163, 230, 53, 0.2);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
         .cli-input { 
             background: transparent; 
             border: none; 
             outline: none; 
-            color: #a3e635; 
+            color: #f4f4f5; 
             flex: 1; 
             width: 100%; 
             caret-color: #a3e635;
         }
 
-        /* Glassmorphism utilities */
+        /* Glassmorphism Panels */
         .glass-panel {
-            background: rgba(24, 24, 27, 0.85); /* zinc-900/85 */
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(63, 63, 70, 0.5); /* zinc-700/50 */
+            background: rgba(24, 24, 27, 0.80);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(63, 63, 70, 0.4);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 
 <body class="flex flex-col h-screen text-zinc-100 bg-zinc-950 font-sans antialiased selection:bg-brand-500 selection:text-white">
 
-    <div id="custom-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl w-[420px] overflow-hidden transform scale-95 transition-transform duration-300" id="custom-modal-content">
-            <div class="px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-zinc-100" id="modal-title">Notice</h3>
-                <button onclick="closeModal()" class="text-zinc-500 hover:text-zinc-300 transition rounded-md p-1 hover:bg-zinc-800">
+    <!-- Global Alert Modal -->
+    <div id="custom-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl w-[420px] overflow-hidden transform scale-95 transition-transform duration-300" id="custom-modal-content">
+            <div class="px-6 py-4 border-b border-zinc-800/50 flex justify-between items-center bg-zinc-900/50">
+                <h3 class="text-lg font-semibold text-zinc-100 flex items-center gap-2" id="modal-title">Notice</h3>
+                <button onclick="closeModal()" class="text-zinc-500 hover:text-zinc-200 transition rounded-md p-1 hover:bg-zinc-800">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div class="px-6 py-6 text-zinc-400 text-sm leading-relaxed" id="modal-message">
-                Message content goes here.
+            <div class="px-6 py-6 text-zinc-300 text-sm leading-relaxed" id="modal-message">
+                Message content.
             </div>
-            <div class="px-6 py-4 bg-zinc-950/50 border-t border-zinc-800 flex justify-end gap-3" id="modal-actions">
+            <div class="px-6 py-4 bg-zinc-950 border-t border-zinc-800 flex justify-end gap-3" id="modal-actions">
                 <!-- Action buttons injected via JS -->
             </div>
         </div>
     </div>
 
-    <header class="h-14 glass-panel flex items-center justify-between px-6 z-40 shrink-0 border-b-0 border-b border-zinc-800">
+    <!-- Top Header Navigation -->
+    <header class="h-14 glass-panel flex items-center justify-between px-6 z-50 shrink-0 border-b-0 border-b border-zinc-800">
         <div class="flex items-center space-x-6">
-            <div class="flex items-center space-x-3 group cursor-pointer">
-                <div class="bg-gradient-to-br from-brand-500 to-brand-600 p-1.5 rounded-lg shadow-[0_0_15px_rgba(14,165,233,0.3)] group-hover:shadow-[0_0_20px_rgba(14,165,233,0.5)] transition-all">
+            <div class="flex items-center space-x-3 group cursor-default">
+                <div class="bg-gradient-to-br from-brand-500 to-brand-700 p-1.5 rounded-lg shadow-[0_0_15px_rgba(14,165,233,0.4)] group-hover:shadow-[0_0_20px_rgba(14,165,233,0.6)] transition-all">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                 </div>
-                <span class="font-bold text-lg tracking-tight text-white">Web Packet <span class="text-brand-500">Pro</span></span>
+                <span class="font-bold text-lg tracking-tight text-white">Switch<span class="text-brand-400">Lab</span> <span class="font-normal text-sm text-zinc-500 ml-1">v2.0</span></span>
             </div>
-            <div class="h-4 w-px bg-zinc-800"></div>
-            <div id="project-name" class="text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer flex items-center gap-2">
-                Untitled Lab <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+            <div class="h-5 w-px bg-zinc-800"></div>
+            <div id="project-name" class="text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer flex items-center gap-2 px-2 py-1 rounded hover:bg-zinc-800">
+                Untitled Network <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
             </div>
         </div>
         <div class="flex items-center space-x-3">
-            <button onclick="saveTopology()" class="text-zinc-300 hover:text-white bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-all">
+            <button onclick="saveTopology()" class="text-zinc-300 hover:text-white bg-zinc-800/60 hover:bg-zinc-700/80 border border-zinc-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg> Save Lab
             </button>
-            <button onclick="loadTopology()" class="text-zinc-300 hover:text-white bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-all">
+            <button onclick="loadTopology()" class="text-zinc-300 hover:text-white bg-zinc-800/60 hover:bg-zinc-700/80 border border-zinc-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> Load
             </button>
             <div class="w-px h-5 bg-zinc-800 mx-1"></div>
-            <button onclick="promptClearWorkspace()" class="text-red-400 hover:text-red-300 bg-red-950/30 hover:bg-red-900/40 border border-red-900/50 px-3 py-1.5 rounded-md text-sm font-medium transition-all">
-                Clear
+            <button onclick="promptClearWorkspace()" class="text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-900/60 border border-red-900/50 px-3 py-1.5 rounded-md text-sm font-medium transition-all shadow-sm">
+                Clear All
             </button>
         </div>
     </header>
 
-    <div class="absolute top-20 left-1/2 transform -translate-x-1/2 glass-panel rounded-full px-2 py-2 flex items-center gap-1 z-30 shadow-2xl border-zinc-700">
-        <button onclick="setTool('pointer')" id="tool-pointer" class="tool-btn tool-active p-2 rounded-full hover:bg-zinc-800 transition text-zinc-400 hover:text-zinc-100" title="Select / Move (Esc)">
+    <!-- Floating Tool Palette -->
+    <div class="absolute top-20 left-1/2 transform -translate-x-1/2 glass-panel rounded-full px-2 py-2 flex items-center gap-1 z-40 shadow-2xl border-zinc-700/60">
+        <button onclick="setTool('pointer')" id="tool-pointer" class="tool-btn tool-active p-2 rounded-full hover:bg-zinc-800 transition text-zinc-400 hover:text-zinc-100" title="Select / Move / Configure (Esc)">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
         </button>
-        <button onclick="setTool('cable')" id="tool-cable" class="tool-btn p-2 rounded-full hover:bg-zinc-800 transition text-zinc-400 hover:text-amber-400" title="Connect Devices (C)">
+        <button onclick="setTool('cable')" id="tool-cable" class="tool-btn p-2 rounded-full hover:bg-zinc-800 transition text-zinc-400 hover:text-amber-400" title="Connect Devices with Cable (C)">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
         </button>
-        <button onclick="setTool('ping')" id="tool-ping" class="tool-btn p-2 rounded-full hover:bg-zinc-800 transition text-zinc-400 hover:text-brand-400" title="Send PDU / Ping (P)">
+        <button onclick="setTool('ping')" id="tool-ping" class="tool-btn p-2 rounded-full hover:bg-zinc-800 transition text-zinc-400 hover:text-purple-400" title="Send ICMP Ping (P)">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
         </button>
         <div class="w-px h-6 bg-zinc-700 mx-1"></div>
@@ -254,28 +295,34 @@
     </div>
 
     <!-- Mode Status Indicator -->
-    <div class="absolute top-20 left-6 z-30">
-        <div class="bg-zinc-900/80 backdrop-blur border border-zinc-800 px-3 py-1.5 rounded-lg flex items-center shadow-lg">
-            <div class="w-2 h-2 rounded-full bg-brand-500 mr-2 animate-pulse" id="status-dot"></div>
+    <div class="absolute top-20 left-6 z-40 pointer-events-none">
+        <div class="bg-zinc-900/80 backdrop-blur border border-zinc-700/50 px-3 py-1.5 rounded-lg flex items-center shadow-lg">
+            <div class="w-2 h-2 rounded-full bg-brand-500 mr-2 shadow-[0_0_8px_rgba(14,165,233,0.8)]" id="status-dot"></div>
             <span id="tool-status" class="text-[11px] font-medium text-zinc-300 uppercase tracking-wider font-mono">Mode: Select</span>
         </div>
     </div>
 
+    <!-- Main Interactive Area -->
     <div class="flex flex-1 overflow-hidden relative">
-        <main id="workspace" class="flex-1 relative overflow-auto shadow-inner">
-            <svg id="cables-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10"></svg>
+        <main id="workspace" class="flex-1 relative overflow-hidden shadow-inner">
+            <!-- SVGs for drawing cables -->
+            <svg id="cables-layer" class="absolute top-0 left-0 w-full h-full z-10"></svg>
             <svg id="drawing-cable" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10 hidden">
                 <line id="drawing-line" x1="0" y1="0" x2="0" y2="0" />
             </svg>
+            <!-- Layer for HTML device elements -->
             <div id="devices-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-20"></div>
+            <!-- Layer for animated packets -->
             <div id="packets-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-30"></div>
         </main>
 
-        <aside id="properties-panel" class="w-96 glass-panel border-l-0 flex flex-col shadow-2xl z-40 transition-transform duration-300 transform translate-x-full absolute right-0 top-0 h-full border-zinc-800">
-            <!-- Header -->
-            <div class="h-16 flex items-center justify-between px-6 shrink-0 border-b border-zinc-800">
+        <!-- Right Sidebar: Properties & CLI -->
+        <aside id="properties-panel" class="w-96 glass-panel border-l border-t-0 border-b-0 border-zinc-700/50 flex flex-col shadow-2xl z-40 transition-transform duration-400 ease-in-out transform translate-x-full absolute right-0 top-0 h-full">
+            
+            <!-- Panel Header -->
+            <div class="h-16 flex items-center justify-between px-6 shrink-0 border-b border-zinc-800 bg-zinc-900/30">
                 <div class="flex items-center gap-3">
-                    <div id="prop-small-icon" class="text-zinc-400 w-6 h-6"></div>
+                    <div id="prop-small-icon" class="text-zinc-400 w-6 h-6 filter drop-shadow-md"></div>
                     <span class="font-semibold text-base tracking-wide text-zinc-100" id="prop-header-title">Device Properties</span>
                 </div>
                 <button onclick="closeProperties()" class="text-zinc-500 hover:text-zinc-200 transition rounded-md p-1.5 hover:bg-zinc-800 focus:outline-none">
@@ -283,106 +330,108 @@
                 </button>
             </div>
             
-            <!-- Tabs -->
-            <div class="flex border-b border-zinc-800 text-[13px] font-medium text-zinc-400 shrink-0 px-2 pt-2">
+            <!-- Panel Tabs -->
+            <div class="flex border-b border-zinc-800 text-[13px] font-medium text-zinc-400 shrink-0 px-2 pt-2 bg-zinc-900/30">
                 <button class="flex-1 py-2.5 hover:text-zinc-200 border-b-2 border-brand-500 text-brand-400 transition outline-none" id="tab-btn-config" onclick="switchTab('config')">Configuration</button>
                 <button class="flex-1 py-2.5 hover:text-zinc-200 border-b-2 border-transparent transition outline-none" id="tab-btn-cli" onclick="switchTab('cli')">Console CLI</button>
             </div>
 
-            <!-- Config Tab -->
+            <!-- Configuration Form Tab -->
             <div id="tab-config" class="p-6 flex-1 overflow-y-auto bg-transparent custom-scrollbar">
-                
                 <div class="space-y-6">
-                    <!-- Device Name -->
+                    <!-- Global Settings -->
                     <div>
-                        <label class="block text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-2">Device Name</label>
-                        <input type="text" id="prop-name" class="w-full bg-zinc-900 border border-zinc-700 text-zinc-200 rounded-md px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition shadow-sm" onchange="updateDeviceProp('name')">
+                        <label class="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-2">Display Name</label>
+                        <input type="text" id="prop-name" class="w-full bg-zinc-950 border border-zinc-700 text-zinc-100 rounded-md px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition shadow-inner" onchange="updateDeviceProp('name')">
                     </div>
                     
-                    <!-- Gateway (End Devices) -->
+                    <!-- L3 Gateway -->
                     <div id="prop-gateway-container">
-                        <label class="block text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-2">Default Gateway</label>
-                        <input type="text" id="prop-gateway" class="w-full bg-zinc-900 border border-zinc-700 text-zinc-200 rounded-md px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition font-mono shadow-sm" placeholder="0.0.0.0" onchange="updateDeviceProp('gateway')">
+                        <label class="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-2">Default Gateway</label>
+                        <input type="text" id="prop-gateway" class="w-full bg-zinc-950 border border-zinc-700 text-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition font-mono shadow-inner" placeholder="0.0.0.0" onchange="updateDeviceProp('gateway')">
                     </div>
 
-                    <div class="w-full h-px bg-zinc-800/50 my-2"></div>
+                    <div class="w-full h-px bg-zinc-800 my-2"></div>
 
-                    <!-- Interface Selector -->
+                    <!-- Interface Configuration -->
                     <div id="prop-interface-container">
-                        <label class="block text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-2 flex justify-between items-center">
+                        <label class="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-2 flex justify-between items-center">
                             Network Interface
-                            <span class="text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-mono" id="prop-mac">MAC: 00:00:00</span>
+                            <span class="text-[9px] bg-zinc-800 border border-zinc-700 text-zinc-400 px-1.5 py-0.5 rounded font-mono" id="prop-mac">MAC: 00:00:00</span>
                         </label>
-                        <select id="prop-interface-sel" class="w-full bg-zinc-900 border border-zinc-700 text-zinc-200 rounded-md px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 shadow-sm transition" onchange="loadInterfaceProps()">
+                        <select id="prop-interface-sel" class="w-full bg-zinc-950 border border-zinc-700 text-zinc-200 rounded-md px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 shadow-inner transition mb-4" onchange="loadInterfaceProps()">
                         </select>
                     </div>
 
-                    <!-- IPv4 Configuration -->
-                    <div id="prop-ip-mask-container" class="space-y-4 bg-zinc-900/50 p-4 rounded-lg border border-zinc-800/50">
+                    <div id="prop-ip-mask-container" class="space-y-4 bg-zinc-900/40 p-4 rounded-xl border border-zinc-800 shadow-sm">
                         <div>
                             <label class="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-2">IPv4 Address</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span class="text-zinc-600 font-mono text-sm">IP</span>
                                 </div>
-                                <input type="text" id="prop-ip" class="w-full bg-zinc-950 border border-zinc-700 text-brand-400 rounded-md pl-9 pr-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition font-mono" placeholder="0.0.0.0" onchange="updateDeviceProp('ip')">
+                                <input type="text" id="prop-ip" class="w-full bg-black/50 border border-zinc-700 text-brand-400 rounded-md pl-9 pr-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition font-mono shadow-inner" placeholder="0.0.0.0" onchange="updateDeviceProp('ip')">
                             </div>
                         </div>
                         <div>
                             <label class="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-2">Subnet Mask</label>
-                            <input type="text" id="prop-mask" class="w-full bg-zinc-950 border border-zinc-700 text-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition font-mono" placeholder="0.0.0.0" onchange="updateDeviceProp('mask')">
+                            <input type="text" id="prop-mask" class="w-full bg-black/50 border border-zinc-700 text-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition font-mono shadow-inner" placeholder="255.255.255.0" onchange="updateDeviceProp('mask')">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-cli" class="flex-1 cli-container p-4 hidden flex-col relative rounded-b-xl overflow-hidden m-2 border border-zinc-800">
-                <div id="cli-output" class="whitespace-pre-wrap flex-1 break-words overflow-y-auto text-[13px] leading-relaxed pb-12 custom-scrollbar"></div>
-                <div class="flex items-center mt-2 shrink-0 absolute bottom-0 left-0 right-0 bg-black py-3 px-4 border-t border-zinc-800">
+            <!-- CLI Interface Tab -->
+            <div id="tab-cli" class="flex-1 cli-container p-4 hidden flex-col relative rounded-b-xl overflow-hidden m-3 border border-zinc-700 shadow-2xl">
+                <div id="cli-output" class="whitespace-pre-wrap flex-1 break-words overflow-y-auto text-[13px] leading-relaxed pb-12 custom-scrollbar pr-2"></div>
+                <div class="flex items-center mt-2 shrink-0 absolute bottom-0 left-0 right-0 bg-zinc-950 py-3 px-4 border-t border-zinc-800">
                     <span id="cli-prompt" class="font-bold text-zinc-400">R1></span>
-                    <input type="text" id="cli-input" class="cli-input ml-2 text-[13px] font-bold text-white" onkeydown="handleCliInput(event)" autocomplete="off" spellcheck="false" placeholder="Enter command...">
+                    <input type="text" id="cli-input" class="cli-input ml-2 text-[13px] font-bold text-white font-mono" onkeydown="handleCliInput(event)" autocomplete="off" spellcheck="false" placeholder="Enter command...">
                 </div>
             </div>
         </aside>
 
-        <div id="pdu-panel" class="absolute bottom-6 right-6 w-80 glass-panel shadow-2xl rounded-xl flex flex-col z-30 overflow-hidden hidden transition-all border-zinc-800">
+        <!-- Simulation Event Log -->
+        <div id="pdu-panel" class="absolute bottom-6 right-6 w-80 glass-panel shadow-2xl rounded-xl flex flex-col z-30 overflow-hidden hidden transition-all duration-300 transform translate-y-2 opacity-0 border-zinc-700">
             <div class="bg-zinc-900/90 px-4 py-3 text-[11px] font-semibold uppercase tracking-wider border-b border-zinc-800 flex justify-between items-center text-zinc-300">
                 <div class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     Simulation Events
                 </div>
                 <button onclick="clearPdus()" class="hover:text-red-400 transition font-normal lowercase bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 px-2 py-0.5 rounded text-[10px]">clear</button>
             </div>
-            <div id="pdu-list" class="h-40 overflow-y-auto text-[12px] p-2 space-y-1.5 custom-scrollbar bg-black/20">
-                <div class="text-zinc-600 text-center italic mt-14 font-mono text-[11px]">Awaiting simulation data...</div>
+            <div id="pdu-list" class="h-48 overflow-y-auto text-[12px] p-2 space-y-1.5 custom-scrollbar bg-black/30">
+                <div class="text-zinc-600 text-center italic mt-16 font-mono text-[11px]">Awaiting simulation data...</div>
             </div>
         </div>
     </div>
 
-    <footer class="h-32 glass-panel border-t-0 flex z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.3)] shrink-0 border-zinc-800">
+    <!-- Bottom Equipment Catalog -->
+    <footer class="h-32 glass-panel border-t border-b-0 border-x-0 flex z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.4)] shrink-0 border-zinc-700/50">
         
-        <!-- Category Selection -->
-        <div class="w-24 bg-zinc-900/50 border-r border-zinc-800 flex flex-col shrink-0 py-2 gap-1 items-center justify-center">
-            <button onclick="selectCategory('routers')" class="w-16 h-12 rounded-lg hover:bg-zinc-800 flex items-center justify-center transition group relative" id="cat-routers" title="Routers">
-                <svg class="w-7 h-7 text-zinc-400 group-hover:text-rose-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <!-- Category Selector -->
+        <div class="w-24 bg-zinc-900/60 border-r border-zinc-800 flex flex-col shrink-0 py-2 gap-1 items-center justify-center">
+            <button onclick="selectCategory('routers')" class="w-16 h-12 rounded-lg hover:bg-zinc-800 flex items-center justify-center transition group relative outline-none" id="cat-routers" title="Routers">
+                <svg class="w-7 h-7 text-zinc-500 group-hover:text-rose-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             </button>
-            <button onclick="selectCategory('switches')" class="w-16 h-12 rounded-lg hover:bg-zinc-800 flex items-center justify-center transition group relative" id="cat-switches" title="Switches">
-                <svg class="w-7 h-7 text-zinc-400 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            <button onclick="selectCategory('switches')" class="w-16 h-12 rounded-lg hover:bg-zinc-800 flex items-center justify-center transition group relative outline-none" id="cat-switches" title="Switches">
+                <svg class="w-7 h-7 text-zinc-500 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             </button>
-            <button onclick="selectCategory('end_devices')" class="w-16 h-12 rounded-lg hover:bg-zinc-800 flex items-center justify-center transition group relative bg-zinc-800 shadow-inner" id="cat-end_devices" title="End Devices">
+            <button onclick="selectCategory('end_devices')" class="w-16 h-12 rounded-lg flex items-center justify-center transition group relative bg-zinc-800 shadow-inner outline-none" id="cat-end_devices" title="End Devices">
                 <svg class="w-7 h-7 text-sky-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             </button>
         </div>
         
-        <!-- Equipment List Items -->
+        <!-- Draggable Equipment Items Container -->
         <div class="flex-1 px-6 py-4 flex gap-4 overflow-x-auto items-center bg-transparent custom-scrollbar" id="equipment-list">
-            <!-- Populated dynamically -->
+            <!-- Dynamically populated via JS -->
         </div>
     </footer>
 
     <script>
+        // --- SVG Asset Definitions ---
         const ICONS = {
-            router: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-full h-full"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path d="M12 2L12 22M2 12L22 12M6 6L18 18M6 18L18 6" stroke-width="1.5" opacity="0.5"></path><path d="M10 8l2 -3l2 3M10 16l2 3l2 -3M8 10l-3 2l3 2M16 10l3 2l-3 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+            router: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-full h-full"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path d="M12 2L12 22M2 12L22 12M6 6L18 18M6 18L18 6" stroke-width="1.5" opacity="0.4"></path><path d="M10 8l2 -3l2 3M10 16l2 3l2 -3M8 10l-3 2l3 2M16 10l3 2l-3 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
             switch: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-full h-full"><rect x="2" y="6" width="20" height="12" rx="2" stroke-width="2"></rect><path d="M6 10h2M10 10h2M14 10h2M18 10h.01M6 14h2M10 14h2M14 14h2M18 14h.01" stroke-width="2" stroke-linecap="round"></path></svg>`,
             pc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>`,
             laptop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-full h-full"><rect x="3" y="4" width="18" height="12" rx="2" stroke-width="2"></rect><path d="M2 20h20M4 16v4M20 16v4" stroke-width="2" stroke-linecap="round"></path></svg>`,
@@ -391,8 +440,8 @@
 
         const CATEGORIES = {
             routers: [ 
-                { id: 'vios', name: 'vIOS', label: 'vIOS Router', type: 'router' },
-                { id: 'csr1000v', name: 'CSR', label: 'CSR1000v', type: 'router' }
+                { id: 'vios', name: 'R', label: 'vIOS Router', type: 'router' },
+                { id: 'csr', name: 'CSR', label: 'CSR1000v', type: 'router' }
             ],
             switches: [ 
                 { id: 'l2', name: 'SW', label: 'L2 Switch', type: 'switch' } 
@@ -404,7 +453,7 @@
             ]
         };
 
-        // --- State Variables ---
+        // --- Application State ---
         let devices = [];
         let links = [];
         let deviceCounter = 1;
@@ -413,11 +462,13 @@
         let currentCategory = 'end_devices';
         let itemToPlace = null;
         
+        // Interaction specific states
         let activeDevice = null;
         let draggingDevice = null;
         let cableSourceDevice = null;
         let pingSourceDevice = null;
 
+        // --- DOM Element References ---
         const workspace = document.getElementById('workspace');
         const devicesLayer = document.getElementById('devices-layer');
         const cablesLayer = document.getElementById('cables-layer');
@@ -425,6 +476,500 @@
         const drawingLine = document.getElementById('drawing-line');
         const toolStatus = document.getElementById('tool-status');
         const statusDot = document.getElementById('status-dot');
+
+        // --- Networking Utility Functions ---
+        
+        // Generate pseudo-random MAC address
+        function generateMAC() {
+            return "00:" + Array.from({length:5}, () => Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join(':');
+        }
+
+        // Convert IP string to 32-bit integer for subnet math
+        function ipToLong(ip) {
+            if(!ip) return 0;
+            const parts = ip.split('.');
+            if(parts.length !== 4) return 0;
+            return parts.reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+        }
+
+        // Check if two IPs reside in the same subnet
+        function isSameSubnet(ip1, mask1, ip2, mask2) {
+            if(!ip1 || !mask1 || !ip2 || !mask2) return false;
+            let i1 = ipToLong(ip1);
+            let m1 = ipToLong(mask1);
+            let i2 = ipToLong(ip2);
+            let m2 = ipToLong(mask2);
+            return (m1 === m2) && ((i1 & m1) === (i2 & m2));
+        }
+
+        // Get network address string and CIDR (e.g. "192.168.1.0/24")
+        function getNetworkStr(ip, mask) {
+            if(!ip || !mask) return "Unconfigured";
+            let i = ip.split('.').map(Number);
+            let m = mask.split('.').map(Number);
+            if(i.length !== 4 || m.length !== 4) return "Invalid";
+            let net = i.map((oct, idx) => oct & m[idx]).join('.');
+            let cidr = m.reduce((acc, val) => acc + val.toString(2).split('1').length - 1, 0);
+            return `${net}/${cidr}`;
+        }
+
+        // --- Simulated Hardware Classes ---
+
+        class NetworkDevice {
+            constructor(typeStr, namePref, x, y) {
+                this.id = 'dev_' + Date.now() + '_' + deviceCounter++;
+                this.typeStr = typeStr;
+                this.name = namePref + (deviceCounter - 1);
+                this.x = x;
+                this.y = y;
+                this.mac = generateMAC();
+                
+                // Boot sequence text for CLI
+                this.cliHistory = [
+                    `SwitchLab OS (tm) Software, Version 15.2(4)E6`,
+                    `Copyright (c) 1986-2026 by SwitchLab Systems, Inc.`,
+                    `Compiled by builder\n`,
+                    `%SYS-5-RESTART: System restarted --`,
+                    `Device ${this.name} initialized.\n`
+                ];
+            }
+            // Determines if device processes IP logic
+            get isLayer3() { return ['pc', 'laptop', 'server', 'router'].includes(this.typeStr); }
+        }
+
+        class EndDevice extends NetworkDevice {
+            constructor(typeStr, namePref, x, y) {
+                super(typeStr, namePref, x, y);
+                this.interfaces = [{ name: 'eth0', ip: '', mask: '255.255.255.0', mac: this.mac }];
+                this.gateway = '';
+                this.prompt = 'user@' + this.name.toLowerCase() + ':~$ ';
+                this.cliHistory = [`Linux ${this.name.toLowerCase()} 5.15.0-generic #1 SMP x86_64\n`];
+            }
+        }
+
+        class Router extends NetworkDevice {
+            constructor(typeStr, namePref, x, y) {
+                super(typeStr, namePref, x, y);
+                this.interfaces = [
+                    { name: 'GigabitEthernet0/0', ip: '', mask: '255.255.255.0', mac: generateMAC() },
+                    { name: 'GigabitEthernet0/1', ip: '', mask: '255.255.255.0', mac: generateMAC() }
+                ];
+                this.prompt = this.name + '>';
+            }
+        }
+
+        class Switch extends NetworkDevice {
+            constructor(typeStr, namePref, x, y) {
+                super(typeStr, namePref, x, y);
+                // Simulate an 8 port switch
+                this.interfaces = Array.from({length: 8}, (_, i) => ({ name: `Gi0/${i+1}`, mac: generateMAC() }));
+                this.prompt = this.name + '>';
+            }
+        }
+
+        
+        // --- UI Rendering & Interaction ---
+
+        // Switch equipment categories in footer
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.w-24 button').forEach(b => {
+                b.classList.remove('bg-zinc-800', 'shadow-inner');
+                b.querySelector('svg').classList.remove('text-rose-500', 'text-emerald-500', 'text-sky-400');
+                b.querySelector('svg').classList.add('text-zinc-500');
+            });
+            const activeBtn = document.getElementById('cat-' + cat);
+            activeBtn.classList.add('bg-zinc-800', 'shadow-inner');
+            
+            // Apply specific tint to active category icon
+            let colorClass = 'text-brand-400';
+            if(cat === 'routers') colorClass = 'text-rose-500';
+            if(cat === 'switches') colorClass = 'text-emerald-500';
+            if(cat === 'end_devices') colorClass = 'text-sky-400';
+            
+            let svg = activeBtn.querySelector('svg');
+            svg.classList.remove('text-zinc-500');
+            svg.classList.add(colorClass);
+            
+            renderEquipmentList();
+        }
+
+        // Render available devices in the footer based on selected category
+        function renderEquipmentList() {
+            const list = document.getElementById('equipment-list');
+            list.innerHTML = '';
+            CATEGORIES[currentCategory].forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'equipment-item flex flex-col items-center justify-center w-24 h-[84px] bg-zinc-900/80 border border-zinc-700/60 rounded-xl hover:bg-zinc-800 hover:border-zinc-600 transition-all shrink-0 outline-none group shadow-sm';
+                
+                let iconColor = 'text-zinc-500 group-hover:text-zinc-300';
+                if(item.type === 'router') iconColor = 'text-rose-800 group-hover:text-rose-400';
+                if(item.type === 'switch') iconColor = 'text-emerald-800 group-hover:text-emerald-400';
+                if(['pc','laptop','server'].includes(item.type)) iconColor = 'text-sky-800 group-hover:text-sky-400';
+
+                btn.innerHTML = `
+                    <div class="w-8 h-8 mb-2 transition-transform duration-300 group-hover:-translate-y-1 ${iconColor}">${ICONS[item.type]}</div>
+                    <span class="text-[10px] font-medium text-zinc-400 text-center leading-tight group-hover:text-zinc-200 transition-colors">${item.label}</span>
+                `;
+                
+                // Arm device placement
+                btn.onclick = () => {
+                    if(selectedTool !== 'pointer') setTool('pointer');
+                    itemToPlace = item;
+                    document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-2', 'ring-brand-500', 'bg-zinc-800'));
+                    btn.classList.add('ring-2', 'ring-brand-500', 'bg-zinc-800');
+                    updateStatus(`Placing ${item.label}`, 'animate-pulse shadow-[0_0_8px_rgba(14,165,233,0.8)] bg-brand-500');
+                    workspace.style.cursor = 'crosshair';
+                };
+                list.appendChild(btn);
+            });
+        }
+
+        // Update the top-left status indicator
+        function updateStatus(text, dotClass = 'bg-brand-500 shadow-[0_0_8px_rgba(14,165,233,0.8)]') {
+            toolStatus.innerText = text;
+            statusDot.className = `w-2 h-2 rounded-full mr-2 ${dotClass}`;
+        }
+
+        // Handle tool switching (Pointer, Cable, Ping, Delete)
+        function setTool(tool) {
+            selectedTool = tool;
+            itemToPlace = null;
+            
+            // Visual reset
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
+            document.getElementById('tool-' + tool).classList.add('tool-active');
+            document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-2', 'ring-brand-500', 'bg-zinc-800'));
+            
+            // Logic reset
+            cableSourceDevice = null;
+            pingSourceDevice = null;
+            drawingCableSvg.classList.add('hidden');
+            
+            devices.forEach(d => {
+                const el = document.getElementById(d.id);
+                if(el) {
+                    el.classList.remove('ping-src');
+                    el.classList.remove('cable-src');
+                }
+            });
+
+            // State specific UI
+            if(tool === 'pointer') { updateStatus('Mode: Select / Move', 'bg-brand-500 shadow-[0_0_8px_rgba(14,165,233,0.8)]'); workspace.style.cursor = 'default'; }
+            if(tool === 'delete') { updateStatus('Mode: Delete Object', 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'); workspace.style.cursor = 'crosshair'; closeProperties(); }
+            if(tool === 'cable') { updateStatus('Mode: Connect (Click Src -> Dst)', 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse'); workspace.style.cursor = 'crosshair'; }
+            if(tool === 'ping') { updateStatus('Mode: Send PDU (Click Src -> Dst)', 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)] animate-pulse'); workspace.style.cursor = 'crosshair'; }
+        }
+
+        // Global Keyboard Shortcuts
+        window.addEventListener('keydown', e => {
+            // Ignore if typing in inputs (except CLI where we want to capture some)
+            if(e.target.tagName === 'INPUT' && e.target.id !== 'cli-input') return; 
+            
+            if(e.key === 'Escape') { 
+                setTool('pointer'); 
+                closeProperties(); 
+            }
+            if(e.key === 'Delete' || e.key === 'Backspace') {
+                if(e.target.tagName !== 'INPUT') setTool('delete');
+            }
+            if(e.key.toLowerCase() === 'c' && document.activeElement.tagName !== 'INPUT') setTool('cable');
+            if(e.key.toLowerCase() === 'p' && document.activeElement.tagName !== 'INPUT') setTool('ping');
+        });
+
+        
+        // Workspace Click Handler (Placing devices, cancelling actions)
+        workspace.addEventListener('click', e => {
+            // Ignore clicks directly on devices or cables, let them bubble or handle themselves
+            if(e.target.closest('.device') || e.target.closest('.link-group')) return;
+
+            // Place new device
+            if (itemToPlace) {
+                const rect = workspace.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                let newDev;
+                if(['pc', 'laptop', 'server'].includes(itemToPlace.type)) {
+                    newDev = new EndDevice(itemToPlace.type, itemToPlace.name, x, y);
+                } else if (itemToPlace.type === 'router') {
+                    newDev = new Router(itemToPlace.type, itemToPlace.name, x, y);
+                } else if (itemToPlace.type === 'switch') {
+                    newDev = new Switch(itemToPlace.type, itemToPlace.name, x, y);
+                }
+
+                if(newDev) {
+                    devices.push(newDev);
+                    renderDevice(newDev);
+                }
+                
+                // Reset placement state
+                itemToPlace = null;
+                document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-2', 'ring-brand-500', 'bg-zinc-800'));
+                setTool('pointer');
+            } 
+            // Click empty space with pointer -> Deselect all
+            else if (selectedTool === 'pointer') {
+                closeProperties();
+                devices.forEach(d => document.getElementById(d.id)?.classList.remove('selected'));
+                activeDevice = null;
+            } 
+            // Click empty space while drawing cable -> Cancel cable
+            else if (selectedTool === 'cable' && cableSourceDevice) {
+                document.getElementById(cableSourceDevice.id)?.classList.remove('cable-src');
+                cableSourceDevice = null;
+                drawingCableSvg.classList.add('hidden');
+                updateStatus('Mode: Connect (Click Src -> Dst)', 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]');
+            } 
+            // Click empty space while pinging -> Cancel ping
+            else if (selectedTool === 'ping' && pingSourceDevice) {
+                pingSourceDevice = null;
+                devices.forEach(d => document.getElementById(d.id)?.classList.remove('ping-src'));
+                updateStatus('Mode: Send PDU (Click Src -> Dst)', 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]');
+            }
+        });
+
+        // Workspace Mouse Move (Dragging devices, drawing cable line)
+        workspace.addEventListener('mousemove', e => {
+            const rect = workspace.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (draggingDevice && selectedTool === 'pointer') {
+                // Keep within bounds
+                draggingDevice.x = Math.max(36, Math.min(mouseX, rect.width - 36));
+                draggingDevice.y = Math.max(36, Math.min(mouseY, rect.height - 36));
+                
+                const el = document.getElementById(draggingDevice.id);
+                // Use transform instead of left/top for smoother dragging if preferred, 
+                // but left/top with absolute is robust here without layout thrashing.
+                el.style.left = draggingDevice.x + 'px';
+                el.style.top = draggingDevice.y + 'px';
+                drawLinks(); // Re-render cables connected to this device
+            }
+
+            if (selectedTool === 'cable' && cableSourceDevice) {
+                drawingLine.setAttribute('x2', mouseX);
+                drawingLine.setAttribute('y2', mouseY);
+            }
+        });
+
+        // Mouse Up anywhere (End dragging)
+        window.addEventListener('mouseup', () => {
+            if(draggingDevice) {
+                const el = document.getElementById(draggingDevice.id);
+                if(el) el.style.cursor = 'default';
+            }
+            draggingDevice = null;
+        });
+
+        // --- Rendering Logic ---
+
+        // Create DOM element for a device
+        function renderDevice(dev) {
+            const el = document.createElement('div');
+            el.className = 'device';
+            el.id = dev.id;
+            el.style.left = dev.x + 'px';
+            el.style.top = dev.y + 'px';
+
+            let iconColor = 'text-zinc-400';
+            if(dev.typeStr === 'router') iconColor = 'text-rose-500';
+            if(dev.typeStr === 'switch') iconColor = 'text-emerald-500';
+            if(['pc','laptop','server'].includes(dev.typeStr)) iconColor = 'text-sky-400';
+
+            el.innerHTML = `
+                <div class="device-icon ${iconColor}">${ICONS[dev.typeStr]}</div>
+                <div class="device-label">${dev.name}</div>
+                ${dev.isLayer3 && dev.interfaces[0].ip ? `<div class="device-ip-label">${dev.interfaces[0].ip}</div>` : ''}
+            `;
+
+            // Drag initiation
+            el.addEventListener('mousedown', e => {
+                if(selectedTool === 'pointer' && e.button === 0) {
+                    draggingDevice = dev;
+                }
+            });
+
+            // Device Interaction Logic
+            el.addEventListener('click', e => {
+                e.stopPropagation();
+                
+                if (selectedTool === 'pointer') {
+                    devices.forEach(d => document.getElementById(d.id)?.classList.remove('selected'));
+                    el.classList.add('selected');
+                    openProperties(dev);
+                } 
+                else if (selectedTool === 'delete') {
+                    deleteDevice(dev);
+                }
+                else if (selectedTool === 'cable') {
+                    if (!cableSourceDevice) {
+                        cableSourceDevice = dev;
+                        el.classList.add('cable-src');
+                        drawingCableSvg.classList.remove('hidden');
+                        drawingLine.setAttribute('x1', dev.x);
+                        drawingLine.setAttribute('y1', dev.y);
+                        drawingLine.setAttribute('x2', dev.x);
+                        drawingLine.setAttribute('y2', dev.y);
+                        updateStatus(`Connecting ${dev.name}...`, 'bg-amber-500 animate-pulse');
+                    } else {
+                        if (cableSourceDevice.id !== dev.id) {
+                            createLink(cableSourceDevice, dev);
+                        }
+                        document.getElementById(cableSourceDevice.id)?.classList.remove('cable-src');
+                        cableSourceDevice = null;
+                        drawingCableSvg.classList.add('hidden');
+                        setTool('pointer');
+                    }
+                }
+                else if (selectedTool === 'ping') {
+                    if (!pingSourceDevice) {
+                        // Source must be an end device for this simple simulation
+                        if(['pc', 'laptop', 'server'].includes(dev.typeStr)) {
+                            pingSourceDevice = dev;
+                            el.classList.add('ping-src');
+                            updateStatus(`Pinging from ${dev.name}...`, 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)] animate-pulse');
+                        } else {
+                            showModal('Invalid Source', 'Ping source must be an End Device (PC, Laptop, Server).', 'info');
+                            setTool('pointer');
+                        }
+                    } else {
+                        // Target can be end device or router
+                        if (pingSourceDevice.id !== dev.id && ['pc', 'laptop', 'server', 'router'].includes(dev.typeStr)) {
+                            let targetIp = dev.interfaces[0].ip;
+                            if(dev.typeStr === 'router') {
+                                // Find first configured interface
+                                let validInt = dev.interfaces.find(i => i.ip !== '');
+                                targetIp = validInt ? validInt.ip : '';
+                            }
+                            
+                            if(!targetIp) {
+                                addPduLog(pingSourceDevice.name, dev.name, 'ICMP Error', 'Target Unconfigured');
+                                showModal('Ping Failed', `Target device ${dev.name} does not have a configured IP address.`, 'info');
+                            } else {
+                                // Auto open CLI to show ping
+                                openProperties(pingSourceDevice);
+                                switchTab('cli');
+                                executePing(pingSourceDevice, targetIp, dev);
+                            }
+                        }
+                        const pingSrcEl = document.getElementById(pingSourceDevice.id);
+                        if(pingSrcEl) pingSrcEl.classList.remove('ping-src');
+                        pingSourceDevice = null;
+                        setTool('pointer');
+                    }
+                }
+            });
+
+            devicesLayer.appendChild(el);
+        }
+
+        
+        // Update labels on device element
+        function updateDeviceDOM(dev) {
+            const el = document.getElementById(dev.id);
+            if(!el) return;
+            el.querySelector('.device-label').innerText = dev.name;
+            
+            let ipLabel = el.querySelector('.device-ip-label');
+            let primaryIp = dev.isLayer3 ? (dev.interfaces[0].ip || (dev.interfaces[1] && dev.interfaces[1].ip) || '') : '';
+            
+            if(primaryIp) {
+                if(ipLabel) ipLabel.innerText = primaryIp;
+                else {
+                    const newLabel = document.createElement('div');
+                    newLabel.className = 'device-ip-label';
+                    newLabel.innerText = primaryIp;
+                    el.appendChild(newLabel);
+                }
+            } else if (ipLabel) {
+                ipLabel.remove();
+            }
+        }
+
+        function createLink(dev1, dev2) {
+            // Prevent duplicate links
+            const exists = links.some(l => 
+                (l.sourceId === dev1.id && l.targetId === dev2.id) ||
+                (l.sourceId === dev2.id && l.targetId === dev1.id)
+            );
+            if(exists) return;
+
+            links.push({ id: 'link_' + Date.now(), sourceId: dev1.id, targetId: dev2.id });
+            drawLinks();
+        }
+
+        function drawLinks() {
+            cablesLayer.innerHTML = '';
+            links.forEach(l => {
+                const s = devices.find(d => d.id === l.sourceId);
+                const t = devices.find(d => d.id === l.targetId);
+                if(s && t) {
+                    // Create a group for hit area and visual line
+                    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    group.classList.add('link-group');
+
+                    // Visible Line
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', s.x);
+                    line.setAttribute('y1', s.y);
+                    line.setAttribute('x2', t.x);
+                    line.setAttribute('y2', t.y);
+                    line.classList.add('link-line');
+
+                    // Invisible thicker line for easier clicking
+                    const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    hitArea.setAttribute('x1', s.x);
+                    hitArea.setAttribute('y1', s.y);
+                    hitArea.setAttribute('x2', t.x);
+                    hitArea.setAttribute('y2', t.y);
+                    hitArea.classList.add('link-hit-area');
+                    
+                    // Click handler for deleting cables
+                    group.addEventListener('click', e => {
+                        e.stopPropagation();
+                        if(selectedTool === 'delete') {
+                            links = links.filter(lk => lk.id !== l.id);
+                            drawLinks();
+                            setTool('pointer');
+                        }
+                    });
+
+                    group.appendChild(line);
+                    group.appendChild(hitArea);
+
+                    // Connection Dots (Green Lights)
+                    const dotS = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dotS.setAttribute('cx', s.x + (t.x - s.x) * 0.12);
+                    dotS.setAttribute('cy', s.y + (t.y - s.y) * 0.12);
+                    dotS.setAttribute('r', 3);
+                    dotS.classList.add('link-dot');
+                    
+                    const dotT = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dotT.setAttribute('cx', t.x + (s.x - t.x) * 0.12);
+                    dotT.setAttribute('cy', t.y + (s.y - t.y) * 0.12);
+                    dotT.setAttribute('r', 3);
+                    dotT.classList.add('link-dot');
+
+                    group.appendChild(dotS);
+                    group.appendChild(dotT);
+                    cablesLayer.appendChild(group);
+                }
+            });
+        }
+
+        function deleteDevice(dev) {
+            if(activeDevice && activeDevice.id === dev.id) closeProperties();
+            document.getElementById(dev.id).remove();
+            devices = devices.filter(d => d.id !== dev.id);
+            // Remove connected links
+            links = links.filter(l => l.sourceId !== dev.id && l.targetId !== dev.id);
+            drawLinks();
+            setTool('pointer');
+        }
+
+        // --- Modals & System UI ---
 
         function showModal(title, message, type = 'info', onConfirm = null) {
             const modal = document.getElementById('custom-modal');
@@ -443,8 +988,8 @@
                 cancelBtn.onclick = closeModal;
                 
                 const confirmBtn = document.createElement('button');
-                confirmBtn.innerText = 'Confirm';
-                confirmBtn.className = 'px-4 py-2 rounded-md text-sm font-medium bg-red-600/90 text-white hover:bg-red-500 transition outline-none shadow-sm';
+                confirmBtn.innerText = 'Confirm Action';
+                confirmBtn.className = 'px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-500 transition outline-none shadow-sm';
                 confirmBtn.onclick = () => {
                     if (onConfirm) onConfirm();
                     closeModal();
@@ -477,403 +1022,6 @@
             }, 300);
         }
 
-        function generateMAC() {
-            return "00:" + Array.from({length:5}, () => Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join(':');
-        }
-
-        function ipToLong(ip) {
-            if(!ip) return 0;
-            const parts = ip.split('.');
-            if(parts.length !== 4) return 0;
-            return parts.reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
-        }
-
-        function isSameSubnet(ip1, mask1, ip2, mask2) {
-            if(!ip1 || !mask1 || !ip2 || !mask2) return false;
-            let i1 = ipToLong(ip1);
-            let m1 = ipToLong(mask1);
-            let i2 = ipToLong(ip2);
-            let m2 = ipToLong(mask2);
-            return (m1 === m2) && ((i1 & m1) === (i2 & m2));
-        }
-
-        function getNetworkStr(ip, mask) {
-            let i = ip.split('.').map(Number);
-            let m = mask.split('.').map(Number);
-            let net = i.map((oct, idx) => oct & m[idx]).join('.');
-            let cidr = m.reduce((acc, val) => acc + val.toString(2).split('1').length - 1, 0);
-            return `${net}/${cidr}`;
-        }
-
-        class NetworkDevice {
-            constructor(typeStr, namePref, x, y) {
-                this.id = 'dev_' + Date.now() + '_' + deviceCounter++;
-                this.typeStr = typeStr;
-                this.name = namePref + (deviceCounter - 1);
-                this.x = x;
-                this.y = y;
-                this.mac = generateMAC();
-                this.cliHistory = [
-                    `SwitchLab OS (tm) Software, Version 15.2(4)E6`,
-                    `Copyright (c) 1986-2026 by SwitchLab Systems, Inc.`,
-                    `Compiled Thu 26-Sep-26 14:12 by builder\n`,
-                    `%SYS-5-RESTART: System restarted --`,
-                    `Device ${this.name} initialized.\n`
-                ];
-            }
-            get isLayer3() { return ['pc', 'laptop', 'server', 'router'].includes(this.typeStr); }
-        }
-
-        class EndDevice extends NetworkDevice {
-            constructor(typeStr, namePref, x, y) {
-                super(typeStr, namePref, x, y);
-                this.interfaces = [{ name: 'eth0', ip: '', mask: '', mac: this.mac }];
-                this.gateway = '';
-                this.prompt = 'user@' + this.name.toLowerCase() + ':~$ ';
-                this.cliHistory = [`Linux ${this.name.toLowerCase()} 5.15.0-generic #1 SMP x86_64\n`];
-            }
-        }
-
-        class Router extends NetworkDevice {
-            constructor(typeStr, namePref, x, y) {
-                super(typeStr, namePref, x, y);
-                this.interfaces = [
-                    { name: 'GigabitEthernet0/0', ip: '', mask: '', mac: generateMAC() },
-                    { name: 'GigabitEthernet0/1', ip: '', mask: '', mac: generateMAC() }
-                ];
-                this.prompt = this.name + '>';
-            }
-        }
-
-        class Switch extends NetworkDevice {
-            constructor(typeStr, namePref, x, y) {
-                super(typeStr, namePref, x, y);
-                this.interfaces = Array.from({length: 8}, (_, i) => ({ name: `Gi0/${i+1}`, mac: generateMAC() }));
-                this.prompt = this.name + '>';
-            }
-        }
-
-        function selectCategory(cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.w-24 button').forEach(b => {
-                b.classList.remove('bg-zinc-800', 'shadow-inner');
-                b.querySelector('svg').classList.remove('text-brand-400');
-            });
-            const activeBtn = document.getElementById('cat-' + cat);
-            activeBtn.classList.add('bg-zinc-800', 'shadow-inner');
-            
-            // Set active color based on category
-            let colorClass = 'text-brand-400';
-            if(cat === 'routers') colorClass = 'text-rose-500';
-            if(cat === 'switches') colorClass = 'text-emerald-500';
-            if(cat === 'end_devices') colorClass = 'text-sky-400';
-            
-            activeBtn.querySelector('svg').classList.add(colorClass);
-            renderEquipmentList();
-        }
-
-        function renderEquipmentList() {
-            const list = document.getElementById('equipment-list');
-            list.innerHTML = '';
-            CATEGORIES[currentCategory].forEach(item => {
-                const btn = document.createElement('button');
-                btn.className = 'equipment-item flex flex-col items-center justify-center w-24 h-20 bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-800 hover:border-zinc-700 transition-all shrink-0 outline-none group';
-                
-                let iconColor = 'text-zinc-500 group-hover:text-zinc-300';
-                if(item.type === 'router') iconColor = 'text-rose-900 group-hover:text-rose-500';
-                if(item.type === 'switch') iconColor = 'text-emerald-900 group-hover:text-emerald-500';
-                if(['pc','laptop','server'].includes(item.type)) iconColor = 'text-sky-900 group-hover:text-sky-400';
-
-                btn.innerHTML = `
-                    <div class="w-8 h-8 mb-2 transition-transform ${iconColor}">${ICONS[item.type]}</div>
-                    <span class="text-[10px] font-medium text-zinc-400 text-center leading-tight group-hover:text-zinc-200">${item.label}</span>
-                `;
-                btn.onclick = () => {
-                    if(selectedTool !== 'pointer') setTool('pointer');
-                    itemToPlace = item;
-                    document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-1', 'ring-brand-500', 'bg-zinc-800'));
-                    btn.classList.add('ring-1', 'ring-brand-500', 'bg-zinc-800');
-                    updateStatus(`Placing ${item.label}`, 'animate-pulse bg-brand-500');
-                    workspace.style.cursor = 'crosshair';
-                };
-                list.appendChild(btn);
-            });
-        }
-
-        function updateStatus(text, dotClass = 'bg-brand-500') {
-            toolStatus.innerText = text;
-            statusDot.className = `w-2 h-2 rounded-full mr-2 ${dotClass}`;
-        }
-
-        function setTool(tool) {
-            selectedTool = tool;
-            itemToPlace = null;
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
-            document.getElementById('tool-' + tool).classList.add('tool-active');
-            document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-1', 'ring-brand-500', 'bg-zinc-800'));
-            
-            cableSourceDevice = null;
-            pingSourceDevice = null;
-            drawingCableSvg.classList.add('hidden');
-            
-            devices.forEach(d => {
-                const el = document.getElementById(d.id);
-                if(el) el.classList.remove('ping-src');
-            });
-
-            if(tool === 'pointer') { updateStatus('Mode: Select / Move', 'bg-brand-500'); workspace.style.cursor = 'default'; }
-            if(tool === 'delete') { updateStatus('Mode: Delete Object', 'bg-red-500'); workspace.style.cursor = 'crosshair'; }
-            if(tool === 'cable') { updateStatus('Mode: Connect (Click Src -> Dst)', 'bg-amber-400 animate-pulse'); workspace.style.cursor = 'crosshair'; }
-            if(tool === 'ping') { updateStatus('Mode: Send PDU (Click Src -> Dst)', 'bg-purple-500 animate-pulse'); workspace.style.cursor = 'crosshair'; }
-        }
-
-        window.addEventListener('keydown', e => {
-            if(e.target.tagName === 'INPUT' && e.target.id !== 'cli-input') return; 
-            if(e.key === 'Escape') { setTool('pointer'); closeProperties(); }
-            if(e.key === 'Delete') setTool('delete');
-            if(e.key.toLowerCase() === 'c' && document.activeElement.tagName !== 'INPUT') setTool('cable');
-            if(e.key.toLowerCase() === 'p' && document.activeElement.tagName !== 'INPUT') setTool('ping');
-        });
-
-        workspace.addEventListener('click', e => {
-            if(e.target.closest('.device') || e.target.classList.contains('link-line')) return;
-
-            if (itemToPlace) {
-                const rect = workspace.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                let newDev;
-                if(['pc', 'laptop', 'server'].includes(itemToPlace.type)) {
-                    newDev = new EndDevice(itemToPlace.type, itemToPlace.name, x, y);
-                } else if (itemToPlace.type === 'router') {
-                    newDev = new Router(itemToPlace.type, itemToPlace.name, x, y);
-                } else if (itemToPlace.type === 'switch') {
-                    newDev = new Switch(itemToPlace.type, itemToPlace.name, x, y);
-                }
-
-                if(newDev) {
-                    devices.push(newDev);
-                    renderDevice(newDev);
-                }
-                
-                itemToPlace = null;
-                document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-1', 'ring-brand-500', 'bg-zinc-800'));
-                setTool('pointer');
-            } else if (selectedTool === 'pointer') {
-                closeProperties();
-                devices.forEach(d => document.getElementById(d.id)?.classList.remove('selected'));
-                activeDevice = null;
-            } else if (selectedTool === 'cable' && cableSourceDevice) {
-                cableSourceDevice = null;
-                drawingCableSvg.classList.add('hidden');
-                updateStatus('Mode: Connect (Click Src -> Dst)', 'bg-amber-400');
-            } else if (selectedTool === 'ping' && pingSourceDevice) {
-                pingSourceDevice = null;
-                devices.forEach(d => document.getElementById(d.id)?.classList.remove('ping-src'));
-                updateStatus('Mode: Send PDU (Click Src -> Dst)', 'bg-purple-500');
-            }
-        });
-
-        workspace.addEventListener('mousemove', e => {
-            const rect = workspace.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-
-            if (draggingDevice && selectedTool === 'pointer') {
-                draggingDevice.x = Math.max(36, Math.min(mouseX, rect.width - 36));
-                draggingDevice.y = Math.max(36, Math.min(mouseY, rect.height - 36));
-                const el = document.getElementById(draggingDevice.id);
-                el.style.left = draggingDevice.x + 'px';
-                el.style.top = draggingDevice.y + 'px';
-                drawLinks();
-            }
-
-            if (selectedTool === 'cable' && cableSourceDevice) {
-                drawingLine.setAttribute('x2', mouseX);
-                drawingLine.setAttribute('y2', mouseY);
-            }
-        });
-
-        window.addEventListener('mouseup', () => {
-            if(draggingDevice) {
-                document.getElementById(draggingDevice.id).style.cursor = 'default';
-            }
-            draggingDevice = null;
-        });
-
-        function renderDevice(dev) {
-            const el = document.createElement('div');
-            el.className = 'device';
-            el.id = dev.id;
-            el.style.left = dev.x + 'px';
-            el.style.top = dev.y + 'px';
-
-            let iconColor = 'text-zinc-400';
-            if(dev.typeStr === 'router') iconColor = 'text-rose-500';
-            if(dev.typeStr === 'switch') iconColor = 'text-emerald-500';
-            if(['pc','laptop','server'].includes(dev.typeStr)) iconColor = 'text-sky-400';
-
-            el.innerHTML = `
-                <div class="device-icon ${iconColor}">${ICONS[dev.typeStr]}</div>
-                <div class="device-label">${dev.name}</div>
-                ${dev.isLayer3 && dev.interfaces[0].ip ? `<div class="device-ip-label">${dev.interfaces[0].ip}</div>` : ''}
-            `;
-
-            el.addEventListener('mousedown', e => {
-                if(selectedTool === 'pointer' && e.button === 0) {
-                    draggingDevice = dev;
-                }
-            });
-
-            el.addEventListener('click', e => {
-                e.stopPropagation();
-                handleDeviceClick(dev, el);
-            });
-
-            devicesLayer.appendChild(el);
-        }
-
-        function updateDeviceDOM(dev) {
-            const el = document.getElementById(dev.id);
-            if(!el) return;
-            el.querySelector('.device-label').innerText = dev.name;
-            
-            let ipLabel = el.querySelector('.device-ip-label');
-            let primaryIp = dev.isLayer3 ? (dev.interfaces[0].ip || (dev.interfaces[1] && dev.interfaces[1].ip) || '') : '';
-            
-            if(primaryIp) {
-                if(ipLabel) ipLabel.innerText = primaryIp;
-                else el.innerHTML += `<div class="device-ip-label">${primaryIp}</div>`;
-            } else if (ipLabel) {
-                ipLabel.remove();
-            }
-        }
-
-        function handleDeviceClick(dev, el) {
-            if (selectedTool === 'pointer') {
-                devices.forEach(d => document.getElementById(d.id)?.classList.remove('selected'));
-                el.classList.add('selected');
-                openProperties(dev);
-            } 
-            else if (selectedTool === 'delete') {
-                deleteDevice(dev);
-            }
-            else if (selectedTool === 'cable') {
-                if (!cableSourceDevice) {
-                    cableSourceDevice = dev;
-                    drawingCableSvg.classList.remove('hidden');
-                    drawingLine.setAttribute('x1', dev.x);
-                    drawingLine.setAttribute('y1', dev.y);
-                    drawingLine.setAttribute('x2', dev.x);
-                    drawingLine.setAttribute('y2', dev.y);
-                    updateStatus(`Connecting ${dev.name}...`, 'bg-amber-400 animate-pulse');
-                } else {
-                    if (cableSourceDevice.id !== dev.id) {
-                        createLink(cableSourceDevice, dev);
-                    }
-                    cableSourceDevice = null;
-                    drawingCableSvg.classList.add('hidden');
-                    setTool('pointer');
-                }
-            }
-            else if (selectedTool === 'ping') {
-                if (!pingSourceDevice) {
-                    if(['pc', 'laptop', 'server'].includes(dev.typeStr)) {
-                        pingSourceDevice = dev;
-                        el.classList.add('ping-src');
-                        updateStatus(`Pinging from ${dev.name}...`, 'bg-purple-500 animate-pulse');
-                    } else {
-                        showModal('Invalid Source', 'Ping source must be an End Device (PC, Laptop, Server).', 'info');
-                        setTool('pointer');
-                    }
-                } else {
-                    if (pingSourceDevice.id !== dev.id && ['pc', 'laptop', 'server', 'router'].includes(dev.typeStr)) {
-                        let targetIp = dev.interfaces[0].ip;
-                        if(dev.typeStr === 'router') {
-                            let validInt = dev.interfaces.find(i => i.ip !== '');
-                            targetIp = validInt ? validInt.ip : '';
-                        }
-                        
-                        if(!targetIp) {
-                            addPduLog(pingSourceDevice.name, dev.name, 'ICMP Error', 'Target Unconfigured');
-                            showModal('Ping Failed', `Target device ${dev.name} does not have a configured IP address.`, 'info');
-                        } else {
-                            openProperties(pingSourceDevice);
-                            switchTab('cli');
-                            executePing(pingSourceDevice, targetIp, dev);
-                        }
-                    }
-                    pingSourceDevice.element = document.getElementById(pingSourceDevice.id);
-                    if(pingSourceDevice.element) pingSourceDevice.element.classList.remove('ping-src');
-                    pingSourceDevice = null;
-                    setTool('pointer');
-                }
-            }
-        }
-
-        function createLink(dev1, dev2) {
-            const exists = links.some(l => 
-                (l.sourceId === dev1.id && l.targetId === dev2.id) ||
-                (l.sourceId === dev2.id && l.targetId === dev1.id)
-            );
-            if(exists) return;
-
-            links.push({ id: 'link_' + Date.now(), sourceId: dev1.id, targetId: dev2.id });
-            drawLinks();
-        }
-
-        function drawLinks() {
-            cablesLayer.innerHTML = '';
-            links.forEach(l => {
-                const s = devices.find(d => d.id === l.sourceId);
-                const t = devices.find(d => d.id === l.targetId);
-                if(s && t) {
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.setAttribute('x1', s.x);
-                    line.setAttribute('y1', s.y);
-                    line.setAttribute('x2', t.x);
-                    line.setAttribute('y2', t.y);
-                    line.classList.add('link-line');
-                    
-                    line.addEventListener('click', e => {
-                        e.stopPropagation();
-                        if(selectedTool === 'delete') {
-                            links = links.filter(lk => lk.id !== l.id);
-                            drawLinks();
-                            setTool('pointer');
-                        }
-                    });
-
-                    cablesLayer.appendChild(line);
-
-                    const dotS = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    dotS.setAttribute('cx', s.x + (t.x - s.x) * 0.15);
-                    dotS.setAttribute('cy', s.y + (t.y - s.y) * 0.15);
-                    dotS.setAttribute('r', 3);
-                    dotS.classList.add('link-dot');
-                    
-                    const dotT = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    dotT.setAttribute('cx', t.x + (s.x - t.x) * 0.15);
-                    dotT.setAttribute('cy', t.y + (s.y - t.y) * 0.15);
-                    dotT.setAttribute('r', 3);
-                    dotT.classList.add('link-dot');
-
-                    cablesLayer.appendChild(dotS);
-                    cablesLayer.appendChild(dotT);
-                }
-            });
-        }
-
-        function deleteDevice(dev) {
-            if(activeDevice && activeDevice.id === dev.id) closeProperties();
-            document.getElementById(dev.id).remove();
-            devices = devices.filter(d => d.id !== dev.id);
-            links = links.filter(l => l.sourceId !== dev.id && l.targetId !== dev.id);
-            drawLinks();
-            setTool('pointer');
-        }
-
         function promptClearWorkspace() {
             showModal('Clear Topology', 'Are you sure you want to delete all devices and connections? This action cannot be undone.', 'confirm', () => {
                 devicesLayer.innerHTML = '';
@@ -883,10 +1031,12 @@
                 links = [];
                 deviceCounter = 1;
                 closeProperties();
-                document.getElementById('pdu-list').innerHTML = '<div class="text-zinc-600 text-center italic mt-14 font-mono text-[11px]">Awaiting simulation data...</div>';
+                document.getElementById('pdu-panel').classList.add('hidden');
+                document.getElementById('pdu-list').innerHTML = '<div class="text-zinc-600 text-center italic mt-16 font-mono text-[11px]">Awaiting simulation data...</div>';
             });
         }
 
+        
         const panel = document.getElementById('properties-panel');
         const tabConfig = document.getElementById('tab-config');
         const tabCli = document.getElementById('tab-cli');
@@ -901,6 +1051,7 @@
             document.getElementById('prop-header-title').innerText = dev.name;
             document.getElementById('prop-small-icon').innerHTML = ICONS[dev.typeStr];
             
+            // Populate Config Form
             document.getElementById('prop-name').value = dev.name;
             document.getElementById('prop-mac').innerText = "MAC: " + dev.interfaces[0].mac;
 
@@ -908,6 +1059,7 @@
             const intCont = document.getElementById('prop-interface-container');
             const ipMaskCont = document.getElementById('prop-ip-mask-container');
 
+            // Reset visibility
             gwCont.classList.add('hidden');
             intCont.classList.add('hidden');
             ipMaskCont.classList.remove('hidden');
@@ -930,10 +1082,13 @@
                 loadInterfaceProps();
             }
             else if (dev.typeStr === 'switch') {
+                // Layer 2 switch config doesn't need IP/Mask in this simple simulation
                 ipMaskCont.classList.add('hidden');
             }
 
             renderCli();
+            
+            // Slide in animation
             panel.classList.remove('translate-x-full');
             switchTab('config');
         }
@@ -956,39 +1111,45 @@
             if(tab === 'config') {
                 tabConfig.classList.remove('hidden');
                 tabCli.classList.remove('flex'); tabCli.classList.add('hidden');
-                btnConfig.classList.add('border-brand-500', 'text-brand-400'); btnConfig.classList.remove('border-transparent');
-                btnCli.classList.remove('border-brand-500', 'text-brand-400'); btnCli.classList.add('border-transparent');
+                btnConfig.classList.add('border-brand-500', 'text-brand-400'); btnConfig.classList.remove('border-transparent', 'text-zinc-400');
+                btnCli.classList.remove('border-brand-500', 'text-brand-400'); btnCli.classList.add('border-transparent', 'text-zinc-400');
             } else {
                 tabConfig.classList.add('hidden');
                 tabCli.classList.remove('hidden'); tabCli.classList.add('flex');
-                btnCli.classList.add('border-brand-500', 'text-brand-400'); btnCli.classList.remove('border-transparent');
-                btnConfig.classList.remove('border-brand-500', 'text-brand-400'); btnConfig.classList.add('border-transparent');
-                cliInput.focus();
-                cliOutput.scrollTop = cliOutput.scrollHeight;
+                btnCli.classList.add('border-brand-500', 'text-brand-400'); btnCli.classList.remove('border-transparent', 'text-zinc-400');
+                btnConfig.classList.remove('border-brand-500', 'text-brand-400'); btnConfig.classList.add('border-transparent', 'text-zinc-400');
+                
+                // Focus input and scroll to bottom
+                setTimeout(() => {
+                    cliInput.focus();
+                    cliOutput.scrollTop = cliOutput.scrollHeight;
+                }, 50);
             }
         }
 
         function updateDeviceProp(prop) {
             if(!activeDevice) return;
+            
             if(prop === 'name') {
                 let newName = document.getElementById('prop-name').value.trim();
                 if(newName) {
                     activeDevice.name = newName;
                     
-                    // Update prompt dynamically
+                    // Dynamically update CLI prompt to match new name
                     if(activeDevice.typeStr === 'router' || activeDevice.typeStr === 'switch') {
-                        if(activeDevice.prompt.includes('>')) activeDevice.prompt = newName + '>';
+                        if(activeDevice.prompt.includes('(config)#')) activeDevice.prompt = newName + '(config)#';
                         else if(activeDevice.prompt.includes('#')) activeDevice.prompt = newName + '#';
-                        else if(activeDevice.prompt.includes('(config)')) activeDevice.prompt = newName + '(config)#';
+                        else activeDevice.prompt = newName + '>';
                     } else {
                         activeDevice.prompt = 'user@' + newName.toLowerCase() + ':~$ ';
                     }
-                    
                     document.getElementById('prop-header-title').innerText = newName;
                 }
-            } else if(prop === 'gateway') {
+            } 
+            else if(prop === 'gateway') {
                 activeDevice.gateway = document.getElementById('prop-gateway').value.trim();
-            } else if(prop === 'ip' || prop === 'mask') {
+            } 
+            else if(prop === 'ip' || prop === 'mask') {
                 let val = document.getElementById('prop-' + prop).value.trim();
                 if(['pc', 'laptop', 'server'].includes(activeDevice.typeStr)) {
                     activeDevice.interfaces[0][prop] = val;
@@ -1001,6 +1162,7 @@
             renderCli();
         }
 
+        
         function printCli(text) {
             if(!activeDevice) return;
             activeDevice.cliHistory.push(text);
@@ -1011,28 +1173,34 @@
             if(!activeDevice) return;
             cliOutput.textContent = activeDevice.cliHistory.join('\n');
             cliPrompt.innerText = activeDevice.prompt;
-            cliOutput.scrollTop = cliOutput.scrollHeight;
+            
+            // Auto-scroll to bottom
+            requestAnimationFrame(() => {
+                cliOutput.scrollTop = cliOutput.scrollHeight;
+            });
         }
 
         function handleCliInput(e) {
             if(e.key === 'Enter') {
                 let cmd = e.target.value.trim();
-                e.target.value = '';
+                e.target.value = ''; // clear input
                 printCli(activeDevice.prompt + cmd);
                 processCommand(activeDevice, cmd);
             }
         }
 
+        // Basic command parser for simulation purposes
         function processCommand(device, cmd) {
             if(!cmd) return;
             let args = cmd.split(' ').filter(x=>x);
             let base = args[0].toLowerCase();
             
             if (['pc', 'laptop', 'server'].includes(device.typeStr)) {
+                // Linux-style commands
                 if(base === 'ping') {
                     if(args.length < 2) { printCli("Usage: ping <ip_address>"); return; }
                     executePing(device, args[1], null);
-                } else if (base === 'ipconfig' || base === 'ifconfig') {
+                } else if (base === 'ipconfig' || base === 'ifconfig' || base === 'ip') {
                     let i = device.interfaces[0];
                     printCli(`\neth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500\n        inet ${i.ip || '0.0.0.0'}  netmask ${i.mask || '0.0.0.0'}  broadcast x.x.x.x\n        ether ${i.mac}  txqueuelen 1000  (Ethernet)\n        Gateway: ${device.gateway || '0.0.0.0'}\n`);
                 } else if (base === 'clear' || base === 'cls') {
@@ -1043,6 +1211,7 @@
                 }
             } 
             else if (['router', 'switch'].includes(device.typeStr)) {
+                // Cisco-style commands
                 if (base === 'enable' || base === 'en') {
                     device.prompt = device.name + '#';
                 } else if (base === 'disable') {
@@ -1071,7 +1240,7 @@
                         });
                         printCli("end\n");
                     } else if (args[1] === 'ip' && args[2] === 'int' && args[3] === 'brief') {
-                        printCli(`Interface              IP-Address      OK? Method Status                Protocol`);
+                        printCli(`Interface                  IP-Address      OK? Method Status                Protocol`);
                         device.interfaces.forEach(i => {
                             printCli(`${i.name.padEnd(22)} ${i.ip ? i.ip.padEnd(15) : 'unassigned     '} YES manual up                    up`);
                         });
@@ -1085,6 +1254,10 @@
             }
         }
 
+        
+        // --- Simulation Core Logic ---
+
+        // Find immediately connected devices via cables
         function getPhysicalNeighbors(deviceId) {
             let n = [];
             links.forEach(l => {
@@ -1094,6 +1267,7 @@
             return n.map(id => devices.find(d => d.id === id));
         }
 
+        // Simulate ARP / Layer 2 Broadcast Domain discovery
         function getBroadcastDomain(startDev) {
             let q = [startDev];
             let visited = new Set([startDev.id]);
@@ -1103,6 +1277,7 @@
                 let curr = q.shift();
                 domain.push(curr);
                 
+                // Broadcasts traverse switches but stop at routers/end devices
                 if (curr.typeStr === 'switch' || curr.id === startDev.id) {
                     let neighbors = getPhysicalNeighbors(curr.id);
                     for(let n of neighbors) {
@@ -1116,6 +1291,7 @@
             return domain;
         }
 
+        // BFS to find path through switches (Layer 2)
         function findLayer2Path(startDev, targetDev) {
             let q = [{ dev: startDev, path: [startDev] }];
             let visited = new Set([startDev.id]);
@@ -1134,14 +1310,17 @@
                     }
                 }
             }
-            return null;
+            return null; // No physical path found
         }
 
+        // Determine how a packet gets from A to B based on IP and Subnets
         function traceRouteLogic(srcDevice, targetIp) {
             let srcIp = srcDevice.interfaces[0].ip;
             let srcMask = srcDevice.interfaces[0].mask;
             
+            // Scenario 1: Target is on the SAME subnet
             if (isSameSubnet(srcIp, srcMask, targetIp, srcMask)) {
+                // Find device with that IP in our state
                 let targetDev = devices.find(d => {
                     if(['pc','laptop','server'].includes(d.typeStr) && d.interfaces[0].ip === targetIp) return true;
                     if(d.typeStr === 'router' && d.interfaces.some(i => i.ip === targetIp)) return true;
@@ -1150,22 +1329,27 @@
                 
                 if(!targetDev) return { success: false, error: "Request timed out." };
                 
+                // Must have a physical L2 path
                 let path = findLayer2Path(srcDevice, targetDev);
                 if(path) return { success: true, path: path };
                 else return { success: false, error: "Destination host unreachable." };
             } 
+            // Scenario 2: Target is on a DIFFERENT subnet (requires Gateway)
             else {
                 let gwIp = srcDevice.gateway;
-                if(!gwIp) return { success: false, error: "Ping transmit failed. General failure." };
+                if(!gwIp) return { success: false, error: "Ping transmit failed. General failure." }; // Missing gateway config
 
+                // ARP for gateway
                 let bd = getBroadcastDomain(srcDevice);
                 let router = bd.find(d => d.typeStr === 'router' && d.interfaces.some(i => i.ip === gwIp));
                 
                 if(!router) return { success: false, error: "Reply from " + srcIp + ": Destination host unreachable." };
 
+                // Router checks its routing table (direct connections only in this simulation)
                 let outIntf = router.interfaces.find(i => i.ip && isSameSubnet(i.ip, i.mask, targetIp, i.mask));
                 if(!outIntf) return { success: false, error: "Reply from " + gwIp + ": Destination net unreachable." };
 
+                // Find destination device
                 let targetDev = devices.find(d => {
                     if(['pc','laptop','server'].includes(d.typeStr) && d.interfaces[0].ip === targetIp) return true;
                     if(d.typeStr === 'router' && d.interfaces.some(i => i.ip === targetIp)) return true;
@@ -1174,15 +1358,19 @@
 
                 if(!targetDev) return { success: false, error: "Request timed out." };
 
+                // Verify L2 path from router to destination
                 let path2 = findLayer2Path(router, targetDev);
                 if(!path2) return { success: false, error: "Request timed out." };
 
+                // Combine paths
                 let path1 = findLayer2Path(srcDevice, router);
-                let fullPath = path1.concat(path2.slice(1));
+                let fullPath = path1.concat(path2.slice(1)); // Remove duplicate router node
                 return { success: true, path: fullPath };
             }
         }
 
+        
+        // Asynchronous Ping execution
         async function executePing(source, targetIp, targetDevObj) {
             let destName = targetIp;
             if(targetDevObj) destName = targetDevObj.name;
@@ -1191,7 +1379,7 @@
             
             if(!source.interfaces[0].ip) {
                 printCli("connect: Network is unreachable");
-                addPduLog(source.name, destName, 'ICMP', 'Failed (No Route)');
+                addPduLog(source.name, destName, 'ICMP', 'Failed');
                 return;
             }
 
@@ -1199,16 +1387,24 @@
             let successes = 0;
 
             for(let i=0; i<4; i++) {
-                await new Promise(r => setTimeout(r, 600));
+                // Initial delay per ping
+                await new Promise(r => setTimeout(r, 800));
                 
                 if(result.success) {
+                    // Trigger animation
                     animatePacket(result.path);
+                    
+                    // Calculate wait time based on path length (round trip)
                     let animTime = (result.path.length - 1) * 500 * 2;
                     await new Promise(r => setTimeout(r, animTime + 200));
                     
-                    let time = Math.floor(Math.random()*15)+1;
+                    let time = Math.floor(Math.random()*10)+1;
                     printCli(`64 bytes from ${targetIp}: icmp_seq=${i+1} ttl=64 time=${time} ms`);
                     successes++;
+                    
+                    // Visual target flash
+                    if(targetDevObj) flashDevice(targetDevObj.id, 'rgba(16, 185, 129, 0.8)');
+                    
                     if(i===0) addPduLog(source.name, targetIp, 'ICMP', 'Success');
                 } else {
                     printCli(`From ${result.error.includes('Reply') ? result.error.split(' ')[2] : source.interfaces[0].ip} icmp_seq=${i+1} Destination Host Unreachable`);
@@ -1217,15 +1413,35 @@
             }
 
             printCli(`\n--- ${targetIp} ping statistics ---`);
-            printCli(`4 packets transmitted, ${successes} received, ${(4-successes)*25}% packet loss, time 3000ms\n`);
+            printCli(`4 packets transmitted, ${successes} received, ${(4-successes)*25}% packet loss, time ${Math.floor(Math.random()*2000)+1000}ms\n`);
         }
 
+        // Visual flash effect on devices
+        function flashDevice(id, color) {
+            const el = document.getElementById(id);
+            if(el) {
+                const icon = el.querySelector('.device-icon');
+                const origColor = icon.style.color;
+                const origFilter = el.style.filter;
+                
+                icon.style.color = color;
+                el.style.filter = `drop-shadow(0 0 20px ${color})`;
+                
+                setTimeout(() => {
+                    icon.style.color = origColor;
+                    el.style.filter = origFilter;
+                }, 400);
+            }
+        }
+
+        // Handle the DOM animation of the packet dot
         function animatePacket(path) {
             if(path.length < 2) return;
             const pktLayer = document.getElementById('packets-layer');
             const pkt = document.createElement('div');
             pkt.className = 'packet';
             
+            // Set initial position
             pkt.style.left = path[0].x + 'px';
             pkt.style.top = path[0].y + 'px';
             pktLayer.appendChild(pkt);
@@ -1234,11 +1450,13 @@
             let goingBack = false;
 
             function move() {
+                // Turn around
                 if(!goingBack && step >= path.length) {
                     goingBack = true;
                     step = path.length - 2;
                     pkt.classList.add('return');
                 }
+                // Finish
                 if(goingBack && step < 0) {
                     pkt.remove();
                     return;
@@ -1251,23 +1469,30 @@
                 if(goingBack) step--;
                 else step++;
 
-                setTimeout(move, 500);
+                setTimeout(move, 500); // Wait for transition duration
             }
+            // Start movement slightly after placing to allow CSS to register initial pos
             setTimeout(move, 50);
         }
 
+        // Event Logging UI
         function addPduLog(src, dest, type, status) {
-            document.getElementById('pdu-panel').classList.remove('hidden');
+            const panel = document.getElementById('pdu-panel');
+            panel.classList.remove('hidden');
+            setTimeout(() => {
+                panel.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+            
             const list = document.getElementById('pdu-list');
             if(list.innerHTML.includes('Awaiting simulation data')) list.innerHTML = '';
             
-            let color = status === 'Success' ? 'text-emerald-400 bg-emerald-950/30 border-emerald-900/50' : 'text-red-400 bg-red-950/30 border-red-900/50';
+            let color = status === 'Success' ? 'text-emerald-400 bg-emerald-950/40 border-emerald-900/50' : 'text-rose-400 bg-rose-950/40 border-rose-900/50';
             
             let html = `
-                <div class="border rounded-lg px-3 py-2 flex items-center justify-between shadow-sm mb-2 ${color} backdrop-blur-sm">
+                <div class="border rounded-lg px-3 py-2 flex items-center justify-between shadow-sm mb-2 ${color} backdrop-blur-md">
                     <div class="flex flex-col gap-0.5">
                         <span class="font-bold font-mono tracking-tight">${type}</span>
-                        <span class="text-[10px] text-zinc-400">${src} <span class="text-zinc-600">→</span> ${dest}</span>
+                        <span class="text-[10px] text-zinc-400">${src} <span class="text-zinc-600 px-1">→</span> ${dest}</span>
                     </div>
                     <span class="font-bold text-[10px] uppercase tracking-wider">${status}</span>
                 </div>
@@ -1276,33 +1501,40 @@
         }
 
         function clearPdus() {
-            document.getElementById('pdu-list').innerHTML = '<div class="text-zinc-600 text-center italic mt-14 font-mono text-[11px]">Awaiting simulation data...</div>';
+            document.getElementById('pdu-list').innerHTML = '<div class="text-zinc-600 text-center italic mt-16 font-mono text-[11px]">Awaiting simulation data...</div>';
         }
+
+        
+        // --- Persistence ---
 
         function saveTopology() {
             const data = { devices, links, deviceCounter };
-            localStorage.setItem('wpt_switchlab_save', JSON.stringify(data));
-            showModal('Topology Saved', 'Your current lab configuration has been saved to the browser.', 'info');
+            localStorage.setItem('wpt_switchlab_save_v2', JSON.stringify(data));
+            showModal('Topology Saved', 'Your current lab configuration has been saved successfully to the browser.', 'info');
         }
 
         function loadTopology() {
-            const dataStr = localStorage.getItem('wpt_switchlab_save');
+            const dataStr = localStorage.getItem('wpt_switchlab_save_v2');
             if(!dataStr) { 
-                showModal('No Save Found', 'There is no saved lab configuration in your browser storage.', 'info');
+                showModal('No Save Found', 'There is no saved lab configuration found in your browser storage.', 'info');
                 return; 
             }
             
-            showModal('Load Topology', 'Loading will overwrite your current workspace. Proceed?', 'confirm', () => {
+            showModal('Load Topology', 'Loading will overwrite your current workspace. Do you wish to proceed?', 'confirm', () => {
+                // Clear Workspace
                 devicesLayer.innerHTML = '';
                 cablesLayer.innerHTML = '';
                 document.getElementById('packets-layer').innerHTML = '';
                 devices = [];
                 links = [];
+                closeProperties();
+                clearPdus();
                 
                 try {
                     const data = JSON.parse(dataStr);
                     deviceCounter = data.deviceCounter;
                     
+                    // Rehydrate Objects
                     data.devices.forEach(d => {
                         let newDev;
                         if(['pc','laptop','server'].includes(d.typeStr)) {
@@ -1312,34 +1544,46 @@
                         } else if(d.typeStr === 'switch') {
                             newDev = new Switch(d.typeStr, 'x', d.x, d.y);
                         }
+                        // Merge saved state
                         Object.assign(newDev, d);
                         devices.push(newDev);
                         renderDevice(newDev);
                         updateDeviceDOM(newDev);
                     });
 
-                    data.links.forEach(l => {
-                        links.push(l);
-                    });
+                    data.links.forEach(l => { links.push(l); });
                     drawLinks();
                     
                 } catch(e) {
-                    console.error(e);
-                    showModal('Error', 'Failed to parse saved topology data.', 'info');
+                    console.error("Load Error:", e);
+                    showModal('Error', 'Failed to parse saved topology data. The save file might be corrupted.', 'info');
                 }
             });
         }
 
+        // --- Initialization ---
+
         window.onload = () => {
             selectCategory('routers');
             
-            // Build default network
-            let r1 = new Router('router', 'Edge-R1', 300, 250); r1.interfaces[0].ip = '10.0.0.1'; r1.interfaces[0].mask = '255.255.255.0'; r1.interfaces[1].ip = '172.16.0.1'; r1.interfaces[1].mask = '255.255.255.0';
-            let sw1 = new Switch('switch', 'Core-SW1', 550, 250);
-            let pc1 = new EndDevice('pc', 'User-PC1', 800, 150); pc1.interfaces[0].ip = '172.16.0.10'; pc1.interfaces[0].mask = '255.255.255.0'; pc1.gateway = '172.16.0.1';
-            let svr = new EndDevice('server', 'Web-Srv', 800, 350); svr.interfaces[0].ip = '172.16.0.100'; svr.interfaces[0].mask = '255.255.255.0'; svr.gateway = '172.16.0.1';
+            // Build default demonstration network
+            let r1 = new Router('router', 'Edge-Router', 400, 200); 
+            r1.interfaces[0].ip = '10.0.0.1'; r1.interfaces[0].mask = '255.255.255.0'; 
+            r1.interfaces[1].ip = '192.168.1.1'; r1.interfaces[1].mask = '255.255.255.0';
+            
+            let sw1 = new Switch('switch', 'Core-SW1', 650, 200);
+            
+            let pc1 = new EndDevice('pc', 'Admin-PC', 850, 100); 
+            pc1.interfaces[0].ip = '192.168.1.10'; pc1.interfaces[0].mask = '255.255.255.0'; pc1.gateway = '192.168.1.1';
+            
+            let svr = new EndDevice('server', 'Web-Server', 850, 300); 
+            svr.interfaces[0].ip = '192.168.1.100'; svr.interfaces[0].mask = '255.255.255.0'; svr.gateway = '192.168.1.1';
 
-            [r1, sw1, pc1, svr].forEach(d => { devices.push(d); renderDevice(d); updateDeviceDOM(d); });
+            [r1, sw1, pc1, svr].forEach(d => { 
+                devices.push(d); 
+                renderDevice(d); 
+                updateDeviceDOM(d); 
+            });
             
             links.push({ id: 'l1', sourceId: r1.id, targetId: sw1.id });
             links.push({ id: 'l2', sourceId: sw1.id, targetId: pc1.id });
