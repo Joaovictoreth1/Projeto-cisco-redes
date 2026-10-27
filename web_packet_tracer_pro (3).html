@@ -59,7 +59,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Premium Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.15); border-radius: 4px; }
@@ -84,26 +83,19 @@
             background-position: center, -1px -1px, -1px -1px;
         }
 
-        /* Dispositivos */
         .device {
-            position: absolute;
-            width: 80px; height: 80px;
+            position: absolute; width: 80px; height: 80px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transform: translate(-50%, -50%);
-            z-index: 20;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translate(-50%, -50%); z-index: 20;
         }
         
         .device-icon-wrapper {
             width: 52px; height: 52px;
             display: flex; align-items: center; justify-content: center;
             background: linear-gradient(135deg, rgba(20,20,30,0.9), rgba(10,10,15,0.9));
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px;
-            backdrop-filter: blur(8px);
-            transition: all 0.25s ease;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
+            backdrop-filter: blur(8px); transition: all 0.25s ease;
             box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1);
-            position: relative;
         }
 
         .device:hover .device-icon-wrapper {
@@ -114,7 +106,6 @@
 
         .device i { font-size: 28px; transition: color 0.3s, filter 0.3s; filter: drop-shadow(0 0 8px currentColor); }
         
-        /* Device States */
         .device.selected .device-icon-wrapper {
             border-color: #0ea5e9;
             box-shadow: 0 0 25px rgba(14, 165, 233, 0.5), inset 0 0 15px rgba(14, 165, 233, 0.3);
@@ -138,30 +129,26 @@
             background: rgba(5, 5, 8, 0.95); padding: 4px 14px;
             border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08);
             color: #e2e8f0; pointer-events: none; white-space: nowrap;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); letter-spacing: 0.5px;
         }
 
         .device-ip-label {
             font-size: 9px; color: #38bdf8; font-family: 'JetBrains Mono', monospace;
-            background: rgba(14, 165, 233, 0.1); padding: 2px 8px;
-            border-radius: 6px; pointer-events: none; margin-top: 6px;
-            border: 1px solid rgba(14, 165, 233, 0.2);
+            background: rgba(14, 165, 233, 0.1); padding: 2px 8px; border-radius: 6px; 
+            pointer-events: none; margin-top: 6px; border: 1px solid rgba(14, 165, 233, 0.2);
         }
 
-        /* Cabos */
+        /* Cables */
         .link-group { cursor: pointer; }
         .link-hit-area { stroke: transparent; stroke-width: 25; fill: none; pointer-events: stroke; }
-        .link-line {
-            stroke: rgba(148, 163, 184, 0.4); stroke-width: 3; fill: none;
-            transition: stroke 0.3s, stroke-width 0.2s, filter 0.3s; pointer-events: none;
-        }
-        .link-group:hover .link-line {
-            stroke: #f43f5e; stroke-width: 4; filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.8));
-        }
-        .link-group.active-flow .link-line {
-            stroke: #8b5cf6; filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8));
-        }
+        
+        .link-line { fill: none; transition: stroke 0.3s, stroke-width 0.2s, filter 0.3s; pointer-events: none; }
+        .link-line.auto { stroke: rgba(148, 163, 184, 0.4); stroke-width: 3; }
+        .link-line.straight { stroke: #334155; stroke-width: 4; }
+        .link-line.cross { stroke: #334155; stroke-width: 4; stroke-dasharray: 8,6; }
+
+        .link-group:hover .link-line { stroke: #f43f5e; stroke-width: 4; filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.8)); stroke-dasharray: none; }
+        .link-group.active-flow .link-line { stroke: #8b5cf6; filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)); }
         
         .port-light {
             fill: #10b981; stroke: #050507; stroke-width: 2;
@@ -171,8 +158,11 @@
         .port-light.down { fill: #f43f5e; filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.8)); }
 
         .port-label {
-            font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: #94a3b8;
-            pointer-events: none; text-anchor: middle; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.9));
+            font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: bold; fill: #cbd5e1;
+            pointer-events: none; text-anchor: middle; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9));
+        }
+        .port-label-bg {
+            fill: rgba(0,0,0,0.7); pointer-events: none; rx: 4; ry: 4;
         }
 
         #drawing-line {
@@ -180,58 +170,38 @@
             animation: dash 0.6s linear infinite; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8));
         }
 
-        /* Pacotes SVG */
-        .svg-packet {
-            fill: #8b5cf6;
-            filter: drop-shadow(0 0 10px #8b5cf6) drop-shadow(0 0 20px #8b5cf6);
-            transition: fill 0.2s;
-        }
+        .svg-packet { fill: #8b5cf6; filter: drop-shadow(0 0 10px #8b5cf6) drop-shadow(0 0 20px #8b5cf6); transition: fill 0.2s; }
         .svg-packet.return { fill: #10b981; filter: drop-shadow(0 0 10px #10b981) drop-shadow(0 0 20px #10b981); }
         .svg-packet.error { fill: #f43f5e; filter: drop-shadow(0 0 10px #f43f5e) drop-shadow(0 0 20px #f43f5e); }
 
-        /* Ferramentas */
         .tool-active {
             background-color: rgba(14, 165, 233, 0.15) !important;
             color: #38bdf8 !important; border-color: rgba(14, 165, 233, 0.4) !important;
             box-shadow: inset 0 0 15px rgba(14, 165, 233, 0.2), 0 0 15px rgba(14, 165, 233, 0.2);
         }
 
-        /* CLI */
         .cli-container {
             background-color: #020203; color: #4ade80;
             font-family: 'JetBrains Mono', monospace; box-shadow: inset 0 0 30px rgba(0,0,0,1);
             position: relative; border-radius: 0 0 12px 12px;
         }
-        .cli-container::before {
-            content: " "; display: block; position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none;
-        }
         .cli-input { background: transparent; border: none; outline: none; color: #f8fafc; flex: 1; width: 100%; caret-color: #4ade80; }
         .input-glow:focus { box-shadow: 0 0 0 1px #0ea5e9, 0 0 15px rgba(14, 165, 233, 0.25); border-color: transparent; }
 
-        /* Toasts */
         #toast-container { position: fixed; top: 70px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
         .toast-message {
-            background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(12px);
-            border-left: 4px solid #0ea5e9; color: white; padding: 14px 20px;
-            border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            font-size: 13px; display: flex; align-items: center; gap: 12px;
+            background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(12px); border-left: 4px solid #0ea5e9; color: white; padding: 14px 20px;
+            border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); font-size: 13px; display: flex; align-items: center; gap: 12px;
             transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
             pointer-events: auto; border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .toast-message.show { transform: translateX(0); }
         .toast-error { border-left-color: #f43f5e; } .toast-success { border-left-color: #10b981; } .toast-warning { border-left-color: #f59e0b; }
 
-        /* Menu de Contexto */
         #context-menu {
-            position: absolute; z-index: 1000;
-            background: rgba(15, 15, 22, 0.95); backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-            width: 180px; overflow: hidden;
-            transform-origin: top left;
+            position: absolute; z-index: 1000; background: rgba(15, 15, 22, 0.95); backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+            width: 180px; overflow: hidden; transform-origin: top left;
         }
         .context-item {
             padding: 10px 16px; font-size: 12px; color: #cbd5e1; cursor: pointer;
@@ -246,7 +216,6 @@
 
     <div id="toast-container"></div>
 
-    <!-- Menu de Contexto Oculto -->
     <div id="context-menu" class="hidden">
         <div class="px-4 py-2 border-b border-white/10 text-[10px] font-bold text-slate-500 uppercase tracking-widest" id="ctx-header">Device</div>
         <div class="context-item" id="ctx-btn-config"><i class="ph ph-gear text-slate-400"></i> Configurações</div>
@@ -256,7 +225,6 @@
         <div class="context-item danger" id="ctx-btn-delete"><i class="ph ph-trash"></i> Excluir</div>
     </div>
 
-    <!-- Modais Estruturais -->
     <div id="custom-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300" onclick="if(event.target===this) closeModal()">
         <div class="bg-cyber-surface border border-white/10 rounded-2xl shadow-2xl w-[420px] overflow-hidden transform scale-95 transition-transform duration-300" id="custom-modal-content">
             <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/5">
@@ -268,7 +236,6 @@
         </div>
     </div>
 
-    <!-- Header -->
     <header class="h-14 glass-panel flex items-center justify-between px-6 z-50 shrink-0 border-b border-white/5 relative">
         <div class="absolute inset-0 bg-gradient-to-r from-sky-500/10 via-transparent to-transparent opacity-50 pointer-events-none"></div>
         <div class="flex items-center space-x-6 relative z-10">
@@ -297,12 +264,11 @@
         </div>
     </header>
 
-    <!-- Toolbar Central -->
     <div class="absolute top-20 left-1/2 transform -translate-x-1/2 glass-panel rounded-full px-2 py-2 flex items-center gap-1 z-40 shadow-[0_10px_40px_rgba(0,0,0,0.8)] border-white/10">
         <button onclick="ToolManager.set('pointer')" id="tool-pointer" class="tool-btn tool-active p-2 rounded-full transition text-slate-400 hover:text-sky-400 border border-transparent" title="Select / Move (Esc)">
             <i class="ph ph-cursor text-xl"></i>
         </button>
-        <button onclick="ToolManager.set('cable')" id="tool-cable" class="tool-btn p-2 rounded-full transition text-slate-400 hover:text-amber-400 border border-transparent" title="Connect Cable (C)">
+        <button onclick="ToolManager.set('cable', 'auto')" id="tool-cable" class="tool-btn p-2 rounded-full transition text-slate-400 hover:text-amber-400 border border-transparent" title="Connect Auto Cable (C)">
             <i class="ph ph-plug text-xl"></i>
         </button>
         <button onclick="ToolManager.set('ping')" id="tool-ping" class="tool-btn p-2 rounded-full transition text-slate-400 hover:text-purple-400 border border-transparent" title="Send PDU (P)">
@@ -314,7 +280,6 @@
         </button>
     </div>
 
-    <!-- Indicador de Status da Ferramenta -->
     <div class="absolute top-20 left-6 z-40 pointer-events-none">
         <div class="glass-panel px-3 py-2 rounded-lg flex items-center shadow-lg border-white/10 backdrop-blur-xl">
             <div class="w-2 h-2 rounded-full bg-sky-500 mr-2 shadow-[0_0_10px_rgba(14,165,233,1)]" id="status-dot"></div>
@@ -322,7 +287,6 @@
         </div>
     </div>
 
-    <!-- Área de Trabalho Principal -->
     <div class="flex flex-1 overflow-hidden relative">
         <main id="workspace" class="flex-1 relative overflow-hidden">
             <svg id="cables-layer" class="absolute top-0 left-0 w-full h-full z-10"></svg>
@@ -333,7 +297,6 @@
             <svg id="packets-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-30"></svg>
         </main>
 
-        <!-- Painel de Propriedades Lateral -->
         <aside id="properties-panel" class="w-[420px] glass-panel border-l border-t-0 border-b-0 border-white/10 flex flex-col shadow-[-10px_0_40px_rgba(0,0,0,0.8)] z-40 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] transform translate-x-full absolute right-0 top-0 h-full bg-cyber-surface/95">
             <div class="h-16 flex items-center justify-between px-6 shrink-0 border-b border-white/5 bg-black/30">
                 <div class="flex items-center gap-3">
@@ -353,7 +316,6 @@
                 <button class="flex-1 py-3 hover:text-white border-b-2 border-transparent transition outline-none" id="tab-btn-cli" onclick="PropertiesManager.switchTab('cli')">Terminal CLI</button>
             </div>
 
-            <!-- Tab Configuração -->
             <div id="tab-config" class="p-6 flex-1 overflow-y-auto bg-transparent custom-scrollbar">
                 <div class="space-y-6">
                     <div>
@@ -393,7 +355,6 @@
                 </div>
             </div>
 
-            <!-- Tab CLI -->
             <div id="tab-cli" class="flex-1 cli-container p-4 hidden flex-col relative m-3 border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
                 <div id="cli-output" class="whitespace-pre-wrap flex-1 break-words overflow-y-auto text-[13px] leading-relaxed pb-12 custom-scrollbar pr-2 z-10 relative"></div>
                 <div class="flex items-center mt-2 shrink-0 absolute bottom-0 left-0 right-0 bg-[#020203] py-3 px-4 border-t border-white/10 z-10">
@@ -403,7 +364,6 @@
             </div>
         </aside>
 
-        <!-- Monitor de PDUs -->
         <div id="pdu-panel" class="absolute bottom-6 right-6 w-[360px] glass-panel shadow-2xl rounded-xl flex flex-col z-30 overflow-hidden transition-all duration-300 border-white/10 hidden">
             <div class="bg-black/80 px-4 py-3 text-[10px] font-bold uppercase tracking-widest border-b border-white/5 flex justify-between items-center text-slate-300">
                 <div class="flex items-center gap-2">
@@ -417,18 +377,20 @@
         </div>
     </div>
 
-    <!-- Catálogo de Equipamentos -->
     <footer class="h-32 glass-panel border-t border-white/10 flex z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.8)] shrink-0 bg-[#030305]/95 relative">
         <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none"></div>
         <div class="w-24 bg-black/50 border-r border-white/5 flex flex-col shrink-0 py-2 gap-1 items-center justify-center relative z-10">
-            <button onclick="CatalogManager.selectCategory('routers')" class="w-16 h-10 rounded-lg hover:bg-white/5 flex items-center justify-center transition group outline-none" id="cat-routers" title="Routers">
-                <i class="ph ph-cpu text-2xl text-slate-500 group-hover:text-rose-500 transition-colors drop-shadow-md"></i>
+            <button onclick="CatalogManager.selectCategory('routers')" class="w-16 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center transition group outline-none" id="cat-routers" title="Routers">
+                <i class="ph ph-cpu text-xl text-slate-500 group-hover:text-rose-500 transition-colors drop-shadow-md"></i>
             </button>
-            <button onclick="CatalogManager.selectCategory('switches')" class="w-16 h-10 rounded-lg hover:bg-white/5 flex items-center justify-center transition group outline-none" id="cat-switches" title="Switches">
-                <i class="ph ph-share-network text-2xl text-slate-500 group-hover:text-emerald-500 transition-colors drop-shadow-md"></i>
+            <button onclick="CatalogManager.selectCategory('switches')" class="w-16 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center transition group outline-none" id="cat-switches" title="Switches">
+                <i class="ph ph-share-network text-xl text-slate-500 group-hover:text-emerald-500 transition-colors drop-shadow-md"></i>
             </button>
-            <button onclick="CatalogManager.selectCategory('end_devices')" class="w-16 h-10 rounded-lg flex items-center justify-center transition group bg-white/10 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] outline-none border border-white/5" id="cat-end_devices" title="End Devices">
-                <i class="ph ph-desktop text-2xl text-sky-400 transition-colors drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]"></i>
+            <button onclick="CatalogManager.selectCategory('end_devices')" class="w-16 h-8 rounded-lg flex items-center justify-center transition group bg-white/10 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] outline-none border border-white/5" id="cat-end_devices" title="End Devices">
+                <i class="ph ph-desktop text-xl text-sky-400 transition-colors drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]"></i>
+            </button>
+            <button onclick="CatalogManager.selectCategory('connections')" class="w-16 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center transition group outline-none" id="cat-connections" title="Connections (Cables)">
+                <i class="ph ph-lightning text-xl text-slate-500 group-hover:text-amber-500 transition-colors drop-shadow-md"></i>
             </button>
         </div>
         <div class="flex-1 px-6 py-4 flex gap-5 overflow-x-auto items-center bg-transparent custom-scrollbar relative z-10" id="equipment-list"></div>
@@ -437,7 +399,6 @@
     <script>
         'use strict';
 
-        // --- SISTEMA DE NOTIFICAÇÕES ---
         const Toast = {
             show(message, type = 'success', duration = 3000) {
                 const container = document.getElementById('toast-container');
@@ -453,22 +414,20 @@
                 
                 container.appendChild(toast);
                 requestAnimationFrame(() => toast.classList.add('show'));
-
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 400);
-                }, duration);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, duration);
             }
         };
 
-        // --- DADOS E ESTADO ---
         const ICONS = {
             router: `<i class="ph-fill ph-cpu text-rose-500"></i>`,
             switch: `<i class="ph-fill ph-share-network text-emerald-500"></i>`,
             pc: `<i class="ph-fill ph-desktop text-sky-400"></i>`,
             laptop: `<i class="ph-fill ph-laptop text-sky-400"></i>`,
             server: `<i class="ph-fill ph-hard-drives text-sky-400"></i>`,
-            cloud: `<i class="ph-fill ph-cloud text-purple-400"></i>`
+            cloud: `<i class="ph-fill ph-cloud text-purple-400"></i>`,
+            auto: `<i class="ph-fill ph-lightning text-amber-500"></i>`,
+            straight: `<div class="w-8 h-1 bg-slate-900 rotate-45 border border-white/20"></div>`,
+            cross: `<div class="w-8 h-1 border-t-2 border-dashed border-slate-900 rotate-45"></div>`
         };
 
         const CATEGORIES = {
@@ -485,6 +444,11 @@
                 { id: 'laptop', name: 'Laptop', label: 'Laptop', type: 'laptop', color: 'sky' },
                 { id: 'server', name: 'Server', label: 'Data Server', type: 'server', color: 'sky' },
                 { id: 'cloud', name: 'Cloud', label: 'WAN Emul', type: 'cloud', color: 'purple' }
+            ],
+            connections: [
+                { id: 'auto', name: 'Auto', label: 'Automático', type: 'auto', color: 'amber' },
+                { id: 'straight', name: 'Straight', label: 'Copper Straight', type: 'straight', color: 'amber' },
+                { id: 'cross', name: 'Cross', label: 'Copper Cross-Over', type: 'cross', color: 'amber' }
             ]
         };
 
@@ -492,13 +456,13 @@
 
         const State = {
             devices: [], links: [], deviceCounter: 1,
-            selectedTool: 'pointer', currentCategory: 'end_devices',
+            selectedTool: 'pointer', selectedCableType: 'auto',
+            currentCategory: 'end_devices',
             itemToPlace: null, activeDevice: null, draggingDevice: null,
             cableSourceDevice: null, pingSourceDevice: null,
             cliHistoryBuffer: {}, contextMenuTarget: null
         };
 
-        // --- UTILITÁRIOS ---
         const Utils = {
             generateMAC: () => "00:" + Array.from({length:5}, () => Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join(':'),
             ipToLong: (ip) => {
@@ -521,14 +485,13 @@
             calculateGravityCurve: (x1, y1, x2, y2) => {
                 const dx = x2 - x1, dy = y2 - y1;
                 const distance = Math.sqrt(dx*dx + dy*dy);
-                const sag = distance * 0.18; // Curva um pouco mais pronunciada
+                const sag = distance * 0.18;
                 const controlX = (x1 + x2) / 2;
                 const controlY = Math.max(y1, y2) + sag + 20;
                 return `M ${x1} ${y1} Q ${controlX} ${controlY} ${x2} ${y2}`;
             }
         };
 
-        // --- CLASSES ---
         class NetworkDevice {
             constructor(typeStr, namePref, x, y) {
                 this.id = 'dev_' + Date.now() + '_' + State.deviceCounter++;
@@ -536,9 +499,7 @@
                 this.x = x; this.y = y;
                 this.cliOutput = [
                     `SwitchLab OS (tm) Software, Version 16.09(1)E`,
-                    `Copyright (c) 1986-2026 by SwitchLab Systems, Inc.`,
-                    `Compiled by sysadmin\n`,
-                    `%SYS-5-RESTART: System restarted --`,
+                    `Copyright (c) 1986-2026 by SwitchLab Systems, Inc.\n`,
                     `Device ${this.name} initialized.\n`
                 ];
                 State.cliHistoryBuffer[this.id] = { cmds: [], index: -1 };
@@ -551,15 +512,17 @@
                 super(typeStr, namePref, x, y);
                 this.interfaces = [{ name: 'eth0', ip: '', mask: '255.255.255.0', mac: Utils.generateMAC(), connectedTo: null }];
                 this.gateway = ''; this.prompt = 'user@' + this.name.toLowerCase() + ':~$ ';
-                this.cliOutput = [`Linux ${this.name.toLowerCase()} 6.2.0-generic #1 SMP PREEMPT_DYNAMIC x86_64\n`];
             }
         }
         class Router extends NetworkDevice {
             constructor(typeStr, namePref, x, y) {
                 super(typeStr, namePref, x, y);
+                // AUMENTADO PARA 4 PORTAS PARA EVITAR FALTA DE ESPAÇO
                 this.interfaces = [
                     { name: 'GigabitEthernet0/0', ip: '', mask: '255.255.255.0', mac: Utils.generateMAC(), connectedTo: null },
-                    { name: 'GigabitEthernet0/1', ip: '', mask: '255.255.255.0', mac: Utils.generateMAC(), connectedTo: null }
+                    { name: 'GigabitEthernet0/1', ip: '', mask: '255.255.255.0', mac: Utils.generateMAC(), connectedTo: null },
+                    { name: 'GigabitEthernet0/2', ip: '', mask: '255.255.255.0', mac: Utils.generateMAC(), connectedTo: null },
+                    { name: 'GigabitEthernet0/3', ip: '', mask: '255.255.255.0', mac: Utils.generateMAC(), connectedTo: null }
                 ];
                 this.prompt = this.name + '>';
             }
@@ -579,11 +542,11 @@
             }
         }
 
-        // --- MANAGERS ---
         const ToolManager = {
-            set(tool) {
+            set(tool, cableType = 'auto') {
                 State.selectedTool = tool; State.itemToPlace = null;
                 State.cableSourceDevice = null; State.pingSourceDevice = null;
+                if(tool === 'cable') State.selectedCableType = cableType;
                 
                 document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
                 document.getElementById('tool-' + tool)?.classList.add('tool-active');
@@ -595,7 +558,7 @@
                 const workspace = document.getElementById('workspace');
                 if(tool === 'pointer') { this.updateStatus('Mover / Selecionar', 'bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,1)]'); workspace.style.cursor = 'default'; }
                 if(tool === 'delete') { this.updateStatus('Excluir Elemento', 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,1)]'); workspace.style.cursor = 'crosshair'; PropertiesManager.close(); }
-                if(tool === 'cable') { this.updateStatus('Conectar (Origem -> Destino)', 'bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,1)] animate-pulse'); workspace.style.cursor = 'crosshair'; }
+                if(tool === 'cable') { this.updateStatus(`Conectar (${cableType})`, 'bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,1)] animate-pulse'); workspace.style.cursor = 'crosshair'; }
                 if(tool === 'ping') { this.updateStatus('Enviar PDU (Origem -> Destino)', 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,1)] animate-pulse'); workspace.style.cursor = 'crosshair'; }
             },
             updateStatus(text, dotClass = 'bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,1)]') {
@@ -610,23 +573,16 @@
                 document.querySelectorAll('.w-24 button').forEach(b => {
                     b.classList.remove('bg-white/10', 'shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]', 'border', 'border-white/5');
                     const i = b.querySelector('i');
-                    if(i) {
-                        i.className = i.className.replace(/text-(rose|emerald|sky|purple)-500/g, 'text-slate-500');
-                        i.classList.remove('drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]', 'drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]', 'drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]');
-                    }
+                    if(i) i.className = i.className.replace(/text-(rose|emerald|sky|purple|amber)-500/g, 'text-slate-500');
                 });
                 
                 const activeBtn = document.getElementById('cat-' + cat);
                 if(activeBtn) {
                     activeBtn.classList.add('bg-white/10', 'shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]', 'border', 'border-white/5');
-                    const colorMap = { routers: 'rose', switches: 'emerald', end_devices: 'sky' };
+                    const colorMap = { routers: 'rose', switches: 'emerald', end_devices: 'sky', connections: 'amber' };
                     const color = colorMap[cat] || 'sky';
                     const icon = activeBtn.querySelector('i');
                     icon.className = icon.className.replace('text-slate-500', `text-${color}-500`);
-                    
-                    if(color==='sky') icon.classList.add('drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]');
-                    if(color==='rose') icon.classList.add('drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]');
-                    if(color==='emerald') icon.classList.add('drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]');
                 }
                 this.renderList();
             },
@@ -635,19 +591,24 @@
                 list.innerHTML = '';
                 CATEGORIES[State.currentCategory].forEach(item => {
                     const btn = document.createElement('button');
-                    btn.className = `equipment-item flex flex-col items-center justify-center w-24 h-[90px] bg-black/40 border border-white/5 rounded-xl hover:bg-white/10 hover:border-${item.color}-500/50 transition-all shrink-0 outline-none group shadow-lg`;
+                    btn.className = `equipment-item flex flex-col items-center justify-center w-24 h-[90px] bg-black/40 border border-white/5 rounded-xl hover:bg-white/10 transition-all shrink-0 outline-none group shadow-lg`;
                     btn.innerHTML = `
-                        <div class="w-10 h-10 mb-2 transition-transform duration-300 group-hover:-translate-y-1 flex items-center justify-center text-3xl opacity-80 group-hover:opacity-100 group-hover:scale-110 drop-shadow-lg">${ICONS[item.type]}</div>
+                        <div class="w-10 h-10 mb-2 transition-transform duration-300 group-hover:-translate-y-1 flex items-center justify-center text-3xl opacity-80 group-hover:opacity-100">${ICONS[item.type]}</div>
                         <span class="text-[10px] font-bold text-slate-400 text-center leading-tight group-hover:text-white transition-colors tracking-wide">${item.label}</span>
                     `;
                     btn.onclick = () => {
-                        if(State.selectedTool !== 'pointer') ToolManager.set('pointer');
-                        State.itemToPlace = item;
-                        document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-2', `ring-${item.color}-500`, 'bg-white/10', `shadow-[0_0_15px_rgba(0,0,0,0)]`));
-                        btn.classList.add('ring-2', `ring-${item.color}-500`, 'bg-white/10');
-                        btn.style.boxShadow = `0 0 15px var(--tw-ring-color)`;
-                        ToolManager.updateStatus(`Implantando ${item.label}...`, `animate-pulse bg-${item.color}-500 shadow-[0_0_15px_currentColor] text-${item.color}-500`);
-                        document.getElementById('workspace').style.cursor = 'crosshair';
+                        if(State.currentCategory === 'connections') {
+                            ToolManager.set('cable', item.type);
+                            document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-2', `ring-${item.color}-500`, 'bg-white/10'));
+                            btn.classList.add('ring-2', `ring-${item.color}-500`, 'bg-white/10');
+                        } else {
+                            if(State.selectedTool !== 'pointer') ToolManager.set('pointer');
+                            State.itemToPlace = item;
+                            document.querySelectorAll('.equipment-item').forEach(el => el.classList.remove('ring-2', `ring-${item.color}-500`, 'bg-white/10'));
+                            btn.classList.add('ring-2', `ring-${item.color}-500`, 'bg-white/10');
+                            ToolManager.updateStatus(`Implantando ${item.label}...`, `animate-pulse bg-${item.color}-500 shadow-[0_0_15px_currentColor] text-${item.color}-500`);
+                            document.getElementById('workspace').style.cursor = 'crosshair';
+                        }
                     };
                     list.appendChild(btn);
                 });
@@ -697,10 +658,7 @@
                     c.classList.add('hidden'); cli.classList.replace('hidden', 'flex');
                     bcli.classList.add('border-sky-500', 'text-sky-400'); bcli.classList.remove('border-transparent', 'text-slate-400');
                     bc.classList.remove('border-sky-500', 'text-sky-400'); bc.classList.add('border-transparent', 'text-slate-400');
-                    setTimeout(() => { 
-                        document.getElementById('cli-input').focus(); 
-                        document.getElementById('cli-output').scrollTop = document.getElementById('cli-output').scrollHeight; 
-                    }, 50);
+                    setTimeout(() => { document.getElementById('cli-input').focus(); document.getElementById('cli-output').scrollTop = document.getElementById('cli-output').scrollHeight; }, 50);
                 }
             },
             loadInterface() {
@@ -786,14 +744,9 @@
                     if(base === 'ping') {
                         if(args.length < 2) return this.print("Usage: ping <ip_address>");
                         NetworkEngine.executePing(dev, args[1]);
-                    } else if(base === 'traceroute' || base === 'tracert') {
-                        if(args.length < 2) return this.print("Usage: traceroute <ip_address>");
-                        NetworkEngine.executeTraceroute(dev, args[1]);
                     } else if (base === 'ipconfig' || base === 'ifconfig' || base === 'ip') {
                         let i = dev.interfaces[0];
                         this.print(`\neth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500\n        inet ${i.ip || '0.0.0.0'}  netmask ${i.mask || '0.0.0.0'}\n        ether ${i.mac}  txqueuelen 1000\n        Gateway: ${dev.gateway || '0.0.0.0'}\n`);
-                    } else if (base === 'arp') {
-                        this.print("\nAddress                  HWtype  HWaddress           Flags Mask            Iface\n192.168.1.1              ether   00:1a:2b:3c:4d:5e   C                     eth0\n");
                     } else if (base === 'clear') {
                         dev.cliOutput = []; this.render();
                     } else this.print(`bash: ${base}: command not found`);
@@ -847,8 +800,7 @@
         const NetworkEngine = {
             renderDevice(dev) {
                 const el = document.createElement('div');
-                el.className = 'device animate-pop-in';
-                el.id = dev.id;
+                el.className = 'device animate-pop-in'; el.id = dev.id;
                 el.style.left = dev.x + 'px'; el.style.top = dev.y + 'px';
 
                 el.innerHTML = `
@@ -857,28 +809,18 @@
                     ${dev.isLayer3 && dev.interfaces[0].ip ? `<div class="device-ip-label">${dev.interfaces[0].ip}</div>` : ''}
                 `;
 
-                // Impedir seleção de texto durante arraste
                 el.addEventListener('mousedown', e => { 
-                    if(State.selectedTool === 'pointer' && e.button === 0) {
-                        State.draggingDevice = dev;
-                        document.body.style.userSelect = 'none';
-                    }
+                    if(State.selectedTool === 'pointer' && e.button === 0) { State.draggingDevice = dev; document.body.style.userSelect = 'none'; }
                 });
 
-                el.addEventListener('contextmenu', e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    ContextMenu.show(e.clientX, e.clientY, dev);
-                });
+                el.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); ContextMenu.show(e.clientX, e.clientY, dev); });
 
                 el.addEventListener('click', e => {
-                    e.stopPropagation();
-                    ContextMenu.hide();
+                    e.stopPropagation(); ContextMenu.hide();
                     
                     if (State.selectedTool === 'pointer') {
                         State.devices.forEach(d => document.getElementById(d.id)?.classList.remove('selected'));
-                        el.classList.add('selected');
-                        PropertiesManager.open(dev);
+                        el.classList.add('selected'); PropertiesManager.open(dev);
                     } 
                     else if (State.selectedTool === 'delete') { this.deleteDevice(dev); }
                     else if (State.selectedTool === 'cable') {
@@ -889,11 +831,9 @@
                             document.getElementById('drawing-line').setAttribute('d', Utils.calculateGravityCurve(dev.x, dev.y, dev.x, dev.y));
                             ToolManager.updateStatus(`Conectando ${dev.name}...`, 'bg-amber-500 animate-pulse');
                         } else {
-                            if (State.cableSourceDevice.id !== dev.id) this.createLink(State.cableSourceDevice, dev);
+                            if (State.cableSourceDevice.id !== dev.id) this.createLink(State.cableSourceDevice, dev, State.selectedCableType);
                             document.getElementById(State.cableSourceDevice.id)?.classList.remove('cable-src');
-                            State.cableSourceDevice = null;
-                            document.getElementById('drawing-cable').classList.add('hidden');
-                            ToolManager.set('pointer');
+                            State.cableSourceDevice = null; document.getElementById('drawing-cable').classList.add('hidden'); ToolManager.set('pointer');
                         }
                     }
                     else if (State.selectedTool === 'ping') {
@@ -901,10 +841,7 @@
                             if(dev.isLayer3) {
                                 State.pingSourceDevice = dev; el.classList.add('ping-src');
                                 ToolManager.updateStatus(`Ping a partir de ${dev.name}...`, 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,1)] animate-pulse');
-                            } else {
-                                Toast.show('Ping precisa iniciar em dispositivo Layer 3.', 'error');
-                                ToolManager.set('pointer');
-                            }
+                            } else { Toast.show('Ping precisa iniciar em dispositivo L3.', 'error'); ToolManager.set('pointer'); }
                         } else {
                             if (State.pingSourceDevice.id !== dev.id && dev.isLayer3) {
                                 let targetIp = dev.interfaces.find(i => i.ip)?.ip;
@@ -912,14 +849,12 @@
                                     NetworkLogger.log(State.pingSourceDevice.name, dev.name, 'ICMP', 'Target Unconfigured');
                                     Toast.show('Destino não possui IP configurado.', 'warning');
                                 } else {
-                                    PropertiesManager.open(State.pingSourceDevice);
-                                    PropertiesManager.switchTab('cli');
+                                    PropertiesManager.open(State.pingSourceDevice); PropertiesManager.switchTab('cli');
                                     this.executePing(State.pingSourceDevice, targetIp);
                                 }
                             }
                             document.getElementById(State.pingSourceDevice.id)?.classList.remove('ping-src');
-                            State.pingSourceDevice = null;
-                            ToolManager.set('pointer');
+                            State.pingSourceDevice = null; ToolManager.set('pointer');
                         }
                     }
                 });
@@ -934,23 +869,32 @@
                 let ipLabel = el.querySelector('.device-ip-label');
                 if(primaryIp) {
                     if(ipLabel) ipLabel.innerText = primaryIp;
-                    else {
-                        const nl = document.createElement('div'); nl.className = 'device-ip-label'; nl.innerText = primaryIp;
-                        el.appendChild(nl);
-                    }
+                    else { const nl = document.createElement('div'); nl.className = 'device-ip-label'; nl.innerText = primaryIp; el.appendChild(nl); }
                 } else if (ipLabel) ipLabel.remove();
             },
-            createLink(dev1, dev2) {
-                if(State.links.some(l => (l.sourceId === dev1.id && l.targetId === dev2.id) || (l.sourceId === dev2.id && l.targetId === dev1.id))) return;
+            
+            // CORREÇÃO: CRIAÇÃO DE CABOS BLINDADA CONTRA CORRUPÇÃO E VERIFICAÇÃO CORRETA DE PORTAS
+            createLink(dev1, dev2, type = 'auto') {
+                if(State.links.some(l => (l.sourceId === dev1.id && l.targetId === dev2.id) || (l.sourceId === dev2.id && l.targetId === dev1.id))) {
+                    return Toast.show('Já existe conexão física entre esses ativos.', 'warning');
+                }
+                
                 const idx1 = dev1.interfaces.findIndex(i => !i.connectedTo);
                 const idx2 = dev2.interfaces.findIndex(i => !i.connectedTo);
-                if(idx1 === -1 || idx2 === -1) return Toast.show('Portas físicas insuficientes.', 'error');
+                
+                if(idx1 === -1) return Toast.show(`${dev1.name} não possui portas disponíveis.`, 'error');
+                if(idx2 === -1) return Toast.show(`${dev2.name} não possui portas disponíveis.`, 'error');
 
-                const linkId = 'link_' + Date.now();
-                dev1.interfaces[idx1].connectedTo = linkId; dev2.interfaces[idx2].connectedTo = linkId;
-                State.links.push({ id: linkId, sourceId: dev1.id, srcIntf: idx1, targetId: dev2.id, tgtIntf: idx2 });
+                // GERADOR DE ID ÚNICA PERFEITA PARA EVITAR CORRUPÇÃO
+                const linkId = 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                
+                dev1.interfaces[idx1].connectedTo = linkId; 
+                dev2.interfaces[idx2].connectedTo = linkId;
+                
+                State.links.push({ id: linkId, sourceId: dev1.id, srcIntf: idx1, targetId: dev2.id, tgtIntf: idx2, type: type });
                 this.drawLinks();
             },
+            
             drawLinks() {
                 const layer = document.getElementById('cables-layer');
                 layer.innerHTML = '';
@@ -960,13 +904,13 @@
                     if(!s || !t) return;
                     
                     const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                    group.classList.add('link-group');
-                    group.id = `group_${l.id}`;
+                    group.classList.add('link-group'); group.id = `group_${l.id}`;
 
                     const pathD = Utils.calculateGravityCurve(s.x, s.y, t.x, t.y);
 
                     const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    line.setAttribute('d', pathD); line.classList.add('link-line'); line.id = `path_${l.id}`;
+                    line.setAttribute('d', pathD); line.classList.add('link-line'); line.classList.add(l.type || 'auto'); 
+                    line.id = `path_${l.id}`;
 
                     const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                     hitArea.setAttribute('d', pathD); hitArea.classList.add('link-hit-area');
@@ -982,12 +926,23 @@
 
                     group.appendChild(line); group.appendChild(hitArea);
 
+                    // Posição para as etiquetas e luzes das portas
+                    const px1 = s.x + (t.x - s.x) * 0.18, py1 = s.y + (t.y - s.y) * 0.18;
+                    const px2 = t.x + (s.x - t.x) * 0.18, py2 = t.y + (s.y - t.y) * 0.18;
+
+                    // Adicionar Etiquetas (Labels) das portas
+                    const addLabel = (x, y, text) => {
+                        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        txt.setAttribute('x', x); txt.setAttribute('y', y - 8);
+                        txt.classList.add('port-label'); txt.textContent = text.replace(/[a-z]/gi, '').substring(0,3) || text.substring(0,3);
+                        group.appendChild(txt);
+                    };
+                    addLabel(px1, py1, s.interfaces[l.srcIntf].name);
+                    addLabel(px2, py2, t.interfaces[l.tgtIntf].name);
+
+                    // Luzes
                     const sState = (s.typeStr === 'router' && !s.interfaces[l.srcIntf].ip) ? 'down' : '';
                     const tState = (t.typeStr === 'router' && !t.interfaces[l.tgtIntf].ip) ? 'down' : '';
-
-                    const px1 = s.x + (t.x - s.x) * 0.15, py1 = s.y + (t.y - s.y) * 0.15;
-                    const px2 = t.x + (s.x - t.x) * 0.15, py2 = t.y + (s.y - t.y) * 0.15;
-
                     const dotS = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     dotS.setAttribute('cx', px1); dotS.setAttribute('cy', py1); dotS.setAttribute('r', 4); dotS.setAttribute('class', `port-light ${sState}`);
                     const dotT = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -1076,22 +1031,17 @@
             async executePing(source, targetIp) {
                 CLIManager.print(`\nPING ${targetIp} (${targetIp}) 56(84) bytes of data.`);
                 if(!source.interfaces[0].ip) {
-                    CLIManager.print("connect: Network is unreachable");
-                    NetworkLogger.log(source.name, targetIp, 'ICMP', 'Failed');
-                    return;
+                    CLIManager.print("connect: Network is unreachable"); NetworkLogger.log(source.name, targetIp, 'ICMP', 'Failed'); return;
                 }
-
                 let result = this.traceRouteLogic(source, targetIp);
                 let successes = 0;
-
                 for(let i=0; i<4; i++) {
                     await new Promise(r => setTimeout(r, 600));
                     if(result.success) {
-                        await this.animatePacketSVG(result.path); // Aguarda a animação ir e voltar
+                        await this.animatePacketSVG(result.path);
                         let time = Math.floor(Math.random()*15)+1;
                         CLIManager.print(`64 bytes from ${targetIp}: icmp_seq=${i+1} ttl=64 time=${time} ms`);
-                        successes++;
-                        this.flashDevice(result.path[result.path.length-1].id, 'rgba(16, 185, 129, 1)');
+                        successes++; this.flashDevice(result.path[result.path.length-1].id, 'rgba(16, 185, 129, 1)');
                         if(i===0) NetworkLogger.log(source.name, targetIp, 'ICMP Echo', 'Success');
                     } else {
                         await this.animatePacketSVG(result.path || [source], true);
@@ -1099,55 +1049,26 @@
                         if(i===0) NetworkLogger.log(source.name, targetIp, 'ICMP Drop', 'Dropped');
                     }
                 }
-                CLIManager.print(`\n--- ${targetIp} ping statistics ---`);
-                CLIManager.print(`4 packets transmitted, ${successes} received, ${(4-successes)*25}% packet loss, time ${Math.floor(Math.random()*1500)+500}ms\n`);
-            },
-            async executeTraceroute(source, targetIp) {
-                CLIManager.print(`\ntraceroute to ${targetIp}, 30 hops max, 60 byte packets`);
-                let result = this.traceRouteLogic(source, targetIp);
-                if(result.hops && result.hops.length > 0) {
-                    for(let i=0; i<result.hops.length; i++) {
-                        await new Promise(r => setTimeout(r, 800));
-                        let hop = result.hops[i];
-                        let ipToLog = hop.id === this.findTargetDeviceByIp(targetIp)?.id ? targetIp : hop.interfaces.find(intf => intf.ip)?.ip;
-                        CLIManager.print(` ${i+1}  ${ipToLog} (${ipToLog})  ${Math.floor(Math.random()*10)+1} ms  ${Math.floor(Math.random()*10)+1} ms`);
-                    }
-                    if(!result.success) {
-                        await new Promise(r => setTimeout(r, 800));
-                        CLIManager.print(` ${result.hops.length + 1}  * * *`);
-                    }
-                } else {
-                    await new Promise(r => setTimeout(r, 800));
-                    CLIManager.print(` 1  * * *`);
-                }
-                CLIManager.print("");
+                CLIManager.print(`\n--- ${targetIp} ping statistics ---\n4 packets transmitted, ${successes} received, ${(4-successes)*25}% packet loss, time ${Math.floor(Math.random()*1500)+500}ms\n`);
             },
             flashDevice(id, color) {
                 const el = document.getElementById(id);
                 if(el) {
                     const icon = el.querySelector('.device-icon-wrapper');
-                    icon.style.boxShadow = `0 0 35px ${color}, inset 0 0 20px ${color}`;
-                    icon.style.borderColor = color;
+                    icon.style.boxShadow = `0 0 35px ${color}, inset 0 0 20px ${color}`; icon.style.borderColor = color;
                     setTimeout(() => { icon.style.boxShadow = ''; icon.style.borderColor = ''; }, 500);
                 }
             },
-            
-            // Nova animação realista usando propriedades SVG e getPointAtLength
             animatePacketSVG(pathNodes, isError = false) {
                 return new Promise(resolve => {
                     if(!pathNodes || pathNodes.length < 1) { resolve(); return; }
                     
                     const pktLayer = document.getElementById('packets-layer');
                     const pkt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    pkt.setAttribute('r', 7);
-                    pkt.setAttribute('class', `svg-packet ${isError ? 'error' : ''}`);
+                    pkt.setAttribute('r', 7); pkt.setAttribute('class', `svg-packet ${isError ? 'error' : ''}`);
                     pktLayer.appendChild(pkt);
 
-                    if(pathNodes.length === 1) {
-                        pkt.setAttribute('cx', pathNodes[0].x); pkt.setAttribute('cy', pathNodes[0].y);
-                        setTimeout(() => { pkt.remove(); resolve(); }, 400);
-                        return;
-                    }
+                    if(pathNodes.length === 1) { pkt.setAttribute('cx', pathNodes[0].x); pkt.setAttribute('cy', pathNodes[0].y); setTimeout(() => { pkt.remove(); resolve(); }, 400); return; }
 
                     let segments = [];
                     for(let i=0; i<pathNodes.length-1; i++) {
@@ -1155,7 +1076,6 @@
                         let link = State.links.find(l => (l.sourceId === n1.id && l.targetId === n2.id) || (l.sourceId === n2.id && l.targetId === n1.id));
                         if(link) {
                             let pathEl = document.getElementById(`path_${link.id}`);
-                            // Determinar a direção do path desenhado em relação ao nosso percurso
                             let isReverse = link.sourceId !== n1.id;
                             segments.push({ pathEl, isReverse, length: pathEl.getTotalLength(), linkId: link.id });
                         }
@@ -1168,9 +1088,7 @@
                             if(segs.length === 0) { res(); return; }
                             if(isReturn) pkt.setAttribute('class', 'svg-packet return');
 
-                            let currentSegIdx = 0;
-                            let start = null;
-
+                            let currentSegIdx = 0, start = null;
                             const step = (timestamp) => {
                                 if(!start) start = timestamp;
                                 let progress = (timestamp - start) / durationPerLink;
@@ -1179,41 +1097,30 @@
                                     document.getElementById(`group_${segs[currentSegIdx].linkId}`)?.classList.remove('active-flow');
                                     currentSegIdx++;
                                     if(currentSegIdx >= segs.length) { res(); return; }
-                                    start = timestamp;
-                                    progress = 0;
+                                    start = timestamp; progress = 0;
                                 }
-
                                 let seg = segs[currentSegIdx];
                                 document.getElementById(`group_${seg.linkId}`)?.classList.add('active-flow');
-
                                 let percent = seg.isReverse ? (1 - progress) : progress;
                                 let point = seg.pathEl.getPointAtLength(percent * seg.length);
-                                
-                                pkt.setAttribute('cx', point.x);
-                                pkt.setAttribute('cy', point.y);
-
+                                pkt.setAttribute('cx', point.x); pkt.setAttribute('cy', point.y);
                                 requestAnimationFrame(step);
                             };
                             requestAnimationFrame(step);
                         });
                     };
 
-                    // Ida e Volta
                     animateFlow(segments, false).then(() => {
                         if(isError) { pkt.remove(); resolve(); }
                         else {
-                            // Inverte os segmentos para a volta
                             let returnSegments = segments.slice().reverse().map(s => ({...s, isReverse: !s.isReverse}));
-                            animateFlow(returnSegments, true).then(() => {
-                                pkt.remove(); resolve();
-                            });
+                            animateFlow(returnSegments, true).then(() => { pkt.remove(); resolve(); });
                         }
                     });
                 });
             }
         };
 
-        // --- MENU DE CONTEXTO ---
         const ContextMenu = {
             show(x, y, dev) {
                 State.contextMenuTarget = dev;
@@ -1234,95 +1141,66 @@
 
                 document.getElementById('ctx-btn-delete').onclick = () => { NetworkEngine.deleteDevice(dev); this.hide(); };
             },
-            hide() {
-                document.getElementById('context-menu').classList.add('hidden');
-                State.contextMenuTarget = null;
-            }
+            hide() { document.getElementById('context-menu').classList.add('hidden'); State.contextMenuTarget = null; }
         };
 
         const TopologyManager = {
             save() {
                 const data = { devices: State.devices, links: State.links, deviceCounter: State.deviceCounter };
                 localStorage.setItem('wpt_switchlab_ultra', JSON.stringify(data));
-                Toast.show('Topologia criptografada e armazenada no cache local.', 'success');
+                Toast.show('Topologia armazenada no cache local.', 'success');
             },
             load() {
                 const dataStr = localStorage.getItem('wpt_switchlab_ultra');
-                if(!dataStr) return Toast.show('Nenhuma topologia em cache encontrada.', 'warning');
-                
-                showModal('Carregar Matriz', 'O carregamento substituirá a configuração atual. Prosseguir?', 'confirm', () => {
-                    document.getElementById('devices-layer').innerHTML = ''; 
-                    document.getElementById('cables-layer').innerHTML = ''; 
-                    document.getElementById('packets-layer').innerHTML = '';
+                if(!dataStr) return Toast.show('Nenhuma topologia encontrada.', 'warning');
+                showModal('Carregar Matriz', 'Substituir a configuração atual?', 'confirm', () => {
+                    document.getElementById('devices-layer').innerHTML = ''; document.getElementById('cables-layer').innerHTML = ''; 
                     State.devices = []; State.links = []; PropertiesManager.close(); NetworkLogger.clear();
-                    
                     try {
                         const data = JSON.parse(dataStr);
                         State.deviceCounter = data.deviceCounter;
-                        
                         data.devices.forEach(d => {
                             let newDev;
                             if(['pc','laptop','server'].includes(d.typeStr)) newDev = new EndDevice(d.typeStr, 'x', d.x, d.y);
                             else if(d.typeStr === 'router') newDev = new Router(d.typeStr, 'x', d.x, d.y);
                             else if(d.typeStr === 'switch') newDev = new Switch(d.typeStr, 'x', d.x, d.y);
                             else if(d.typeStr === 'cloud') newDev = new Cloud(d.typeStr, 'x', d.x, d.y);
-                            
                             Object.assign(newDev, d);
                             State.cliHistoryBuffer[newDev.id] = { cmds: [], index: -1 };
                             State.devices.push(newDev); NetworkEngine.renderDevice(newDev); NetworkEngine.updateDeviceDOM(newDev);
                         });
-                        data.links.forEach(l => State.links.push(l)); 
-                        NetworkEngine.drawLinks();
-                        Toast.show('Topologia neural restaurada com sucesso.', 'success');
-                    } catch(e) {
-                        Toast.show('Erro Crítico: Falha ao decodificar matriz salva.', 'error');
-                    }
+                        data.links.forEach(l => State.links.push(l)); NetworkEngine.drawLinks(); Toast.show('Topologia restaurada.', 'success');
+                    } catch(e) { Toast.show('Falha ao decodificar matriz salva.', 'error'); }
                 });
             }
         };
 
         function showModal(title, message, type = 'info', onConfirm = null) {
-            const modal = document.getElementById('custom-modal');
-            const content = document.getElementById('custom-modal-content');
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-message').innerText = message;
-            
+            const modal = document.getElementById('custom-modal'), content = document.getElementById('custom-modal-content');
+            document.getElementById('modal-title').innerText = title; document.getElementById('modal-message').innerText = message;
             const actions = document.getElementById('modal-actions');
             if (type === 'confirm') {
-                actions.innerHTML = `
-                    <button onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white hover:bg-white/10 transition outline-none">Cancelar</button>
-                    <button id="modal-confirm-btn" class="px-5 py-2 rounded-lg text-sm font-bold bg-rose-600 text-white hover:bg-rose-500 transition outline-none shadow-[0_0_15px_rgba(225,29,72,0.4)]">Executar</button>
-                `;
+                actions.innerHTML = `<button onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white hover:bg-white/10 transition outline-none">Cancelar</button><button id="modal-confirm-btn" class="px-5 py-2 rounded-lg text-sm font-bold bg-rose-600 text-white hover:bg-rose-500 transition outline-none shadow-[0_0_15px_rgba(225,29,72,0.4)]">Executar</button>`;
                 document.getElementById('modal-confirm-btn').onclick = () => { if(onConfirm) onConfirm(); closeModal(); };
-            } else {
-                actions.innerHTML = `<button onclick="closeModal()" class="px-6 py-2 rounded-lg text-sm font-bold bg-sky-600 hover:bg-sky-500 text-white transition outline-none shadow-[0_0_15px_rgba(14,165,233,0.4)]">OK</button>`;
-            }
-            modal.classList.remove('hidden'); void modal.offsetWidth;
-            modal.classList.remove('opacity-0'); content.classList.remove('scale-95');
+            } else { actions.innerHTML = `<button onclick="closeModal()" class="px-6 py-2 rounded-lg text-sm font-bold bg-sky-600 hover:bg-sky-500 text-white transition outline-none shadow-[0_0_15px_rgba(14,165,233,0.4)]">OK</button>`; }
+            modal.classList.remove('hidden'); void modal.offsetWidth; modal.classList.remove('opacity-0'); content.classList.remove('scale-95');
         }
 
         function closeModal() {
             const m = document.getElementById('custom-modal'), c = document.getElementById('custom-modal-content');
-            m.classList.add('opacity-0'); c.classList.add('scale-95');
-            setTimeout(() => m.classList.add('hidden'), 300);
+            m.classList.add('opacity-0'); c.classList.add('scale-95'); setTimeout(() => m.classList.add('hidden'), 300);
         }
 
         function promptClearWorkspace() {
-            showModal('Expurgo de Matriz', 'Atenção: Isso erradicará todos os nós e enlaces. Proceder?', 'confirm', () => {
-                document.getElementById('devices-layer').innerHTML = ''; 
-                document.getElementById('cables-layer').innerHTML = ''; 
-                document.getElementById('packets-layer').innerHTML = '';
-                State.devices = []; State.links = []; State.deviceCounter = 1;
-                PropertiesManager.close(); NetworkLogger.clear();
-                Toast.show('Matriz formatada.', 'info');
+            showModal('Expurgo de Matriz', 'Isso erradicará todos os nós e enlaces. Proceder?', 'confirm', () => {
+                document.getElementById('devices-layer').innerHTML = ''; document.getElementById('cables-layer').innerHTML = ''; 
+                State.devices = []; State.links = []; State.deviceCounter = 1; PropertiesManager.close(); NetworkLogger.clear(); Toast.show('Matriz formatada.', 'info');
             });
         }
 
-        // --- EVENTOS GLOBAIS ---
         window.addEventListener('keydown', e => {
             if(e.target.tagName === 'INPUT' && e.target.id !== 'cli-input') return;
             if(e.target.id === 'cli-input') return CLIManager.handleInput(e);
-            
             if(e.key === 'Escape') { ToolManager.set('pointer'); PropertiesManager.close(); ContextMenu.hide(); }
             if((e.key === 'Delete' || e.key === 'Backspace') && e.target.tagName !== 'INPUT') ToolManager.set('delete');
             if(e.key.toLowerCase() === 'c' && document.activeElement.tagName !== 'INPUT') ToolManager.set('cable');
@@ -1336,9 +1214,7 @@
             if (State.itemToPlace) {
                 const rect = document.getElementById('workspace').getBoundingClientRect();
                 const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-                
-                let newDev;
-                const { type, name } = State.itemToPlace;
+                let newDev; const { type, name } = State.itemToPlace;
                 if(['pc', 'laptop', 'server'].includes(type)) newDev = new EndDevice(type, name, x, y);
                 else if (type === 'router') newDev = new Router(type, name, x, y);
                 else if (type === 'switch') newDev = new Switch(type, name, x, y);
@@ -1347,25 +1223,14 @@
                 if(newDev) { State.devices.push(newDev); NetworkEngine.renderDevice(newDev); }
                 ToolManager.set('pointer');
             } 
-            else if (State.selectedTool === 'pointer') {
-                PropertiesManager.close();
-                State.devices.forEach(d => document.getElementById(d.id)?.classList.remove('selected'));
-            } 
-            else if (State.selectedTool === 'cable' && State.cableSourceDevice) {
-                document.getElementById(State.cableSourceDevice.id)?.classList.remove('cable-src');
-                State.cableSourceDevice = null;
-                document.getElementById('drawing-cable').classList.add('hidden');
-            } 
-            else if (State.selectedTool === 'ping' && State.pingSourceDevice) {
-                State.pingSourceDevice = null;
-                State.devices.forEach(d => document.getElementById(d.id)?.classList.remove('ping-src'));
-            }
+            else if (State.selectedTool === 'pointer') { PropertiesManager.close(); State.devices.forEach(d => document.getElementById(d.id)?.classList.remove('selected')); } 
+            else if (State.selectedTool === 'cable' && State.cableSourceDevice) { document.getElementById(State.cableSourceDevice.id)?.classList.remove('cable-src'); State.cableSourceDevice = null; document.getElementById('drawing-cable').classList.add('hidden'); } 
+            else if (State.selectedTool === 'ping' && State.pingSourceDevice) { State.pingSourceDevice = null; State.devices.forEach(d => document.getElementById(d.id)?.classList.remove('ping-src')); }
         });
 
         document.getElementById('workspace').addEventListener('mousemove', e => {
             const rect = document.getElementById('workspace').getBoundingClientRect();
             const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
-
             if (State.draggingDevice && State.selectedTool === 'pointer') {
                 State.draggingDevice.x = Math.max(40, Math.min(mx, rect.width - 40));
                 State.draggingDevice.y = Math.max(40, Math.min(my, rect.height - 40));
@@ -1373,41 +1238,36 @@
                 el.style.left = State.draggingDevice.x + 'px'; el.style.top = State.draggingDevice.y + 'px';
                 NetworkEngine.drawLinks();
             }
-
-            if (State.selectedTool === 'cable' && State.cableSourceDevice) {
-                document.getElementById('drawing-line').setAttribute('d', Utils.calculateGravityCurve(State.cableSourceDevice.x, State.cableSourceDevice.y, mx, my));
-            }
+            if (State.selectedTool === 'cable' && State.cableSourceDevice) document.getElementById('drawing-line').setAttribute('d', Utils.calculateGravityCurve(State.cableSourceDevice.x, State.cableSourceDevice.y, mx, my));
         });
 
-        window.addEventListener('mouseup', () => { 
-            State.draggingDevice = null; 
-            document.body.style.userSelect = 'auto'; // Restaura seleção de texto
-        });
+        window.addEventListener('mouseup', () => { State.draggingDevice = null; document.body.style.userSelect = 'auto'; });
 
-        // --- INICIALIZAÇÃO E DEMONSTRAÇÃO ---
         window.onload = () => {
             CatalogManager.selectCategory('routers');
             
-            let r1 = new Router('router', 'R1-Core', window.innerWidth/2, window.innerHeight * 0.25); 
+            // Garantir que a renderização caiba no Iframe ou tela
+            const baseH = Math.max(window.innerHeight, 600);
+            const baseW = Math.max(window.innerWidth, 800);
+            
+            let r1 = new Router('router', 'R1-Core', baseW/2, baseH * 0.25); 
             r1.interfaces[0].ip = '10.0.0.1'; r1.interfaces[0].mask = '255.255.255.0'; 
             r1.interfaces[1].ip = '192.168.1.1'; r1.interfaces[1].mask = '255.255.255.0';
             
-            let sw1 = new Switch('switch', 'SW-Dist-A', window.innerWidth/2 + 200, window.innerHeight * 0.45);
-            
-            let pc1 = new EndDevice('pc', 'Terminal-01', window.innerWidth/2 + 80, window.innerHeight * 0.65); 
+            let sw1 = new Switch('switch', 'SW-Dist-A', baseW/2 + 200, baseH * 0.45);
+            let pc1 = new EndDevice('pc', 'Terminal-01', baseW/2 + 80, baseH * 0.65); 
             pc1.interfaces[0].ip = '192.168.1.10'; pc1.gateway = '192.168.1.1';
             
-            let srv = new EndDevice('server', 'DataCenter-01', window.innerWidth/2 + 320, window.innerHeight * 0.65); 
+            let srv = new EndDevice('server', 'DataCenter-01', baseW/2 + 320, baseH * 0.65); 
             srv.interfaces[0].ip = '192.168.1.100'; srv.gateway = '192.168.1.1';
-
-            let cld = new Cloud('cloud', 'Internet', window.innerWidth/2 - 200, window.innerHeight * 0.25);
+            let cld = new Cloud('cloud', 'Internet', baseW/2 - 200, baseH * 0.25);
 
             [r1, sw1, pc1, srv, cld].forEach(d => { State.devices.push(d); NetworkEngine.renderDevice(d); NetworkEngine.updateDeviceDOM(d); });
             
-            NetworkEngine.createLink(cld, r1);
-            NetworkEngine.createLink(r1, sw1);
-            NetworkEngine.createLink(sw1, pc1);
-            NetworkEngine.createLink(sw1, srv);
+            NetworkEngine.createLink(cld, r1, 'straight');
+            NetworkEngine.createLink(r1, sw1, 'straight');
+            NetworkEngine.createLink(sw1, pc1, 'straight');
+            NetworkEngine.createLink(sw1, srv, 'straight');
         };
     </script>
 </body>
