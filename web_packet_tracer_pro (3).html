@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Web Packet Tracer Pro | SwitchLab Ultra</title>
+    <title>Web Packet Tracer Pro | SwitchLab Ultra Enterprise</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,9 +23,9 @@
                     },
                     colors: {
                         cyber: {
-                            bg: '#030305',
-                            surface: '#0a0a0f',
-                            panel: 'rgba(10, 10, 15, 0.85)',
+                            bg: '#030306',
+                            surface: '#090910',
+                            panel: 'rgba(10, 10, 18, 0.88)',
                             primary: '#0ea5e9',
                             accent: '#8b5cf6',
                             success: '#10b981',
@@ -34,7 +34,6 @@
                         }
                     },
                     animation: {
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'slide-up': 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                         'pop-in': 'popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                     },
@@ -50,35 +49,34 @@
 
     <style>
         :root {
-            --grid-color: rgba(14, 165, 233, 0.05);
+            --grid-color: rgba(14, 165, 233, 0.055);
             --grid-size: 40px;
         }
 
         body { 
             margin: 0; overflow: hidden; user-select: none; 
-            background-color: #030305; color: #e2e8f0;
+            background-color: #030306; color: #e2e8f0;
             -webkit-font-smoothing: antialiased;
             touch-action: none;
         }
 
-        /* Scrollbars Customizadas */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.2); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.22); border-radius: 99px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.5); }
 
         .glass-panel {
-            background: rgba(10, 10, 16, 0.78);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
+            background: rgba(10, 10, 18, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65);
+            box-shadow: 0 10px 35px 0 rgba(0, 0, 0, 0.72);
         }
 
         #workspace {
-            background-color: #030305;
+            background-color: #030306;
             background-image: 
-                radial-gradient(circle at 50% 45%, rgba(14, 165, 233, 0.06) 0%, transparent 75%),
+                radial-gradient(circle at 50% 45%, rgba(14, 165, 233, 0.07) 0%, transparent 75%),
                 linear-gradient(var(--grid-color) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
             background-size: 100% 100%, var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
@@ -87,16 +85,40 @@
 
         #canvas-stage {
             transform-origin: 0 0;
-            width: 100%;
-            height: 100%;
+            width: 4000px;
+            height: 4000px;
             position: absolute;
             top: 0;
             left: 0;
         }
 
+        /* Zonas / Anotações de Sub-rede */
+        .net-zone {
+            position: absolute;
+            border-radius: 20px;
+            border: 1.5px dashed rgba(56, 189, 248, 0.35);
+            background: rgba(14, 165, 233, 0.04);
+            z-index: 5;
+            cursor: move;
+            transition: border-color 0.2s, background 0.2s;
+            padding: 10px 14px;
+        }
+        .net-zone:hover {
+            border-color: rgba(56, 189, 248, 0.7);
+            background: rgba(14, 165, 233, 0.07);
+        }
+        .net-zone-title {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #38bdf8;
+            letter-spacing: 0.4px;
+            pointer-events: none;
+        }
+
         /* Dispositivos na Topologia */
         .device {
-            position: absolute; width: 88px; height: 88px;
+            position: absolute; width: 92px; height: 92px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transform: translate(-50%, -50%); z-index: 20;
             cursor: grab;
@@ -104,26 +126,26 @@
         .device:active { cursor: grabbing; }
         
         .device-icon-wrapper {
-            width: 54px; height: 54px;
+            width: 56px; height: 56px;
             display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(145deg, rgba(24,24,36,0.95), rgba(10,10,16,0.95));
-            border: 1px solid rgba(255,255,255,0.12); border-radius: 16px;
+            background: linear-gradient(145deg, rgba(24,24,38,0.96), rgba(10,10,18,0.96));
+            border: 1px solid rgba(255,255,255,0.14); border-radius: 16px;
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 10px 22px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.12);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.75), inset 0 1px 1px rgba(255,255,255,0.14);
             position: relative;
         }
 
         .device:hover .device-icon-wrapper {
             transform: translateY(-3px) scale(1.06);
-            border-color: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 14px 28px rgba(0,0,0,0.85), inset 0 1px 2px rgba(255,255,255,0.22);
+            border-color: rgba(255, 255, 255, 0.28);
+            box-shadow: 0 16px 30px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.25);
         }
 
         .device i { font-size: 28px; transition: color 0.3s, filter 0.3s; filter: drop-shadow(0 0 8px currentColor); }
         
         .device.selected .device-icon-wrapper {
             border-color: #0ea5e9;
-            box-shadow: 0 0 28px rgba(14, 165, 233, 0.55), inset 0 0 15px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 0 30px rgba(14, 165, 233, 0.6), inset 0 0 16px rgba(14, 165, 233, 0.35);
         }
         .device.ping-src .device-icon-wrapper {
             border-color: #8b5cf6;
@@ -134,21 +156,28 @@
             animation: pulse-border-amber 1.8s infinite;
         }
 
-        @keyframes pulse-border-purple { 0%, 100% { box-shadow: 0 0 15px rgba(139,92,246,0.45); } 50% { box-shadow: 0 0 36px rgba(139,92,246,0.9); } }
-        @keyframes pulse-border-amber { 0%, 100% { box-shadow: 0 0 15px rgba(245,158,11,0.45); } 50% { box-shadow: 0 0 36px rgba(245,158,11,0.9); } }
+        @keyframes pulse-border-purple { 0%, 100% { box-shadow: 0 0 15px rgba(139,92,246,0.45); } 50% { box-shadow: 0 0 36px rgba(139,92,246,0.95); } }
+        @keyframes pulse-border-amber { 0%, 100% { box-shadow: 0 0 15px rgba(245,158,11,0.45); } 50% { box-shadow: 0 0 36px rgba(245,158,11,0.95); } }
 
         .device-label {
-            font-size: 11px; font-weight: 600; margin-top: 8px;
-            background: rgba(6, 6, 10, 0.92); padding: 3px 12px;
-            border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px; font-weight: 600; margin-top: 7px;
+            background: rgba(6, 6, 12, 0.94); padding: 2.5px 11px;
+            border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.12);
             color: #f1f5f9; pointer-events: none; white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6); letter-spacing: 0.3px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65); letter-spacing: 0.3px;
         }
 
         .device-ip-label {
             font-size: 9px; color: #38bdf8; font-family: 'JetBrains Mono', monospace;
-            background: rgba(14, 165, 233, 0.12); padding: 1px 7px; border-radius: 6px; 
-            pointer-events: none; margin-top: 4px; border: 1px solid rgba(14, 165, 233, 0.25);
+            background: rgba(14, 165, 233, 0.14); padding: 1px 7px; border-radius: 6px; 
+            pointer-events: none; margin-top: 3px; border: 1px solid rgba(14, 165, 233, 0.28);
+        }
+
+        .dhcp-badge {
+            position: absolute; top: -5px; right: -5px;
+            background: #10b981; color: #022c22; font-size: 8px; font-weight: 800;
+            padding: 1px 4px; border-radius: 5px; font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
         }
 
         /* Enlaces / Cabos */
@@ -156,21 +185,21 @@
         .link-hit-area { stroke: transparent; stroke-width: 24; fill: none; pointer-events: stroke; }
         
         .link-line { fill: none; transition: stroke 0.25s, stroke-width 0.2s, filter 0.25s; pointer-events: none; }
-        .link-line.auto { stroke: rgba(148, 163, 184, 0.45); stroke-width: 2.5; }
+        .link-line.auto { stroke: rgba(148, 163, 184, 0.48); stroke-width: 2.5; }
         .link-line.straight { stroke: #475569; stroke-width: 3; }
         .link-line.cross { stroke: #64748b; stroke-width: 3; stroke-dasharray: 8,6; }
-        .link-line.fiber { stroke: #f59e0b; stroke-width: 3; opacity: 0.75; }
+        .link-line.fiber { stroke: #f59e0b; stroke-width: 3; opacity: 0.8; }
 
         .link-group:hover .link-line { stroke: #38bdf8; stroke-width: 4; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.7)); stroke-dasharray: none; }
         .delete-mode .link-group:hover .link-line { stroke: #f43f5e; filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.9)); }
-        .link-group.active-flow .link-line { stroke: #a855f7; stroke-width: 4; filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.9)); }
+        .link-group.active-flow .link-line { stroke: #a855f7; stroke-width: 4; filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.95)); }
         
         .port-light {
             fill: #10b981; stroke: #050507; stroke-width: 2;
-            filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.85));
+            filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.9));
             transition: fill 0.3s, filter 0.3s;
         }
-        .port-light.down { fill: #f43f5e; filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.85)); }
+        .port-light.down { fill: #f43f5e; filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.9)); }
 
         .port-label {
             font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 700; fill: #e2e8f0;
@@ -179,21 +208,22 @@
 
         #drawing-line {
             stroke: #f59e0b; stroke-width: 3; stroke-dasharray: 8,8; fill: none;
-            animation: dash 0.6s linear infinite; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8));
+            animation: dash 0.6s linear infinite; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.85));
         }
 
         .svg-packet { fill: #a855f7; filter: drop-shadow(0 0 8px #a855f7) drop-shadow(0 0 16px #a855f7); }
         .svg-packet.return { fill: #10b981; filter: drop-shadow(0 0 8px #10b981) drop-shadow(0 0 16px #10b981); }
         .svg-packet.error { fill: #f43f5e; filter: drop-shadow(0 0 8px #f43f5e) drop-shadow(0 0 16px #f43f5e); }
+        .svg-packet.dhcp { fill: #38bdf8; filter: drop-shadow(0 0 8px #38bdf8) drop-shadow(0 0 16px #38bdf8); }
 
         .tool-active {
-            background-color: rgba(14, 165, 233, 0.18) !important;
-            color: #38bdf8 !important; border-color: rgba(14, 165, 233, 0.45) !important;
+            background-color: rgba(14, 165, 233, 0.2) !important;
+            color: #38bdf8 !important; border-color: rgba(14, 165, 233, 0.5) !important;
             box-shadow: inset 0 0 12px rgba(14, 165, 233, 0.25), 0 0 14px rgba(14, 165, 233, 0.25);
         }
 
         .cli-container {
-            background-color: #020203; color: #4ade80;
+            background-color: #020204; color: #4ade80;
             font-family: 'JetBrains Mono', monospace; box-shadow: inset 0 0 30px rgba(0,0,0,1);
             position: relative; border-radius: 12px;
         }
@@ -202,24 +232,25 @@
 
         #toast-container { position: fixed; top: 68px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast-message {
-            background: rgba(15, 15, 22, 0.95); backdrop-filter: blur(12px); border-left: 4px solid #0ea5e9; color: white; padding: 12px 18px;
-            border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); font-size: 13px; display: flex; align-items: center; gap: 10px;
+            background: rgba(15, 15, 24, 0.96); backdrop-filter: blur(12px); border-left: 4px solid #0ea5e9; color: white; padding: 12px 18px;
+            border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.75); font-size: 13px; display: flex; align-items: center; gap: 10px;
             transform: translateX(120%); transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s;
             pointer-events: auto; border-top: 1px solid rgba(255,255,255,0.06); border-right: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         .toast-message.show { transform: translateX(0); }
         .toast-error { border-left-color: #f43f5e; } .toast-success { border-left-color: #10b981; } .toast-warning { border-left-color: #f59e0b; }
 
-        #context-menu {
-            position: fixed; z-index: 1000; background: rgba(15, 15, 22, 0.96); backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.85);
-            width: 190px; overflow: hidden; transform-origin: top left;
+        #context-menu, #port-picker-menu {
+            position: fixed; z-index: 1000; background: rgba(14, 14, 22, 0.97); backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; box-shadow: 0 18px 40px rgba(0,0,0,0.9);
+            width: 215px; overflow: hidden; transform-origin: top left;
         }
         .context-item {
-            padding: 10px 14px; font-size: 12px; color: #cbd5e1; cursor: pointer;
-            display: flex; align-items: center; gap: 10px; transition: all 0.15s;
+            padding: 9px 14px; font-size: 12px; color: #cbd5e1; cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.15s;
         }
-        .context-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+        .context-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .context-item.disabled { opacity: 0.4; pointer-events: none; }
         .context-item i { font-size: 16px; }
         .context-item.danger:hover { background: rgba(244, 63, 94, 0.18); color: #f43f5e; }
     </style>
@@ -237,22 +268,31 @@
         <div class="px-4 py-2.5 border-b border-white/10 text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between" id="ctx-header">
             <span>Device</span>
         </div>
-        <div class="context-item" id="ctx-btn-config"><i class="ph ph-sliders text-slate-400"></i> Configurações</div>
-        <div class="context-item" id="ctx-btn-cli"><i class="ph ph-terminal-window text-sky-400"></i> Terminal CLI</div>
-        <div class="context-item" id="ctx-btn-ping"><i class="ph ph-paper-plane-tilt text-purple-400"></i> Enviar Ping (PDU)</div>
-        <div class="context-item" id="ctx-btn-cable"><i class="ph ph-plug text-amber-400"></i> Conectar Cabo</div>
+        <div class="context-item" id="ctx-btn-config"><span class="flex items-center gap-2"><i class="ph ph-sliders text-slate-400"></i> Configurações</span></div>
+        <div class="context-item" id="ctx-btn-cli"><span class="flex items-center gap-2"><i class="ph ph-terminal-window text-sky-400"></i> Terminal CLI</span></div>
+        <div class="context-item" id="ctx-btn-ping"><span class="flex items-center gap-2"><i class="ph ph-paper-plane-tilt text-purple-400"></i> Enviar Ping (PDU)</span></div>
+        <div class="context-item" id="ctx-btn-dhcp"><span class="flex items-center gap-2"><i class="ph ph-magic-wand text-emerald-400"></i> Solicitar IP (DHCP)</span></div>
+        <div class="context-item" id="ctx-btn-cable"><span class="flex items-center gap-2"><i class="ph ph-plug text-amber-400"></i> Conectar Cabo</span></div>
         <div class="w-full h-px bg-white/10 my-1"></div>
-        <div class="context-item danger" id="ctx-btn-delete"><i class="ph ph-trash"></i> Excluir Nó</div>
+        <div class="context-item danger" id="ctx-btn-delete"><span class="flex items-center gap-2"><i class="ph ph-trash"></i> Excluir Nó</span></div>
     </div>
 
-    <!-- Modal Customizado -->
+    <!-- Seletor de Porta Física (Port Picker) -->
+    <div id="port-picker-menu" class="hidden">
+        <div class="px-4 py-2 border-b border-white/10 text-[10px] font-bold text-amber-400 uppercase tracking-widest flex items-center justify-between" id="pp-header">
+            <span>Selecionar Porta</span>
+        </div>
+        <div id="pp-list" class="max-h-60 overflow-y-auto py-1"></div>
+    </div>
+
+    <!-- Modal Customizado / Inspetor de Pacotes OSI -->
     <div id="custom-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 p-4" onclick="if(event.target===this) closeModal()">
-        <div class="bg-cyber-surface border border-white/10 rounded-2xl shadow-2xl w-full max-w-[440px] overflow-hidden transform scale-95 transition-transform duration-300" id="custom-modal-content">
+        <div class="bg-cyber-surface border border-white/10 rounded-2xl shadow-2xl w-full max-w-[480px] overflow-hidden transform scale-95 transition-transform duration-300" id="custom-modal-content">
             <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/5">
                 <h3 class="text-base font-semibold text-white flex items-center gap-2" id="modal-title">Aviso</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition rounded-lg p-1.5 hover:bg-white/10"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <div class="px-6 py-5 text-slate-300 text-sm leading-relaxed" id="modal-message">Mensagem</div>
+            <div class="px-6 py-5 text-slate-300 text-sm leading-relaxed max-h-[70vh] overflow-y-auto" id="modal-message">Mensagem</div>
             <div class="px-6 py-4 bg-black/40 border-t border-white/5 flex justify-end gap-3" id="modal-actions"></div>
         </div>
     </div>
@@ -260,27 +300,40 @@
     <!-- Header Superior -->
     <header class="h-14 glass-panel flex items-center justify-between px-4 md:px-6 z-50 shrink-0 border-b border-white/5 relative">
         <div class="absolute inset-0 bg-gradient-to-r from-sky-500/10 via-transparent to-purple-500/5 opacity-60 pointer-events-none"></div>
-        <div class="flex items-center space-x-3 md:space-x-5 relative z-10">
+        <div class="flex items-center space-x-3 md:space-x-4 relative z-10">
             <div class="flex items-center space-x-2.5 cursor-default">
                 <div class="bg-gradient-to-br from-sky-400 to-blue-600 p-1.5 rounded-xl shadow-[0_0_20px_rgba(14,165,233,0.5)]">
                     <i class="ph-bold ph-graph text-white text-lg"></i>
                 </div>
-                <span class="font-bold text-base md:text-lg tracking-tight text-white">Switch<span class="text-sky-400">Lab</span> <span class="hidden sm:inline-block font-semibold text-[9px] text-sky-400 ml-1 border border-sky-400/40 bg-sky-400/10 px-1.5 py-0.5 rounded-md">ULTRA PRO</span></span>
+                <span class="font-bold text-base md:text-lg tracking-tight text-white">Switch<span class="text-sky-400">Lab</span> <span class="hidden sm:inline-block font-semibold text-[9px] text-sky-400 ml-1 border border-sky-400/40 bg-sky-400/10 px-1.5 py-0.5 rounded-md">ENTERPRISE</span></span>
             </div>
             <div class="hidden md:block h-5 w-px bg-white/10"></div>
             <!-- Seletor de Topologias Exemplo -->
             <div class="relative hidden sm:block">
                 <select id="preset-selector" onchange="TopologyManager.loadPreset(this.value)" class="bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium rounded-lg px-3 py-1.5 border border-white/10 outline-none cursor-pointer transition">
-                    <option value="default" class="bg-slate-900">Topologia: Core & Datacenter</option>
-                    <option value="dual_lan" class="bg-slate-900">Topologia: Roteamento Inter-VLAN / Dual LAN</option>
-                    <option value="mesh_wan" class="bg-slate-900">Topologia: Backbone Multi-Hop</option>
+                    <option value="default" class="bg-slate-900">Lab 1: Core, WAN & Datacenter</option>
+                    <option value="dual_lan" class="bg-slate-900">Lab 2: Roteamento Dual-LAN</option>
+                    <option value="mesh_wan" class="bg-slate-900">Lab 3: Backbone Multi-Hop + Rotas</option>
+                    <option value="dhcp_lab" class="bg-slate-900">Lab 4: Servidor DHCP Corporativo</option>
                 </select>
             </div>
         </div>
 
-        <div class="flex items-center space-x-1.5 md:space-x-2.5 relative z-10">
+        <div class="flex items-center space-x-1.5 md:space-x-2 relative z-10">
+            <!-- Undo / Redo -->
+            <button onclick="HistoryManager.undo()" id="btn-undo" class="text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 p-2 rounded-lg text-sm transition disabled:opacity-30" title="Desfazer (Ctrl+Z)" disabled>
+                <i class="ph ph-arrow-u-up-left text-base"></i>
+            </button>
+            <button onclick="HistoryManager.redo()" id="btn-redo" class="text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 p-2 rounded-lg text-sm transition disabled:opacity-30" title="Refazer (Ctrl+Y)" disabled>
+                <i class="ph ph-arrow-u-up-right text-base"></i>
+            </button>
+            <div class="hidden sm:block w-px h-5 bg-white/10 mx-0.5"></div>
+            <!-- Toggle Velocidade Simulação -->
+            <button onclick="SimMode.toggleSpeed()" id="btn-sim-speed" class="text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1.5 rounded-lg text-xs font-mono transition flex items-center gap-1" title="Alternar Velocidade da Simulação">
+                <i class="ph ph-gauge text-base text-purple-400"></i> <span id="sim-speed-label">1.0x</span>
+            </button>
             <!-- Toggle Som -->
-            <button onclick="SoundFX.toggle()" id="btn-sound" class="text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 p-2 rounded-lg text-sm transition" title="Ativar/Desativar Efeitos Sonoros">
+            <button onclick="SoundFX.toggle()" id="btn-sound" class="text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 p-2 rounded-lg text-sm transition" title="Efeitos Sonoros">
                 <i class="ph ph-speaker-high text-base text-sky-400"></i>
             </button>
             <!-- Toggle Snap to Grid -->
@@ -321,6 +374,9 @@
         <button onclick="ToolManager.set('ping')" id="tool-ping" class="tool-btn p-2.5 rounded-full transition text-slate-400 hover:text-purple-400 border border-transparent" title="Enviar PDU / Ping (P)">
             <i class="ph ph-paper-plane-tilt text-lg md:text-xl"></i>
         </button>
+        <button onclick="ToolManager.set('zone')" id="tool-zone" class="tool-btn p-2.5 rounded-full transition text-slate-400 hover:text-emerald-400 border border-transparent" title="Criar Zona / Anotação de Sub-rede (Z)">
+            <i class="ph ph-bounding-box text-lg md:text-xl"></i>
+        </button>
         <div class="w-px h-5 bg-white/10 mx-0.5"></div>
         <button onclick="ToolManager.set('delete')" id="tool-delete" class="tool-btn p-2.5 rounded-full transition text-slate-400 hover:text-rose-400 border border-transparent" title="Excluir Objeto (Del)">
             <i class="ph ph-trash text-lg md:text-xl"></i>
@@ -335,7 +391,7 @@
         </div>
     </div>
 
-    <!-- Controles de Zoom (Canto Inferior Esquerdo) -->
+    <!-- Controles de Zoom & Auto-Layout (Canto Inferior Esquerdo) -->
     <div class="absolute bottom-36 left-4 md:left-6 z-30 glass-panel rounded-xl p-1 flex items-center gap-1 border-white/10">
         <button onclick="ViewportManager.zoom(-0.15)" class="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition" title="Diminuir Zoom">
             <i class="ph ph-minus text-sm"></i>
@@ -345,8 +401,11 @@
             <i class="ph ph-plus text-sm"></i>
         </button>
         <div class="w-px h-4 bg-white/10"></div>
-        <button onclick="ViewportManager.reset()" class="p-2 text-slate-400 hover:text-sky-400 hover:bg-white/10 rounded-lg transition" title="Resetar Visualização">
+        <button onclick="ViewportManager.reset()" class="p-2 text-slate-400 hover:text-sky-400 hover:bg-white/10 rounded-lg transition" title="Centralizar Visualização">
             <i class="ph ph-corners-out text-sm"></i>
+        </button>
+        <button onclick="document.getElementById('pdu-panel').classList.toggle('hidden')" class="p-2 text-slate-400 hover:text-purple-400 hover:bg-white/10 rounded-lg transition" title="Abrir/Fechar Sniffer de Pacotes">
+            <i class="ph ph-broadcast text-sm"></i>
         </button>
     </div>
 
@@ -354,6 +413,7 @@
     <div class="flex flex-1 overflow-hidden relative">
         <main id="workspace" class="flex-1 relative overflow-hidden">
             <div id="canvas-stage">
+                <div id="zones-layer" class="absolute top-0 left-0 w-[4000px] h-[4000px] z-5"></div>
                 <svg id="cables-layer" class="absolute top-0 left-0 w-[4000px] h-[4000px] z-10 overflow-visible"></svg>
                 <svg id="drawing-cable" class="absolute top-0 left-0 w-[4000px] h-[4000px] pointer-events-none z-10 hidden overflow-visible">
                     <path id="drawing-line" d="" />
@@ -364,7 +424,7 @@
         </main>
 
         <!-- Painel Lateral de Propriedades & Terminal CLI -->
-        <aside id="properties-panel" class="w-full sm:w-[430px] glass-panel border-l border-t-0 border-b-0 border-white/10 flex flex-col shadow-[-15px_0_45px_rgba(0,0,0,0.85)] z-40 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] transform translate-x-full absolute right-0 top-0 h-full bg-cyber-surface/95">
+        <aside id="properties-panel" class="w-full sm:w-[445px] glass-panel border-l border-t-0 border-b-0 border-white/10 flex flex-col shadow-[-15px_0_45px_rgba(0,0,0,0.85)] z-40 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] transform translate-x-full absolute right-0 top-0 h-full bg-cyber-surface/95">
             <div class="h-16 flex items-center justify-between px-5 shrink-0 border-b border-white/5 bg-black/40">
                 <div class="flex items-center gap-3">
                     <div id="prop-small-icon" class="text-sky-400 w-10 h-10 flex items-center justify-center bg-sky-400/10 rounded-xl border border-sky-400/20 text-2xl"></div>
@@ -379,22 +439,35 @@
             </div>
             
             <!-- Abas -->
-            <div class="flex border-b border-white/5 text-[11px] font-bold text-slate-400 shrink-0 px-2 pt-1 bg-black/25 uppercase tracking-widest">
-                <button class="flex-1 py-3 hover:text-white border-b-2 border-sky-500 text-sky-400 transition outline-none" id="tab-btn-config" onclick="PropertiesManager.switchTab('config')">Configuração</button>
-                <button class="flex-1 py-3 hover:text-white border-b-2 border-transparent transition outline-none" id="tab-btn-cli" onclick="PropertiesManager.switchTab('cli')">Terminal CLI</button>
+            <div class="flex border-b border-white/5 text-[10px] font-bold text-slate-400 shrink-0 px-2 pt-1 bg-black/25 uppercase tracking-widest">
+                <button class="flex-1 py-3 hover:text-white border-b-2 border-sky-500 text-sky-400 transition outline-none" id="tab-btn-config" onclick="PropertiesManager.switchTab('config')">Config</button>
+                <button class="flex-1 py-3 hover:text-white border-b-2 border-transparent transition outline-none" id="tab-btn-cli" onclick="PropertiesManager.switchTab('cli')">Terminal</button>
+                <button class="flex-1 py-3 hover:text-white border-b-2 border-transparent transition outline-none" id="tab-btn-services" onclick="PropertiesManager.switchTab('services')">Serviços</button>
                 <button class="flex-1 py-3 hover:text-white border-b-2 border-transparent transition outline-none" id="tab-btn-ports" onclick="PropertiesManager.switchTab('ports')">Portas</button>
             </div>
 
             <!-- Conteúdo Aba: Configuração -->
-            <div id="tab-config" class="p-5 flex-1 overflow-y-auto bg-transparent space-y-5">
+            <div id="tab-config" class="p-5 flex-1 overflow-y-auto bg-transparent space-y-4">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Hostname</label>
-                    <input type="text" id="prop-name" class="w-full bg-black/60 border border-white/10 text-white rounded-xl px-3.5 py-2.5 text-sm outline-none input-glow transition font-medium" onchange="PropertiesManager.update('name')">
+                    <input type="text" id="prop-name" class="w-full bg-black/60 border border-white/10 text-white rounded-xl px-3.5 py-2 text-sm outline-none input-glow transition font-medium" onchange="PropertiesManager.update('name')">
                 </div>
                 
-                <div id="prop-gateway-container">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Default Gateway</label>
-                    <input type="text" id="prop-gateway" class="w-full bg-black/60 border border-white/10 text-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none input-glow transition font-mono" placeholder="Ex: 192.168.1.1" onchange="PropertiesManager.update('gateway')">
+                <div id="prop-gateway-container" class="space-y-3">
+                    <div class="flex items-center justify-between bg-black/35 px-3.5 py-2.5 rounded-xl border border-white/5">
+                        <div>
+                            <div class="text-xs font-semibold text-slate-200">Configuração IP Automática (DHCP)</div>
+                            <div class="text-[10px] text-slate-400">Obtém IP e Gateway de um Roteador/Servidor</div>
+                        </div>
+                        <button onclick="PropertiesManager.requestDHCP()" class="px-3 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <i class="ph ph-magic-wand"></i> Obter IP
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Default Gateway</label>
+                        <input type="text" id="prop-gateway" class="w-full bg-black/60 border border-white/10 text-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none input-glow transition font-mono" placeholder="Ex: 192.168.1.1" onchange="PropertiesManager.update('gateway')">
+                    </div>
                 </div>
 
                 <div class="w-full h-px bg-white/5"></div>
@@ -404,20 +477,20 @@
                         <span>Interface de Rede</span>
                         <span id="prop-intf-status-badge" class="text-[9px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">UP</span>
                     </label>
-                    <select id="prop-interface-sel" class="w-full bg-black/80 border border-white/10 text-slate-200 rounded-xl px-3.5 py-2.5 text-sm outline-none input-glow transition cursor-pointer font-mono" onchange="PropertiesManager.loadInterface()"></select>
+                    <select id="prop-interface-sel" class="w-full bg-black/80 border border-white/10 text-slate-200 rounded-xl px-3.5 py-2 text-sm outline-none input-glow transition cursor-pointer font-mono" onchange="PropertiesManager.loadInterface()"></select>
                 </div>
 
-                <div id="prop-ip-mask-container" class="space-y-4 bg-black/35 p-4 rounded-2xl border border-white/5 relative overflow-hidden">
+                <div id="prop-ip-mask-container" class="space-y-3.5 bg-black/35 p-4 rounded-2xl border border-white/5 relative overflow-hidden">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Endereço IPv4</label>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Endereço IPv4</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none"><i class="ph ph-globe text-sky-500/60"></i></div>
-                            <input type="text" id="prop-ip" class="w-full bg-black/80 border border-sky-500/20 text-sky-400 rounded-xl pl-10 pr-3.5 py-2.5 text-sm outline-none input-glow transition font-mono font-bold" placeholder="Ex: 192.168.1.10" onchange="PropertiesManager.update('ip')">
+                            <input type="text" id="prop-ip" class="w-full bg-black/80 border border-sky-500/20 text-sky-400 rounded-xl pl-10 pr-3.5 py-2 text-sm outline-none input-glow transition font-mono font-bold" placeholder="Ex: 192.168.1.10" onchange="PropertiesManager.update('ip')">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Máscara de Sub-rede</label>
-                        <input type="text" id="prop-mask" class="w-full bg-black/60 border border-white/10 text-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none input-glow transition font-mono" placeholder="255.255.255.0" onchange="PropertiesManager.update('mask')">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Máscara de Sub-rede</label>
+                        <input type="text" id="prop-mask" class="w-full bg-black/60 border border-white/10 text-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none input-glow transition font-mono" placeholder="255.255.255.0" onchange="PropertiesManager.update('mask')">
                     </div>
                     <div class="flex items-center justify-between pt-1">
                         <span class="text-xs text-slate-400">Estado da Porta (Port Status)</span>
@@ -456,6 +529,48 @@
                 </div>
             </div>
 
+            <!-- Conteúdo Aba: Serviços (DHCP / Tabela MAC) -->
+            <div id="tab-services" class="p-5 flex-1 overflow-y-auto hidden space-y-4">
+                <!-- DHCP Server Pool (Routers & Servers) -->
+                <div id="service-dhcp-box" class="hidden space-y-3 bg-black/35 p-4 rounded-2xl border border-white/5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5"><i class="ph-fill ph-broadcast"></i> Servidor DHCPv4</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="dhcp-enabled" class="sr-only peer" onchange="PropertiesManager.saveDHCPConfig()">
+                            <div class="w-10 h-5 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 relative"></div>
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5 text-xs">
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-1">IP Inicial do Pool</label>
+                            <input type="text" id="dhcp-start" placeholder="192.168.1.50" class="w-full bg-black/80 border border-white/10 rounded-lg px-2.5 py-1.5 font-mono text-slate-200 outline-none" onchange="PropertiesManager.saveDHCPConfig()">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-1">Máscara</label>
+                            <input type="text" id="dhcp-mask" placeholder="255.255.255.0" class="w-full bg-black/80 border border-white/10 rounded-lg px-2.5 py-1.5 font-mono text-slate-200 outline-none" onchange="PropertiesManager.saveDHCPConfig()">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="text-[10px] text-slate-400 block mb-1">Default Gateway Distribuído</label>
+                            <input type="text" id="dhcp-gw" placeholder="192.168.1.1" class="w-full bg-black/80 border border-white/10 rounded-lg px-2.5 py-1.5 font-mono text-slate-200 outline-none" onchange="PropertiesManager.saveDHCPConfig()">
+                        </div>
+                    </div>
+                    <div class="text-[10px] text-slate-400 pt-1 border-t border-white/5" id="dhcp-leases-count">Concessões ativas: 0</div>
+                </div>
+
+                <!-- Tabela CAM / MAC (Switches) -->
+                <div id="service-mac-box" class="hidden space-y-2.5 bg-black/35 p-4 rounded-2xl border border-white/5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">Tabela de Endereços MAC (CAM)</span>
+                        <button onclick="PropertiesManager.clearMacTable()" class="text-[10px] text-rose-400 hover:underline">Limpar Tabela</button>
+                    </div>
+                    <div id="mac-table-list" class="space-y-1.5 font-mono text-[11px]"></div>
+                </div>
+
+                <div id="service-none-box" class="text-xs text-slate-500 text-center py-8 italic">
+                    Nenhum serviço de servidor ativo para este tipo de nó.
+                </div>
+            </div>
+
             <!-- Conteúdo Aba: Tabela de Portas / Interfaces -->
             <div id="tab-ports" class="p-5 flex-1 overflow-y-auto hidden space-y-2.5">
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Resumo de Interfaces Físicas</div>
@@ -464,10 +579,10 @@
         </aside>
 
         <!-- Painel Flutuante de Tráfego PDU (Inferior Direito) -->
-        <div id="pdu-panel" class="absolute bottom-6 right-4 md:right-6 w-[330px] md:w-[370px] glass-panel shadow-2xl rounded-2xl flex flex-col z-30 overflow-hidden transition-all duration-300 border-white/10 hidden">
+        <div id="pdu-panel" class="absolute bottom-6 right-4 md:right-6 w-[340px] md:w-[390px] glass-panel shadow-2xl rounded-2xl flex flex-col z-30 overflow-hidden transition-all duration-300 border-white/10 hidden">
             <div class="bg-black/80 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest border-b border-white/5 flex justify-between items-center text-slate-300">
                 <div class="flex items-center gap-2">
-                    <i class="ph-fill ph-broadcast text-sky-400 text-sm animate-pulse"></i> Sniffer de Pacotes (PDU)
+                    <i class="ph-fill ph-broadcast text-sky-400 text-sm animate-pulse"></i> Sniffer PDU <span class="text-[9px] text-slate-500 normal-case font-normal">(Clique p/ inspecionar)</span>
                 </div>
                 <div class="flex items-center gap-1.5">
                     <button onclick="NetworkLogger.clear()" class="hover:text-rose-400 transition bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-0.5 rounded-md outline-none">Limpar</button>
@@ -475,7 +590,7 @@
                 </div>
             </div>
             <div id="pdu-list" class="h-48 overflow-y-auto text-[12px] p-3 space-y-2 bg-black/30">
-                <div class="text-slate-500 text-center italic mt-14 font-mono text-[11px] placeholder-text">Aguardando tráfego ICMP/ARP...</div>
+                <div class="text-slate-500 text-center italic mt-14 font-mono text-[11px] placeholder-text">Aguardando tráfego ICMP/ARP/DHCP...</div>
             </div>
         </div>
     </div>
@@ -503,7 +618,7 @@
         'use strict';
 
         // ==========================================
-        // 1. SINTETIZADOR DE EFEITOS SONOROS (Web Audio)
+        // 1. SINTETIZADOR DE EFEITOS SONOROS
         // ==========================================
         const SoundFX = {
             enabled: true,
@@ -562,7 +677,7 @@
                         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
                         osc.start(now); osc.stop(now + 0.2);
                     }
-                } catch (e) { /* Ignora bloqueio de autoplay */ }
+                } catch (e) {}
             }
         };
 
@@ -628,18 +743,33 @@
         };
 
         const CLI_COMMANDS = [
-            'ping', 'traceroute', 'ipconfig', 'ifconfig', 'arp -a', 'clear', 'help',
+            'ping', 'traceroute', 'ipconfig', 'ifconfig', 'ipconfig /renew', 'arp -a', 'clear', 'help',
             'enable', 'disable', 'configure terminal', 'exit', 'end',
             'hostname', 'interface', 'ip address', 'no shutdown', 'shutdown',
-            'ip route', 'show ip route', 'show ip interface brief', 'show running-config', 'show arp'
+            'ip route', 'show ip route', 'show ip interface brief', 'show running-config', 'show mac address-table', 'show arp'
         ];
 
         // ==========================================
-        // 4. ESTADO GLOBAL DA APLICAÇÃO
+        // 4. ESTADO GLOBAL & SIMULAÇÃO
         // ==========================================
+        const SimMode = {
+            speedMultiplier: 1.0,
+            speeds: [1.0, 2.0, 0.4],
+            labels: ['1.0x', '2.0x', '0.4x (Lento)'],
+            idx: 0,
+            toggleSpeed() {
+                this.idx = (this.idx + 1) % this.speeds.length;
+                this.speedMultiplier = this.speeds[this.idx];
+                document.getElementById('sim-speed-label').innerText = this.labels[this.idx];
+                Toast.show(`Velocidade da simulação: ${this.labels[this.idx]}`, 'info', 1500);
+            }
+        };
+
         const State = {
             devices: [],
             links: [],
+            zones: [],
+            pduLogs: [],
             deviceCounter: 1,
             selectedTool: 'pointer',
             selectedCableType: 'auto',
@@ -647,7 +777,10 @@
             itemToPlace: null,
             activeDevice: null,
             draggingDevice: null,
+            draggingZone: null,
+            dragOffset: { x: 0, y: 0 },
             cableSourceDevice: null,
+            cableSourcePortIdx: null,
             pingSourceDevice: null,
             cliHistoryBuffer: {},
             contextMenuTarget: null,
@@ -655,7 +788,45 @@
         };
 
         // ==========================================
-        // 5. UTILITÁRIOS DE REDE E GEOMETRIA
+        // 5. HISTÓRICO DE AÇÕES (UNDO / REDO)
+        // ==========================================
+        const HistoryManager = {
+            undoStack: [],
+            redoStack: [],
+            maxHistory: 30,
+            push() {
+                const snapshot = TopologyManager.serialize();
+                if (this.undoStack.length > 0 && this.undoStack[this.undoStack.length - 1] === snapshot) return;
+                this.undoStack.push(snapshot);
+                if (this.undoStack.length > this.maxHistory) this.undoStack.shift();
+                this.redoStack = [];
+                this.updateButtons();
+            },
+            undo() {
+                if (this.undoStack.length <= 1) return;
+                const current = this.undoStack.pop();
+                this.redoStack.push(current);
+                const prev = this.undoStack[this.undoStack.length - 1];
+                TopologyManager.restoreFromObject(JSON.parse(prev), false);
+                this.updateButtons();
+                Toast.show('Ação desfeita', 'info', 1400);
+            },
+            redo() {
+                if (this.redoStack.length === 0) return;
+                const next = this.redoStack.pop();
+                this.undoStack.push(next);
+                TopologyManager.restoreFromObject(JSON.parse(next), false);
+                this.updateButtons();
+                Toast.show('Ação refeita', 'info', 1400);
+            },
+            updateButtons() {
+                document.getElementById('btn-undo').disabled = this.undoStack.length <= 1;
+                document.getElementById('btn-redo').disabled = this.redoStack.length === 0;
+            }
+        };
+
+        // ==========================================
+        // 6. UTILITÁRIOS DE REDE E GEOMETRIA
         // ==========================================
         const Utils = {
             generateMAC: () => "00:" + Array.from({length: 5}, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0').toUpperCase()).join(':'),
@@ -668,6 +839,7 @@
                 if (!Utils.isValidIP(ip)) return 0;
                 return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
             },
+            longToIp: (long) => [ (long >>> 24) & 255, (long >>> 16) & 255, (long >>> 8) & 255, long & 255 ].join('.'),
             isSameSubnet: (ip1, mask1, ip2, mask2) => {
                 if (!Utils.isValidIP(ip1) || !Utils.isValidIP(mask1) || !Utils.isValidIP(ip2) || !Utils.isValidIP(mask2)) return false;
                 const m1 = Utils.ipToLong(mask1), m2 = Utils.ipToLong(mask2);
@@ -703,7 +875,7 @@
         };
 
         // ==========================================
-        // 6. GERENCIADOR DE VIEWPORT (ZOOM / PAN / SNAP)
+        // 7. GERENCIADOR DE VIEWPORT (ZOOM / PAN / SNAP)
         // ==========================================
         const ViewportManager = {
             apply() {
@@ -733,7 +905,6 @@
                 State.viewport.y = 0;
                 State.viewport.scale = 1;
                 this.apply();
-                Toast.show('Visualização redefinida (100%)', 'info', 1500);
             },
             toggleSnap() {
                 State.viewport.snap = !State.viewport.snap;
@@ -744,7 +915,7 @@
         };
 
         // ==========================================
-        // 7. MODELOS DE DISPOSITIVOS DE REDE
+        // 8. MODELOS DE DISPOSITIVOS DE REDE
         // ==========================================
         class NetworkDevice {
             constructor(typeStr, namePref, x, y) {
@@ -753,14 +924,15 @@
                 this.name = namePref + (State.deviceCounter - 1);
                 this.x = x;
                 this.y = y;
-                this.cliMode = 'user'; // 'user', 'priv', 'config', 'if'
+                this.cliMode = 'user';
                 this.selectedIfIndex = 0;
-                this.staticRoutes = []; // { dest, mask, nextHop }
-                this.arpTable = {}; // ip -> mac
+                this.staticRoutes = [];
+                this.arpTable = {};
+                this.macTable = []; // Para Switches: { mac, port, type }
+                this.dhcpServer = { enabled: false, startIp: '', mask: '255.255.255.0', gateway: '', leases: {} };
                 this.cliOutput = [
-                    `SwitchLab IOS XE Software, Version 17.09.04a`,
-                    `Technical Support: https://switchlab.local/support`,
-                    `Device ${this.name} booted successfully.\n`
+                    `SwitchLab IOS XE Software, Version 17.12.01 Enterprise`,
+                    `Device ${this.name} initialized and ready.\n`
                 ];
                 State.cliHistoryBuffer[this.id] = { cmds: [], index: -1 };
             }
@@ -809,13 +981,14 @@
         }
 
         // ==========================================
-        // 8. GERENCIADOR DE FERRAMENTAS & CATÁLOGO
+        // 9. GERENCIADOR DE FERRAMENTAS & CATÁLOGO
         // ==========================================
         const ToolManager = {
             set(tool, cableType = 'auto') {
                 State.selectedTool = tool;
                 State.itemToPlace = null;
                 State.cableSourceDevice = null;
+                State.cableSourcePortIdx = null;
                 State.pingSourceDevice = null;
                 if (tool === 'cable') State.selectedCableType = cableType;
                 
@@ -826,6 +999,7 @@
                 });
                 
                 document.getElementById('drawing-cable').classList.add('hidden');
+                PortPicker.hide();
                 State.devices.forEach(d => document.getElementById(d.id)?.classList.remove('ping-src', 'cable-src'));
 
                 const workspace = document.getElementById('workspace');
@@ -833,9 +1007,10 @@
 
                 if (tool === 'pointer') { this.updateStatus('Modo Seleção / Mover', 'bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,1)]'); workspace.style.cursor = 'default'; }
                 if (tool === 'pan') { this.updateStatus('Mover Tela (Arraste)', 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,1)]'); workspace.style.cursor = 'grab'; }
-                if (tool === 'delete') { this.updateStatus('Excluir Nó ou Cabo', 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,1)]'); workspace.style.cursor = 'crosshair'; workspace.classList.add('delete-mode'); PropertiesManager.close(); }
+                if (tool === 'delete') { this.updateStatus('Excluir Nó, Cabo ou Zona', 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,1)]'); workspace.style.cursor = 'crosshair'; workspace.classList.add('delete-mode'); PropertiesManager.close(); }
                 if (tool === 'cable') { this.updateStatus(`Conectar Cabo (${cableType})`, 'bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,1)] animate-pulse'); workspace.style.cursor = 'crosshair'; }
                 if (tool === 'ping') { this.updateStatus('Enviar PDU (Origem -> Destino)', 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,1)] animate-pulse'); workspace.style.cursor = 'crosshair'; }
+                if (tool === 'zone') { this.updateStatus('Clique na matriz para criar Zona de Sub-rede', 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,1)]'); workspace.style.cursor = 'crosshair'; }
             },
             updateStatus(text, dotClass = 'bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,1)]') {
                 document.getElementById('tool-status').innerText = text;
@@ -893,7 +1068,49 @@
         };
 
         // ==========================================
-        // 9. GERENCIADOR DE PROPRIEDADES DO DISPOSITIVO
+        // 10. SELETOR DE PORTAS FÍSICAS (PORT PICKER)
+        // ==========================================
+        const PortPicker = {
+            show(clientX, clientY, dev, onSelectPort) {
+                const menu = document.getElementById('port-picker-menu');
+                const list = document.getElementById('pp-list');
+                document.getElementById('pp-header').innerHTML = `<span>${dev.name} — Porta</span>`;
+                
+                list.innerHTML = dev.interfaces.map((intf, idx) => {
+                    const busy = Boolean(intf.connectedTo);
+                    return `
+                        <div class="context-item ${busy ? 'disabled' : ''}" data-idx="${idx}">
+                            <span class="font-mono text-xs flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full ${busy ? 'bg-rose-500' : 'bg-emerald-400'}"></span>
+                                ${intf.name}
+                            </span>
+                            <span class="text-[9px] font-mono text-slate-400">${busy ? 'Em uso' : (intf.ip || 'Livre')}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                list.querySelectorAll('.context-item:not(.disabled)').forEach(el => {
+                    el.onclick = (e) => {
+                        e.stopPropagation();
+                        const idx = parseInt(el.getAttribute('data-idx'), 10);
+                        this.hide();
+                        onSelectPort(idx);
+                    };
+                });
+
+                const safeX = Math.min(clientX, window.innerWidth - 225);
+                const safeY = Math.min(clientY, window.innerHeight - 260);
+                menu.style.left = safeX + 'px';
+                menu.style.top = safeY + 'px';
+                menu.classList.remove('hidden');
+            },
+            hide() {
+                document.getElementById('port-picker-menu').classList.add('hidden');
+            }
+        };
+
+        // ==========================================
+        // 11. GERENCIADOR DE PROPRIEDADES & SERVIÇOS
         // ==========================================
         const PropertiesManager = {
             open(dev) {
@@ -930,6 +1147,7 @@
                     ipMaskCont.classList.add('hidden');
                 }
 
+                this.renderServicesTab();
                 this.renderPortsSummary();
                 CLIManager.render();
                 document.getElementById('properties-panel').classList.remove('translate-x-full');
@@ -939,7 +1157,7 @@
                 State.activeDevice = null;
             },
             switchTab(tab) {
-                const tabs = ['config', 'cli', 'ports'];
+                const tabs = ['config', 'cli', 'services', 'ports'];
                 tabs.forEach(t => {
                     const panel = document.getElementById('tab-' + t);
                     const btn = document.getElementById('tab-btn-' + t);
@@ -964,6 +1182,8 @@
                     }, 50);
                 } else if (tab === 'ports') {
                     this.renderPortsSummary();
+                } else if (tab === 'services') {
+                    this.renderServicesTab();
                 }
             },
             loadInterface() {
@@ -995,17 +1215,11 @@
                     }
                 } else if (prop === 'gateway') {
                     const gw = document.getElementById('prop-gateway').value.trim();
-                    if (gw && !Utils.isValidIP(gw)) {
-                        Toast.show('Formato de Gateway inválido!', 'error');
-                        return;
-                    }
+                    if (gw && !Utils.isValidIP(gw)) return Toast.show('Formato de Gateway inválido!', 'error');
                     dev.gateway = gw;
                 } else if (prop === 'ip' || prop === 'mask') {
                     let val = document.getElementById('prop-' + prop).value.trim();
-                    if (val && !Utils.isValidIP(val)) {
-                        Toast.show(`Endereço ${prop.toUpperCase()} inválido!`, 'error');
-                        return;
-                    }
+                    if (val && !Utils.isValidIP(val)) return Toast.show(`Endereço ${prop.toUpperCase()} inválido!`, 'error');
                     if (['pc', 'laptop', 'server'].includes(dev.typeStr)) dev.interfaces[0][prop] = val;
                     else if (['router', 'cloud'].includes(dev.typeStr)) {
                         const idx = document.getElementById('prop-interface-sel').value;
@@ -1026,6 +1240,71 @@
                 NetworkEngine.updateDeviceDOM(dev);
                 this.renderPortsSummary();
                 CLIManager.render();
+                HistoryManager.push();
+            },
+            async requestDHCP() {
+                if (!State.activeDevice) return;
+                await NetworkEngine.executeDHCP(State.activeDevice);
+                this.open(State.activeDevice);
+            },
+            renderServicesTab() {
+                if (!State.activeDevice) return;
+                const dev = State.activeDevice;
+                const dhcpBox = document.getElementById('service-dhcp-box');
+                const macBox = document.getElementById('service-mac-box');
+                const noneBox = document.getElementById('service-none-box');
+
+                dhcpBox.classList.add('hidden');
+                macBox.classList.add('hidden');
+                noneBox.classList.add('hidden');
+
+                if (dev.typeStr === 'router' || dev.typeStr === 'server') {
+                    dhcpBox.classList.remove('hidden');
+                    document.getElementById('dhcp-enabled').checked = dev.dhcpServer.enabled;
+                    document.getElementById('dhcp-start').value = dev.dhcpServer.startIp || '';
+                    document.getElementById('dhcp-mask').value = dev.dhcpServer.mask || '255.255.255.0';
+                    document.getElementById('dhcp-gw').value = dev.dhcpServer.gateway || '';
+                    const leases = Object.keys(dev.dhcpServer.leases || {}).length;
+                    document.getElementById('dhcp-leases-count').innerText = `Concessões ativas no pool: ${leases}`;
+                } else if (dev.typeStr === 'switch') {
+                    macBox.classList.remove('hidden');
+                    const list = document.getElementById('mac-table-list');
+                    if (!dev.macTable || dev.macTable.length === 0) {
+                        list.innerHTML = '<div class="text-slate-500 italic text-[10px]">Tabela CAM vazia. Envie tráfego para aprender MACs.</div>';
+                    } else {
+                        list.innerHTML = dev.macTable.map(entry => `
+                            <div class="flex items-center justify-between bg-black/50 px-2.5 py-1.5 rounded-lg border border-white/5 text-slate-300">
+                                <span class="text-emerald-400">${entry.mac}</span>
+                                <span class="text-slate-400">${entry.port}</span>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    noneBox.classList.remove('hidden');
+                }
+            },
+            saveDHCPConfig() {
+                if (!State.activeDevice) return;
+                const dev = State.activeDevice;
+                const enabled = document.getElementById('dhcp-enabled').checked;
+                const startIp = document.getElementById('dhcp-start').value.trim();
+                const mask = document.getElementById('dhcp-mask').value.trim();
+                const gateway = document.getElementById('dhcp-gw').value.trim();
+
+                if (enabled && (!Utils.isValidIP(startIp) || !Utils.isValidIP(mask))) {
+                    document.getElementById('dhcp-enabled').checked = false;
+                    return Toast.show('Configure um IP Inicial e Máscara válidos antes de ativar o DHCP.', 'warning');
+                }
+                dev.dhcpServer = { ...dev.dhcpServer, enabled, startIp, mask, gateway };
+                NetworkEngine.updateDeviceDOM(dev);
+                HistoryManager.push();
+                Toast.show(enabled ? 'Servidor DHCP ativado!' : 'Servidor DHCP desativado.', 'info', 1800);
+            },
+            clearMacTable() {
+                if (!State.activeDevice) return;
+                State.activeDevice.macTable = [];
+                this.renderServicesTab();
+                Toast.show('Tabela MAC limpa.', 'info', 1400);
             },
             addStaticRoute() {
                 if (!State.activeDevice || State.activeDevice.typeStr !== 'router') return;
@@ -1040,12 +1319,14 @@
                 document.getElementById('route-dest').value = '';
                 document.getElementById('route-nh').value = '';
                 this.renderStaticRoutes();
+                HistoryManager.push();
                 Toast.show('Rota estática adicionada.', 'success');
             },
             removeStaticRoute(idx) {
                 if (!State.activeDevice) return;
                 State.activeDevice.staticRoutes.splice(idx, 1);
                 this.renderStaticRoutes();
+                HistoryManager.push();
             },
             renderStaticRoutes() {
                 if (!State.activeDevice) return;
@@ -1096,7 +1377,7 @@
         };
 
         // ==========================================
-        // 10. EMULADOR DE TERMINAL CLI (IOS & BASH)
+        // 12. EMULADOR DE TERMINAL CLI (IOS & BASH)
         // ==========================================
         const CLIManager = {
             syncPrompt(dev) {
@@ -1162,16 +1443,18 @@
                     return this.render();
                 }
 
-                // Comandos para End Devices (PC / Laptop / Server)
+                // Comandos para End Devices
                 if (['pc', 'laptop', 'server'].includes(dev.typeStr)) {
                     if (base === 'help' || base === '?') {
-                        this.print("Comandos disponíveis:\n  ping <ip>       - Testa conectividade ICMP\n  traceroute <ip> - Rastreia saltos até o destino\n  ipconfig        - Exibe configuração de interface\n  arp -a          - Exibe tabela ARP local\n  clear           - Limpa o terminal");
+                        this.print("Comandos disponíveis:\n  ping <ip>         - Testa conectividade ICMP\n  traceroute <ip>   - Rastreia saltos até o destino\n  ipconfig          - Exibe configuração de interface\n  ipconfig /renew   - Solicita IP via DHCP\n  arp -a            - Exibe tabela ARP local\n  clear             - Limpa o terminal");
                     } else if (base === 'ping') {
                         if (args.length < 2) return this.print("Uso: ping <endereco_ip>");
                         NetworkEngine.executePing(dev, args[1]);
                     } else if (base === 'traceroute' || base === 'tracert') {
                         if (args.length < 2) return this.print("Uso: traceroute <endereco_ip>");
                         NetworkEngine.executeTraceroute(dev, args[1]);
+                    } else if (fullCmd === 'ipconfig /renew' || fullCmd === 'dhclient') {
+                        NetworkEngine.executeDHCP(dev);
                     } else if (['ipconfig', 'ifconfig', 'ip'].includes(base)) {
                         let i = dev.interfaces[0];
                         this.print(`\neth0: flags=4163<UP,BROADCAST,RUNNING>  mtu 1500\n        inet ${i.ip || '0.0.0.0'}  netmask ${i.mask || '0.0.0.0'}\n        ether ${i.mac}  txqueuelen 1000\n        Default Gateway: ${dev.gateway || '0.0.0.0'}\n`);
@@ -1188,19 +1471,16 @@
                     return;
                 }
 
-                // Comandos Cisco-like para Routers & Switches
+                // Comandos Cisco IOS para Routers & Switches
                 if (['router', 'switch'].includes(dev.typeStr)) {
                     if (base === 'help' || base === '?') {
-                        this.print("Comandos IOS suportados:\n  enable / disable\n  configure terminal (conf t)\n  hostname <nome>\n  interface <g0/0 | g0/1 | ...>\n  ip address <ip> <mascara>\n  no shutdown / shutdown\n  ip route <rede> <mascara> <next-hop>\n  ping <ip>\n  show ip interface brief (sh ip int br)\n  show ip route (sh ip ro)\n  show running-config (sh run)\n  exit / end");
+                        this.print("Comandos IOS suportados:\n  enable / disable\n  configure terminal (conf t)\n  hostname <nome>\n  interface <g0/0 | fa0/1 | ...>\n  ip address <ip> <mascara>\n  no shutdown / shutdown\n  ip route <rede> <mascara> <next-hop>\n  ping <ip>\n  show ip interface brief (sh ip int br)\n  show ip route (sh ip ro)\n  show mac address-table (sh mac)\n  show running-config (sh run)\n  exit / end");
                     } else if (base === 'enable' || base === 'en') {
-                        dev.cliMode = 'priv';
-                        this.syncPrompt(dev);
+                        dev.cliMode = 'priv'; this.syncPrompt(dev);
                     } else if (base === 'disable') {
-                        dev.cliMode = 'user';
-                        this.syncPrompt(dev);
+                        dev.cliMode = 'user'; this.syncPrompt(dev);
                     } else if (fullCmd.startsWith('conf') && (dev.cliMode === 'priv')) {
-                        dev.cliMode = 'config';
-                        this.syncPrompt(dev);
+                        dev.cliMode = 'config'; this.syncPrompt(dev);
                     } else if (base === 'end') {
                         if (dev.cliMode !== 'user') dev.cliMode = 'priv';
                         this.syncPrompt(dev);
@@ -1211,13 +1491,13 @@
                         this.syncPrompt(dev);
                     } else if (base === 'hostname' && (dev.cliMode === 'config')) {
                         if (args[1]) {
-                            dev.name = args[1];
-                            this.syncPrompt(dev);
+                            dev.name = args[1]; this.syncPrompt(dev);
                             NetworkEngine.updateDeviceDOM(dev);
                             if (State.activeDevice?.id === dev.id) {
                                 document.getElementById('prop-header-title').innerText = dev.name;
                                 document.getElementById('prop-name').value = dev.name;
                             }
+                            HistoryManager.push();
                         }
                     } else if (base === 'interface' || base === 'int') {
                         if (dev.cliMode !== 'config' && dev.cliMode !== 'if') {
@@ -1226,9 +1506,7 @@
                             const query = args[1].toLowerCase().replace('g', 'gigabitethernet').replace('fa', 'fastethernet');
                             const idx = dev.interfaces.findIndex(i => i.name.toLowerCase().includes(args[1].toLowerCase()) || i.name.toLowerCase().startsWith(query));
                             if (idx !== -1) {
-                                dev.selectedIfIndex = idx;
-                                dev.cliMode = 'if';
-                                this.syncPrompt(dev);
+                                dev.selectedIfIndex = idx; dev.cliMode = 'if'; this.syncPrompt(dev);
                             } else {
                                 this.print('% Invalid interface type and number');
                             }
@@ -1239,6 +1517,7 @@
                             dev.interfaces[dev.selectedIfIndex].mask = args[3];
                             NetworkEngine.updateDeviceDOM(dev);
                             NetworkEngine.drawLinks();
+                            HistoryManager.push();
                             if (State.activeDevice?.id === dev.id) PropertiesManager.open(dev);
                         } else {
                             this.print('% Invalid IP address or subnet mask');
@@ -1248,16 +1527,19 @@
                             dev.interfaces[dev.selectedIfIndex].adminUp = true;
                             this.print(`%LINK-3-UPDOWN: Interface ${dev.interfaces[dev.selectedIfIndex].name}, changed state to up`);
                             NetworkEngine.drawLinks();
+                            HistoryManager.push();
                         }
                     } else if (base === 'shutdown' || base === 'shut') {
                         if (dev.cliMode === 'if') {
                             dev.interfaces[dev.selectedIfIndex].adminUp = false;
                             this.print(`%LINK-5-CHANGED: Interface ${dev.interfaces[dev.selectedIfIndex].name}, changed state to administratively down`);
                             NetworkEngine.drawLinks();
+                            HistoryManager.push();
                         }
                     } else if (fullCmd.startsWith('ip route') && dev.cliMode === 'config' && dev.typeStr === 'router') {
                         if (Utils.isValidIP(args[2]) && Utils.isValidIP(args[3]) && Utils.isValidIP(args[4])) {
                             dev.staticRoutes.push({ dest: args[2], mask: args[3], nextHop: args[4] });
+                            HistoryManager.push();
                             if (State.activeDevice?.id === dev.id) PropertiesManager.renderStaticRoutes();
                         } else {
                             this.print('% Inconsistent address and mask');
@@ -1265,6 +1547,10 @@
                     } else if (base === 'ping' && dev.typeStr === 'router') {
                         if (args[1]) NetworkEngine.executePing(dev, args[1]);
                         else this.print('% Incomplete command.');
+                    } else if (fullCmd.startsWith('show mac') || fullCmd === 'sh mac') {
+                        this.print(`          Mac Address Table\n-------------------------------------------\nVlan    Mac Address       Type        Ports\n----    -----------       --------    -----`);
+                        if (!dev.macTable || dev.macTable.length === 0) this.print("  (Tabela vazia)");
+                        else dev.macTable.forEach(m => this.print(`   1    ${m.mac}    DYNAMIC     ${m.port}`));
                     } else if (fullCmd.startsWith('show ip ro') || fullCmd === 'sh ip route') {
                         this.print("Codes: L - local, C - connected, S - static\n");
                         let found = false;
@@ -1305,23 +1591,27 @@
         };
 
         // ==========================================
-        // 11. SNIFFER DE TRÁFEGO PDU
+        // 13. SNIFFER DE TRÁFEGO PDU + INSPETOR OSI
         // ==========================================
         const NetworkLogger = {
-            log(src, dest, type, status) {
+            log(src, dest, type, status, osiDetails = null) {
                 const panel = document.getElementById('pdu-panel');
                 panel.classList.remove('hidden');
                 const list = document.getElementById('pdu-list');
                 const placeholder = list.querySelector('.placeholder-text');
                 if (placeholder) placeholder.remove();
                 
+                const logIdx = State.pduLogs.length;
+                State.pduLogs.push({ src, dest, type, status, timestamp: new Date().toLocaleTimeString(), osi: osiDetails });
+
                 let color = status === 'Success'
-                    ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
-                    : 'text-rose-400 bg-rose-500/10 border-rose-500/30';
+                    ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/15'
+                    : (type.includes('DHCP') ? 'text-sky-400 bg-sky-500/10 border-sky-500/30 hover:bg-sky-500/15' : 'text-rose-400 bg-rose-500/10 border-rose-500/30 hover:bg-rose-500/15');
+                
                 let html = `
-                    <div class="border rounded-xl px-3 py-2 flex items-center justify-between shadow-md ${color} animate-slide-up">
+                    <div onclick="NetworkLogger.inspectPDU(${logIdx})" class="cursor-pointer border rounded-xl px-3 py-2 flex items-center justify-between shadow-md ${color} animate-slide-up transition">
                         <div class="flex flex-col gap-0.5">
-                            <span class="font-bold font-mono tracking-tight text-[11.5px]">${type}</span>
+                            <span class="font-bold font-mono tracking-tight text-[11.5px] flex items-center gap-1.5">${type} <i class="ph ph-magnifying-glass text-[10px] opacity-60"></i></span>
                             <span class="text-[10px] text-slate-300 font-mono flex items-center gap-1.5">${src} <i class="ph ph-arrow-right text-slate-500"></i> ${dest}</span>
                         </div>
                         <span class="font-bold text-[9px] uppercase tracking-widest bg-black/60 px-2 py-1 rounded-md border border-white/5">${status}</span>
@@ -1329,15 +1619,86 @@
                 `;
                 list.insertAdjacentHTML('afterbegin', html);
             },
+            inspectPDU(idx) {
+                const item = State.pduLogs[idx];
+                if (!item) return;
+                const osi = item.osi || {
+                    l1: 'Ethernet 802.3 / Fibra Óptica — Sinalização Física Ativa',
+                    l2: `Src MAC: 00:1A:2B:3C:4D:5E | Dst MAC: FF:FF:FF:FF:FF:FF | EtherType: 0x0800`,
+                    l3: `IPv4 Header — Src: ${item.src} -> Dst: ${item.dest} | TTL: 64`,
+                    l4: `${item.type} — Status: ${item.status} (${item.timestamp})`
+                };
+
+                const html = `
+                    <div class="space-y-2.5 font-mono text-xs">
+                        <div class="bg-purple-500/10 border border-purple-500/30 p-3 rounded-xl">
+                            <div class="text-[10px] font-bold text-purple-400 uppercase mb-1">Camada 4 / Aplicação (${item.type})</div>
+                            <div class="text-slate-200">${osi.l4}</div>
+                        </div>
+                        <div class="bg-sky-500/10 border border-sky-500/30 p-3 rounded-xl">
+                            <div class="text-[10px] font-bold text-sky-400 uppercase mb-1">Camada 3 — Rede (IPv4)</div>
+                            <div class="text-slate-200">${osi.l3}</div>
+                        </div>
+                        <div class="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-xl">
+                            <div class="text-[10px] font-bold text-emerald-400 uppercase mb-1">Camada 2 — Enlace (Ethernet II)</div>
+                            <div class="text-slate-200">${osi.l2}</div>
+                        </div>
+                        <div class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-xl">
+                            <div class="text-[10px] font-bold text-amber-400 uppercase mb-1">Camada 1 — Física</div>
+                            <div class="text-slate-200">${osi.l1}</div>
+                        </div>
+                    </div>
+                `;
+                showModal(`Inspetor de Cabeçalhos OSI — ${item.type}`, html, 'info', null, true);
+            },
             clear() {
-                document.getElementById('pdu-list').innerHTML = '<div class="text-slate-500 text-center italic mt-14 font-mono text-[11px] placeholder-text">Aguardando tráfego ICMP/ARP...</div>';
+                State.pduLogs = [];
+                document.getElementById('pdu-list').innerHTML = '<div class="text-slate-500 text-center italic mt-14 font-mono text-[11px] placeholder-text">Aguardando tráfego ICMP/ARP/DHCP...</div>';
             }
         };
 
         // ==========================================
-        // 12. MOTOR DE SIMULAÇÃO DE REDE E RENDERIZAÇÃO
+        // 14. MOTOR DE SIMULAÇÃO DE REDE E RENDERIZAÇÃO
         // ==========================================
         const NetworkEngine = {
+            renderZone(zone) {
+                const el = document.createElement('div');
+                el.className = 'net-zone';
+                el.id = zone.id;
+                el.style.left = zone.x + 'px';
+                el.style.top = zone.y + 'px';
+                el.style.width = zone.w + 'px';
+                el.style.height = zone.h + 'px';
+                el.innerHTML = `<div class="net-zone-title">${zone.title}</div>`;
+
+                el.addEventListener('mousedown', e => {
+                    if (e.button !== 0) return;
+                    e.stopPropagation();
+                    if (State.selectedTool === 'delete') {
+                        State.zones = State.zones.filter(z => z.id !== zone.id);
+                        el.remove();
+                        HistoryManager.push();
+                        Toast.show('Zona removida.', 'info', 1400);
+                    } else if (State.selectedTool === 'pointer') {
+                        const pos = Utils.screenToCanvas(e.clientX, e.clientY);
+                        State.draggingZone = zone;
+                        State.dragOffset = { x: pos.x - zone.x, y: pos.y - zone.y };
+                    }
+                });
+
+                el.addEventListener('dblclick', e => {
+                    e.stopPropagation();
+                    const newTitle = prompt('Nome / Sub-rede da Zona:', zone.title);
+                    if (newTitle && newTitle.trim()) {
+                        zone.title = newTitle.trim();
+                        el.querySelector('.net-zone-title').innerText = zone.title;
+                        HistoryManager.push();
+                    }
+                });
+
+                document.getElementById('zones-layer').appendChild(el);
+            },
+
             renderDevice(dev) {
                 const el = document.createElement('div');
                 el.className = 'device animate-pop-in';
@@ -1346,25 +1707,16 @@
                 el.style.top = dev.y + 'px';
 
                 let primaryIp = dev.interfaces.find(i => i.ip)?.ip || '';
+                let dhcpTag = dev.dhcpServer?.enabled ? `<span class="dhcp-badge" title="Servidor DHCP Ativo">DHCP</span>` : '';
                 el.innerHTML = `
-                    <div class="device-icon-wrapper">${ICONS[dev.typeStr]}</div>
+                    <div class="device-icon-wrapper">${ICONS[dev.typeStr]}${dhcpTag}</div>
                     <div class="device-label">${dev.name}</div>
                     ${dev.isLayer3 && primaryIp ? `<div class="device-ip-label">${primaryIp}</div>` : ''}
                 `;
 
-                // Suporte Mouse & Touch para Arrastar
-                const startDrag = (clientX, clientY) => {
-                    if (State.selectedTool === 'pointer') {
-                        State.draggingDevice = dev;
-                    }
-                };
-
-                el.addEventListener('mousedown', e => {
-                    if (e.button === 0) startDrag(e.clientX, e.clientY);
-                });
-                el.addEventListener('touchstart', e => {
-                    if (e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY);
-                }, { passive: true });
+                const startDrag = () => { if (State.selectedTool === 'pointer') State.draggingDevice = dev; };
+                el.addEventListener('mousedown', e => { if (e.button === 0) startDrag(); });
+                el.addEventListener('touchstart', e => { if (e.touches.length === 1) startDrag(); }, { passive: true });
 
                 el.addEventListener('contextmenu', e => {
                     e.preventDefault();
@@ -1375,6 +1727,7 @@
                 el.addEventListener('click', e => {
                     e.stopPropagation();
                     ContextMenu.hide();
+                    PortPicker.hide();
                     SoundFX.play('click');
                     
                     if (State.selectedTool === 'pointer') {
@@ -1385,20 +1738,24 @@
                         this.deleteDevice(dev);
                     } else if (State.selectedTool === 'cable') {
                         if (!State.cableSourceDevice) {
-                            State.cableSourceDevice = dev;
-                            el.classList.add('cable-src');
-                            const drawingSvg = document.getElementById('drawing-cable');
-                            drawingSvg.classList.remove('hidden');
-                            document.getElementById('drawing-line').setAttribute('d', Utils.calculateGravityCurve(dev.x, dev.y, dev.x, dev.y));
-                            ToolManager.updateStatus(`Conectando ${dev.name} -> Selecione destino`, 'bg-amber-500 animate-pulse');
-                        } else {
-                            if (State.cableSourceDevice.id !== dev.id) {
-                                this.createLink(State.cableSourceDevice, dev, State.selectedCableType);
-                            }
-                            document.getElementById(State.cableSourceDevice.id)?.classList.remove('cable-src');
-                            State.cableSourceDevice = null;
-                            document.getElementById('drawing-cable').classList.add('hidden');
-                            ToolManager.set('pointer');
+                            PortPicker.show(e.clientX, e.clientY, dev, (portIdx) => {
+                                State.cableSourceDevice = dev;
+                                State.cableSourcePortIdx = portIdx;
+                                el.classList.add('cable-src');
+                                const drawingSvg = document.getElementById('drawing-cable');
+                                drawingSvg.classList.remove('hidden');
+                                document.getElementById('drawing-line').setAttribute('d', Utils.calculateGravityCurve(dev.x, dev.y, dev.x, dev.y));
+                                ToolManager.updateStatus(`${dev.name} [${dev.interfaces[portIdx].name}] -> Escolha destino`, 'bg-amber-500 animate-pulse');
+                            });
+                        } else if (State.cableSourceDevice.id !== dev.id) {
+                            PortPicker.show(e.clientX, e.clientY, dev, (targetPortIdx) => {
+                                this.createLink(State.cableSourceDevice, dev, State.selectedCableType, State.cableSourcePortIdx, targetPortIdx);
+                                document.getElementById(State.cableSourceDevice.id)?.classList.remove('cable-src');
+                                State.cableSourceDevice = null;
+                                State.cableSourcePortIdx = null;
+                                document.getElementById('drawing-cable').classList.add('hidden');
+                                ToolManager.set('pointer');
+                            });
                         }
                     } else if (State.selectedTool === 'ping') {
                         if (!State.pingSourceDevice) {
@@ -1437,6 +1794,15 @@
                 const el = document.getElementById(dev.id);
                 if (!el) return;
                 el.querySelector('.device-label').innerText = dev.name;
+                
+                const wrapper = el.querySelector('.device-icon-wrapper');
+                const existingBadge = wrapper.querySelector('.dhcp-badge');
+                if (dev.dhcpServer?.enabled && !existingBadge) {
+                    wrapper.insertAdjacentHTML('beforeend', `<span class="dhcp-badge" title="Servidor DHCP Ativo">DHCP</span>`);
+                } else if (!dev.dhcpServer?.enabled && existingBadge) {
+                    existingBadge.remove();
+                }
+
                 let primaryIp = dev.interfaces.find(i => i.ip)?.ip || '';
                 let ipLabel = el.querySelector('.device-ip-label');
                 if (primaryIp) {
@@ -1452,16 +1818,16 @@
                 }
             },
 
-            createLink(dev1, dev2, type = 'auto') {
+            createLink(dev1, dev2, type = 'auto', forcedIdx1 = null, forcedIdx2 = null) {
                 if (State.links.some(l => (l.sourceId === dev1.id && l.targetId === dev2.id) || (l.sourceId === dev2.id && l.targetId === dev1.id))) {
                     return Toast.show('Já existe um enlace físico entre esses dispositivos.', 'warning');
                 }
                 
-                const idx1 = dev1.interfaces.findIndex(i => !i.connectedTo);
-                const idx2 = dev2.interfaces.findIndex(i => !i.connectedTo);
+                const idx1 = forcedIdx1 !== null ? forcedIdx1 : dev1.interfaces.findIndex(i => !i.connectedTo);
+                const idx2 = forcedIdx2 !== null ? forcedIdx2 : dev2.interfaces.findIndex(i => !i.connectedTo);
                 
-                if (idx1 === -1) return Toast.show(`${dev1.name} não possui portas livres.`, 'error');
-                if (idx2 === -1) return Toast.show(`${dev2.name} não possui portas livres.`, 'error');
+                if (idx1 === -1 || dev1.interfaces[idx1].connectedTo) return Toast.show(`${dev1.name} não possui esta porta livre.`, 'error');
+                if (idx2 === -1 || dev2.interfaces[idx2].connectedTo) return Toast.show(`${dev2.name} não possui esta porta livre.`, 'error');
 
                 const linkId = 'link_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
                 
@@ -1471,6 +1837,7 @@
                 State.links.push({ id: linkId, sourceId: dev1.id, srcIntf: idx1, targetId: dev2.id, tgtIntf: idx2, type: type });
                 SoundFX.play('connect');
                 this.drawLinks();
+                HistoryManager.push();
                 if (State.activeDevice) PropertiesManager.renderPortsSummary();
             },
 
@@ -1506,6 +1873,7 @@
                             State.links = State.links.filter(lk => lk.id !== l.id);
                             SoundFX.play('click');
                             this.drawLinks();
+                            HistoryManager.push();
                             Toast.show('Enlace removido.', 'info', 1500);
                             if (State.activeDevice) PropertiesManager.renderPortsSummary();
                         }
@@ -1514,8 +1882,6 @@
                     group.appendChild(line);
                     group.appendChild(hitArea);
 
-                    // Cálculo preciso dos pontos na curva quadrática para LEDs e Labels
-                    const pathLen = line.getTotalLength ? 0 : 0;
                     const px1 = s.x + (t.x - s.x) * 0.16;
                     const py1 = s.y + (t.y - s.y) * 0.16 + 10;
                     const px2 = t.x + (s.x - t.x) * 0.16;
@@ -1570,6 +1936,7 @@
                 });
                 SoundFX.play('click');
                 this.drawLinks();
+                HistoryManager.push();
                 ToolManager.set('pointer');
             },
 
@@ -1586,9 +1953,20 @@
             getPhysicalNeighbors(deviceId) {
                 const links = this.getActiveLinksForDevice(deviceId);
                 return links.map(l => {
-                    const neighborId = l.sourceId === deviceId ? l.targetId : l.sourceId;
-                    return State.devices.find(d => d.id === neighborId);
-                }).filter(Boolean);
+                    const isSrc = l.sourceId === deviceId;
+                    const neighborId = isSrc ? l.targetId : l.sourceId;
+                    const neighbor = State.devices.find(d => d.id === neighborId);
+                    const neighborPort = neighbor ? neighbor.interfaces[isSrc ? l.tgtIntf : l.srcIntf].name : '';
+                    return { dev: neighbor, neighborPort };
+                }).filter(x => x.dev);
+            },
+
+            learnMacOnSwitch(sw, mac, portName) {
+                if (!sw || sw.typeStr !== 'switch' || !mac) return;
+                if (!sw.macTable) sw.macTable = [];
+                const existing = sw.macTable.find(e => e.mac === mac);
+                if (existing) existing.port = portName;
+                else sw.macTable.push({ mac, port: portName });
             },
 
             findLayer2Path(startDev, targetDev) {
@@ -1596,9 +1974,21 @@
                 let visited = new Set([startDev.id]);
                 while (q.length > 0) {
                     let { dev, path } = q.shift();
-                    if (dev.id === targetDev.id) return path;
+                    if (dev.id === targetDev.id) {
+                        // Aprende MACs nos Switches ao longo do caminho
+                        for (let i = 0; i < path.length - 1; i++) {
+                            if (path[i + 1].typeStr === 'switch') {
+                                const link = State.links.find(l => (l.sourceId === path[i].id && l.targetId === path[i+1].id) || (l.sourceId === path[i+1].id && l.targetId === path[i].id));
+                                if (link) {
+                                    const swPort = link.sourceId === path[i+1].id ? path[i+1].interfaces[link.srcIntf].name : path[i+1].interfaces[link.tgtIntf].name;
+                                    this.learnMacOnSwitch(path[i+1], startDev.interfaces[0].mac, swPort);
+                                }
+                            }
+                        }
+                        return path;
+                    }
                     if (dev.typeStr === 'switch' || dev.id === startDev.id) {
-                        this.getPhysicalNeighbors(dev.id).forEach(n => {
+                        this.getPhysicalNeighbors(dev.id).forEach(({ dev: n }) => {
                             if (!visited.has(n.id)) {
                                 visited.add(n.id);
                                 q.push({ dev: n, path: [...path, n] });
@@ -1613,7 +2003,67 @@
                 return State.devices.find(d => d.interfaces.some(i => i.ip === ip && i.adminUp !== false));
             },
 
-            // Motor de Roteamento Multi-Hop (L2 + L3 + Static Routes + Cloud)
+            // Descoberta DHCP no domínio de broadcast L2
+            async executeDHCP(clientDev) {
+                if (!['pc', 'laptop', 'server'].includes(clientDev.typeStr)) {
+                    return Toast.show('DHCP client disponível apenas em Hosts finais.', 'warning');
+                }
+                if (State.activeDevice?.id === clientDev.id) CLIManager.print('\nDHCPDISCOVER on eth0 to 255.255.255.255 port 67...');
+                
+                // Busca servidores DHCP no domínio L2
+                const dhcpServers = State.devices.filter(d => d.dhcpServer?.enabled);
+                let foundServer = null, path = null;
+
+                for (const srv of dhcpServers) {
+                    const p = this.findLayer2Path(clientDev, srv);
+                    if (p) { foundServer = srv; path = p; break; }
+                }
+
+                if (!foundServer) {
+                    if (State.activeDevice?.id === clientDev.id) CLIManager.print('No DHCPOFFERS received.\n');
+                    NetworkLogger.log(clientDev.name, '255.255.255.255', 'DHCP Discover', 'Timeout');
+                    SoundFX.play('ping_err');
+                    return Toast.show('Nenhum servidor DHCP encontrado na rede local.', 'error');
+                }
+
+                await this.animatePacketSVG(path, false, 'dhcp');
+
+                // Aloca próximo IP disponível
+                const clientMac = clientDev.interfaces[0].mac;
+                let assignedIp = foundServer.dhcpServer.leases[clientMac];
+                if (!assignedIp) {
+                    let candidateLong = Utils.ipToLong(foundServer.dhcpServer.startIp);
+                    const usedIps = new Set([
+                        ...Object.values(foundServer.dhcpServer.leases),
+                        ...State.devices.flatMap(d => d.interfaces.map(i => i.ip))
+                    ]);
+                    while (usedIps.has(Utils.longToIp(candidateLong))) candidateLong++;
+                    assignedIp = Utils.longToIp(candidateLong);
+                    foundServer.dhcpServer.leases[clientMac] = assignedIp;
+                }
+
+                clientDev.interfaces[0].ip = assignedIp;
+                clientDev.interfaces[0].mask = foundServer.dhcpServer.mask;
+                clientDev.gateway = foundServer.dhcpServer.gateway;
+
+                this.updateDeviceDOM(clientDev);
+                this.drawLinks();
+                HistoryManager.push();
+                SoundFX.play('ping_ok');
+
+                if (State.activeDevice?.id === clientDev.id) {
+                    CLIManager.print(`DHCPOFFER from ${foundServer.name} (${foundServer.interfaces.find(i=>i.ip)?.ip || 'Server'})`);
+                    CLIManager.print(`DHCPACK: bound to ${assignedIp} / ${foundServer.dhcpServer.mask} (GW: ${foundServer.dhcpServer.gateway})\n`);
+                }
+                NetworkLogger.log(foundServer.name, clientDev.name, 'DHCP ACK', 'Success', {
+                    l1: 'Ethernet 802.3 — Link Ativo',
+                    l2: `Src MAC: ${foundServer.interfaces[0].mac} -> Dst MAC: ${clientMac}`,
+                    l3: `IPv4 Offer: ${assignedIp} | Mask: ${foundServer.dhcpServer.mask} | GW: ${foundServer.dhcpServer.gateway}`,
+                    l4: 'UDP Src Port: 67 (BOOTPS) -> Dst Port: 68 (BOOTPC)'
+                });
+                Toast.show(`DHCP: ${clientDev.name} recebeu IP ${assignedIp}`, 'success');
+            },
+
             traceRouteLogic(srcDevice, targetIp) {
                 if (!Utils.isValidIP(targetIp)) {
                     return { success: false, error: `Invalid IP address: ${targetIp}`, path: [srcDevice], hops: [] };
@@ -1633,7 +2083,6 @@
                 let currentL3 = srcDevice;
 
                 for (let ttl = 0; ttl < 12; ttl++) {
-                    // 1. Verifica se o destino está diretamente conectado em alguma sub-rede de currentL3
                     const matchingIntf = currentL3.interfaces.find(i =>
                         i.ip && i.mask && i.adminUp !== false && Utils.isSameSubnet(i.ip, i.mask, targetIp, i.mask)
                     );
@@ -1643,7 +2092,6 @@
                         if (l2Segment) {
                             fullPath = fullPath.concat(l2Segment.slice(1));
                             hops.push(targetDev);
-                            // Popula ARP
                             const targetIntf = targetDev.interfaces.find(i => i.ip === targetIp);
                             if (targetIntf) currentL3.arpTable[targetIp] = targetIntf.mac;
                             return { success: true, path: fullPath, hops };
@@ -1652,17 +2100,14 @@
                         }
                     }
 
-                    // 2. Caso contrário, precisa encaminhar para um próximo salto (Gateway ou Rota Estática)
                     let nextHopIp = null;
                     if (['pc', 'laptop', 'server'].includes(currentL3.typeStr)) {
                         nextHopIp = currentL3.gateway;
                         if (!nextHopIp) return { success: false, error: "Network is unreachable (No Default Gateway).", path: fullPath, hops };
                     } else if (currentL3.typeStr === 'router') {
-                        // Procura rota estática
                         const route = currentL3.staticRoutes.find(r => Utils.ipMatchesNetwork(targetIp, r.dest, r.mask));
                         if (route) nextHopIp = route.nextHop;
                         else {
-                            // Tenta rota padrão 0.0.0.0
                             const defRoute = currentL3.staticRoutes.find(r => r.dest === '0.0.0.0');
                             if (defRoute) nextHopIp = defRoute.nextHop;
                         }
@@ -1706,9 +2151,11 @@
 
                 let result = this.traceRouteLogic(source, targetIp);
                 let successes = 0;
+                const targetDev = this.findTargetDeviceByIp(targetIp);
+                const dstMac = targetDev ? (targetDev.interfaces.find(i=>i.ip===targetIp)?.mac || '00:00:00:00:00:00') : 'FF:FF:FF:FF:FF:FF';
 
                 for (let i = 0; i < 4; i++) {
-                    await new Promise(r => setTimeout(r, 380));
+                    await new Promise(r => setTimeout(r, 340 / SimMode.speedMultiplier));
                     if (result.success) {
                         await this.animatePacketSVG(result.path, false);
                         let time = Math.floor(Math.random() * 12) + (result.hops.length * 2);
@@ -1716,14 +2163,24 @@
                         successes++;
                         this.flashDevice(result.path[result.path.length - 1].id, 'rgba(16, 185, 129, 1)');
                         if (i === 0) {
-                            NetworkLogger.log(source.name, targetIp, 'ICMP Echo', 'Success');
+                            NetworkLogger.log(source.name, targetIp, 'ICMP Echo', 'Success', {
+                                l1: `Meio Físico Verificado (${result.path.length - 1} enlaces ativos)`,
+                                l2: `Src MAC: ${srcIntf.mac} -> Next-Hop/Dst MAC: ${dstMac} | EtherType: 0x0800`,
+                                l3: `Src IP: ${srcIntf.ip} -> Dst IP: ${targetIp} | TTL: ${64 - result.hops.length} | Proto: 1 (ICMP)`,
+                                l4: `ICMP Type 8 (Echo Request) / Type 0 (Echo Reply) — RTT: ${time}ms`
+                            });
                             SoundFX.play('ping_ok');
                         }
                     } else {
                         await this.animatePacketSVG(result.path || [source], true);
                         CLIManager.print(`From ${srcIntf.ip} icmp_seq=${i + 1} ${result.error}`);
                         if (i === 0) {
-                            NetworkLogger.log(source.name, targetIp, 'ICMP Drop', 'Dropped');
+                            NetworkLogger.log(source.name, targetIp, 'ICMP Drop', 'Dropped', {
+                                l1: 'Transmissão iniciada na interface física',
+                                l2: `Src MAC: ${srcIntf.mac} -> ARP Unresolved / Gateway Drop`,
+                                l3: `Src IP: ${srcIntf.ip} -> Dst IP: ${targetIp} | Falha: ${result.error}`,
+                                l4: 'ICMP Destination Unreachable (Type 3)'
+                            });
                             SoundFX.play('ping_err');
                         }
                     }
@@ -1739,7 +2196,7 @@
                     return;
                 }
                 for (let idx = 0; idx < result.hops.length; idx++) {
-                    await new Promise(r => setTimeout(r, 320));
+                    await new Promise(r => setTimeout(r, 300 / SimMode.speedMultiplier));
                     const hopDev = result.hops[idx];
                     const hopIp = hopDev.interfaces.find(i => i.ip)?.ip || hopDev.name;
                     const t1 = Math.floor(Math.random() * 6) + (idx + 1) * 3;
@@ -1748,9 +2205,7 @@
                     CLIManager.print(` ${idx + 1}  ${hopDev.name} (${hopIp})  ${t1} ms  ${t2} ms  ${t3} ms`);
                     this.flashDevice(hopDev.id, 'rgba(56, 189, 248, 0.9)');
                 }
-                if (!result.success) {
-                    CLIManager.print(` ${result.hops.length + 1}  * * * (${result.error})`);
-                }
+                if (!result.success) CLIManager.print(` ${result.hops.length + 1}  * * * (${result.error})`);
                 CLIManager.print('');
             },
 
@@ -1764,20 +2219,20 @@
                 }
             },
 
-            animatePacketSVG(pathNodes, isError = false) {
+            animatePacketSVG(pathNodes, isError = false, customClass = '') {
                 return new Promise(resolve => {
                     if (!pathNodes || pathNodes.length < 1) { resolve(); return; }
                     
                     const pktLayer = document.getElementById('packets-layer');
                     const pkt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     pkt.setAttribute('r', 6.5);
-                    pkt.setAttribute('class', `svg-packet ${isError ? 'error' : ''}`);
+                    pkt.setAttribute('class', `svg-packet ${isError ? 'error' : customClass}`);
                     pktLayer.appendChild(pkt);
 
                     if (pathNodes.length === 1) {
                         pkt.setAttribute('cx', pathNodes[0].x);
                         pkt.setAttribute('cy', pathNodes[0].y);
-                        setTimeout(() => { pkt.remove(); resolve(); }, 350);
+                        setTimeout(() => { pkt.remove(); resolve(); }, 350 / SimMode.speedMultiplier);
                         return;
                     }
 
@@ -1794,12 +2249,12 @@
                         }
                     }
 
-                    const durationPerLink = 320;
+                    const durationPerLink = 320 / SimMode.speedMultiplier;
                     
                     const animateFlow = (segs, isReturn) => {
                         return new Promise(res => {
                             if (segs.length === 0) { res(); return; }
-                            if (isReturn) pkt.setAttribute('class', 'svg-packet return');
+                            if (isReturn && !customClass) pkt.setAttribute('class', 'svg-packet return');
 
                             let currentSegIdx = 0, start = null;
                             const step = (timestamp) => {
@@ -1839,7 +2294,7 @@
         };
 
         // ==========================================
-        // 13. MENU DE CONTEXTO
+        // 15. MENU DE CONTEXTO
         // ==========================================
         const ContextMenu = {
             show(x, y, dev) {
@@ -1847,8 +2302,7 @@
                 const menu = document.getElementById('context-menu');
                 document.getElementById('ctx-header').innerHTML = `<span>${dev.name}</span><span class="text-[9px] text-sky-400 font-mono">${dev.typeStr.toUpperCase()}</span>`;
                 
-                // Ajusta posição para não sair da tela
-                const menuW = 195, menuH = 195;
+                const menuW = 215, menuH = 230;
                 const safeX = Math.min(x, window.innerWidth - menuW);
                 const safeY = Math.min(y, window.innerHeight - menuH);
                 menu.style.left = safeX + 'px';
@@ -1859,14 +2313,18 @@
                 document.getElementById('ctx-btn-cli').onclick = () => { PropertiesManager.open(dev); PropertiesManager.switchTab('cli'); this.hide(); };
                 document.getElementById('ctx-btn-cable').onclick = () => {
                     ToolManager.set('cable', 'auto');
-                    State.cableSourceDevice = dev;
-                    document.getElementById(dev.id)?.classList.add('cable-src');
-                    document.getElementById('drawing-cable').classList.remove('hidden');
-                    document.getElementById('drawing-line').setAttribute('d', Utils.calculateGravityCurve(dev.x, dev.y, dev.x, dev.y));
+                    PortPicker.show(safeX, safeY, dev, (portIdx) => {
+                        State.cableSourceDevice = dev;
+                        State.cableSourcePortIdx = portIdx;
+                        document.getElementById(dev.id)?.classList.add('cable-src');
+                        document.getElementById('drawing-cable').classList.remove('hidden');
+                        document.getElementById('drawing-line').setAttribute('d', Utils.calculateGravityCurve(dev.x, dev.y, dev.x, dev.y));
+                    });
                     this.hide();
                 };
                 
                 const pingBtn = document.getElementById('ctx-btn-ping');
+                const dhcpBtn = document.getElementById('ctx-btn-dhcp');
                 if (dev.isLayer3) {
                     pingBtn.style.display = 'flex';
                     pingBtn.onclick = () => {
@@ -1879,6 +2337,16 @@
                     pingBtn.style.display = 'none';
                 }
 
+                if (['pc', 'laptop', 'server'].includes(dev.typeStr)) {
+                    dhcpBtn.style.display = 'flex';
+                    dhcpBtn.onclick = () => {
+                        this.hide();
+                        NetworkEngine.executeDHCP(dev);
+                    };
+                } else {
+                    dhcpBtn.style.display = 'none';
+                }
+
                 document.getElementById('ctx-btn-delete').onclick = () => { NetworkEngine.deleteDevice(dev); this.hide(); };
             },
             hide() {
@@ -1888,26 +2356,34 @@
         };
 
         // ==========================================
-        // 14. PERSISTÊNCIA, EXPORTAÇÃO E PRESETS
+        // 16. PERSISTÊNCIA, EXPORTAÇÃO E PRESETS
         // ==========================================
         const TopologyManager = {
             serialize() {
                 return JSON.stringify({
-                    version: '2.0',
+                    version: '3.0',
                     devices: State.devices,
                     links: State.links,
+                    zones: State.zones,
                     deviceCounter: State.deviceCounter
                 }, null, 2);
             },
-            restoreFromObject(data) {
+            restoreFromObject(data, recordHistory = true) {
                 document.getElementById('devices-layer').innerHTML = '';
                 document.getElementById('cables-layer').innerHTML = '';
+                document.getElementById('zones-layer').innerHTML = '';
                 State.devices = [];
                 State.links = [];
+                State.zones = [];
                 PropertiesManager.close();
                 NetworkLogger.clear();
 
                 State.deviceCounter = data.deviceCounter || 1;
+                (data.zones || []).forEach(z => {
+                    State.zones.push(z);
+                    NetworkEngine.renderZone(z);
+                });
+
                 data.devices.forEach(d => {
                     let newDev;
                     if (['pc', 'laptop', 'server'].includes(d.typeStr)) newDev = new EndDevice(d.typeStr, 'x', d.x, d.y);
@@ -1917,6 +2393,8 @@
                     Object.assign(newDev, d);
                     if (!newDev.staticRoutes) newDev.staticRoutes = [];
                     if (!newDev.arpTable) newDev.arpTable = {};
+                    if (!newDev.macTable) newDev.macTable = [];
+                    if (!newDev.dhcpServer) newDev.dhcpServer = { enabled: false, startIp: '', mask: '255.255.255.0', gateway: '', leases: {} };
                     State.cliHistoryBuffer[newDev.id] = { cmds: [], index: -1 };
                     State.devices.push(newDev);
                     NetworkEngine.renderDevice(newDev);
@@ -1924,17 +2402,18 @@
                 });
                 data.links.forEach(l => State.links.push(l));
                 NetworkEngine.drawLinks();
+                if (recordHistory) HistoryManager.push();
             },
             save() {
-                localStorage.setItem('wpt_switchlab_ultra_v2', this.serialize());
+                localStorage.setItem('wpt_switchlab_enterprise_v3', this.serialize());
                 Toast.show('Topologia salva no armazenamento local.', 'success');
             },
             load() {
-                const dataStr = localStorage.getItem('wpt_switchlab_ultra_v2');
+                const dataStr = localStorage.getItem('wpt_switchlab_enterprise_v3');
                 if (!dataStr) return Toast.show('Nenhuma topologia salva encontrada.', 'warning');
                 showModal('Carregar Topologia', 'Isso substituirá a topologia atual na tela. Deseja continuar?', 'confirm', () => {
                     try {
-                        this.restoreFromObject(JSON.parse(dataStr));
+                        this.restoreFromObject(JSON.parse(dataStr), true);
                         Toast.show('Topologia restaurada com sucesso.', 'success');
                     } catch (e) {
                         Toast.show('Falha ao ler dados salvos.', 'error');
@@ -1946,7 +2425,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `switchlab-topologia-${new Date().toISOString().slice(0, 10)}.json`;
+                a.download = `switchlab-enterprise-${new Date().toISOString().slice(0, 10)}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
                 Toast.show('Arquivo JSON exportado.', 'success');
@@ -1959,7 +2438,7 @@
                     try {
                         const data = JSON.parse(e.target.result);
                         if (!data.devices || !data.links) throw new Error('Formato inválido');
-                        this.restoreFromObject(data);
+                        this.restoreFromObject(data, true);
                         Toast.show(`Topologia "${file.name}" importada!`, 'success');
                     } catch (err) {
                         Toast.show('Arquivo JSON inválido ou corrompido.', 'error');
@@ -1972,8 +2451,10 @@
                 ViewportManager.reset();
                 document.getElementById('devices-layer').innerHTML = '';
                 document.getElementById('cables-layer').innerHTML = '';
+                document.getElementById('zones-layer').innerHTML = '';
                 State.devices = [];
                 State.links = [];
+                State.zones = [];
                 State.deviceCounter = 1;
                 PropertiesManager.close();
                 NetworkLogger.clear();
@@ -1983,6 +2464,9 @@
                 const cx = baseW / 2;
 
                 if (presetKey === 'default') {
+                    const z1 = { id: 'zone_1', title: 'LAN Corporativa — 192.168.1.0/24', x: cx - 30, y: baseH * 0.36, w: 410, h: baseH * 0.52 };
+                    State.zones.push(z1); NetworkEngine.renderZone(z1);
+
                     let cld = new Cloud('cloud', 'WAN-Internet', cx - 220, baseH * 0.24);
                     let r1 = new Router('router', 'R1-Core', cx, baseH * 0.24);
                     r1.interfaces[0].ip = '8.8.8.1'; r1.interfaces[0].mask = '255.255.255.0';
@@ -1996,11 +2480,15 @@
                     srv.interfaces[0].ip = '192.168.1.100'; srv.gateway = '192.168.1.1';
 
                     [cld, r1, sw1, pc1, srv].forEach(d => { State.devices.push(d); NetworkEngine.renderDevice(d); NetworkEngine.updateDeviceDOM(d); });
-                    NetworkEngine.createLink(cld, r1, 'fiber');
-                    NetworkEngine.createLink(r1, sw1, 'straight');
-                    NetworkEngine.createLink(sw1, pc1, 'straight');
-                    NetworkEngine.createLink(sw1, srv, 'straight');
+                    NetworkEngine.createLink(cld, r1, 'fiber', 0, 0);
+                    NetworkEngine.createLink(r1, sw1, 'straight', 1, 0);
+                    NetworkEngine.createLink(sw1, pc1, 'straight', 1, 0);
+                    NetworkEngine.createLink(sw1, srv, 'straight', 2, 0);
                 } else if (presetKey === 'dual_lan') {
+                    const zA = { id: 'zone_a', title: 'VLAN 10 — 192.168.10.0/24', x: cx - 310, y: baseH * 0.40, w: 240, h: baseH * 0.50 };
+                    const zB = { id: 'zone_b', title: 'VLAN 20 — 192.168.20.0/24', x: cx + 70, y: baseH * 0.40, w: 240, h: baseH * 0.50 };
+                    [zA, zB].forEach(z => { State.zones.push(z); NetworkEngine.renderZone(z); });
+
                     let r1 = new Router('router', 'R-Gateway', cx, baseH * 0.25);
                     r1.interfaces[0].ip = '192.168.10.1'; r1.interfaces[0].mask = '255.255.255.0';
                     r1.interfaces[1].ip = '192.168.20.1'; r1.interfaces[1].mask = '255.255.255.0';
@@ -2015,10 +2503,10 @@
                     srvB.interfaces[0].ip = '192.168.20.50'; srvB.gateway = '192.168.20.1';
 
                     [r1, swA, swB, pcA, srvB].forEach(d => { State.devices.push(d); NetworkEngine.renderDevice(d); NetworkEngine.updateDeviceDOM(d); });
-                    NetworkEngine.createLink(r1, swA, 'straight');
-                    NetworkEngine.createLink(r1, swB, 'straight');
-                    NetworkEngine.createLink(swA, pcA, 'straight');
-                    NetworkEngine.createLink(swB, srvB, 'straight');
+                    NetworkEngine.createLink(r1, swA, 'straight', 0, 0);
+                    NetworkEngine.createLink(r1, swB, 'straight', 1, 0);
+                    NetworkEngine.createLink(swA, pcA, 'straight', 1, 0);
+                    NetworkEngine.createLink(swB, srvB, 'straight', 1, 0);
                 } else if (presetKey === 'mesh_wan') {
                     let r1 = new Router('router', 'R-SP', cx - 160, baseH * 0.28);
                     r1.interfaces[0].ip = '10.0.12.1'; r1.interfaces[0].mask = '255.255.255.252';
@@ -2037,21 +2525,40 @@
                     srv2.interfaces[0].ip = '172.16.2.20'; srv2.gateway = '172.16.2.1';
 
                     [r1, r2, pc1, srv2].forEach(d => { State.devices.push(d); NetworkEngine.renderDevice(d); NetworkEngine.updateDeviceDOM(d); });
-                    NetworkEngine.createLink(r1, r2, 'fiber');
-                    NetworkEngine.createLink(r1, pc1, 'cross');
-                    NetworkEngine.createLink(r2, srv2, 'cross');
+                    NetworkEngine.createLink(r1, r2, 'fiber', 0, 0);
+                    NetworkEngine.createLink(r1, pc1, 'cross', 1, 0);
+                    NetworkEngine.createLink(r2, srv2, 'cross', 1, 0);
+                } else if (presetKey === 'dhcp_lab') {
+                    let r1 = new Router('router', 'R-DHCP', cx, baseH * 0.22);
+                    r1.interfaces[0].ip = '10.10.0.1'; r1.interfaces[0].mask = '255.255.255.0';
+                    r1.dhcpServer = { enabled: true, startIp: '10.10.0.100', mask: '255.255.255.0', gateway: '10.10.0.1', leases: {} };
+
+                    let sw = new Switch('switch', 'SW-Access', cx, baseH * 0.50);
+                    let pc1 = new EndDevice('pc', 'Estacao-1', cx - 150, baseH * 0.78);
+                    let pc2 = new EndDevice('laptop', 'Estacao-2', cx + 150, baseH * 0.78);
+
+                    [r1, sw, pc1, pc2].forEach(d => { State.devices.push(d); NetworkEngine.renderDevice(d); NetworkEngine.updateDeviceDOM(d); });
+                    NetworkEngine.createLink(r1, sw, 'straight', 0, 0);
+                    NetworkEngine.createLink(sw, pc1, 'straight', 1, 0);
+                    NetworkEngine.createLink(sw, pc2, 'straight', 2, 0);
+                    Toast.show('Clique direito nos PCs -> "Solicitar IP (DHCP)" para testar!', 'info', 4000);
                 }
+                HistoryManager.undoStack = [];
+                HistoryManager.redoStack = [];
+                HistoryManager.push();
             }
         };
 
         // ==========================================
-        // 15. MODAIS E EVENTOS GLOBAIS
+        // 17. MODAIS E EVENTOS GLOBAIS
         // ==========================================
-        function showModal(title, message, type = 'info', onConfirm = null) {
+        function showModal(title, message, type = 'info', onConfirm = null, isHtml = false) {
             const modal = document.getElementById('custom-modal');
             const content = document.getElementById('custom-modal-content');
             document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-message').innerText = message;
+            const msgEl = document.getElementById('modal-message');
+            if (isHtml) msgEl.innerHTML = message;
+            else msgEl.innerText = message;
             const actions = document.getElementById('modal-actions');
 
             if (type === 'confirm') {
@@ -2061,7 +2568,7 @@
                 `;
                 document.getElementById('modal-confirm-btn').onclick = () => { if (onConfirm) onConfirm(); closeModal(); };
             } else {
-                actions.innerHTML = `<button onclick="closeModal()" class="px-6 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition outline-none">Entendi</button>`;
+                actions.innerHTML = `<button onclick="closeModal()" class="px-6 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition outline-none">Fechar</button>`;
             }
 
             modal.classList.remove('hidden');
@@ -2079,14 +2586,17 @@
         }
 
         function promptClearWorkspace() {
-            showModal('Limpar Matriz de Rede', 'Todos os dispositivos e enlaces ativos serão removidos. Continuar?', 'confirm', () => {
+            showModal('Limpar Matriz de Rede', 'Todos os dispositivos, zonas e enlaces ativos serão removidos. Continuar?', 'confirm', () => {
                 document.getElementById('devices-layer').innerHTML = '';
                 document.getElementById('cables-layer').innerHTML = '';
+                document.getElementById('zones-layer').innerHTML = '';
                 State.devices = [];
                 State.links = [];
+                State.zones = [];
                 State.deviceCounter = 1;
                 PropertiesManager.close();
                 NetworkLogger.clear();
+                HistoryManager.push();
                 Toast.show('Área de trabalho limpa.', 'info');
             });
         }
@@ -2096,14 +2606,18 @@
             if (e.target.tagName === 'INPUT' && e.target.id !== 'cli-input') return;
             if (e.target.id === 'cli-input') return CLIManager.handleInput(e);
 
-            if (e.key === 'Escape') { ToolManager.set('pointer'); PropertiesManager.close(); ContextMenu.hide(); }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); HistoryManager.undo(); return; }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); HistoryManager.redo(); return; }
+
+            if (e.key === 'Escape') { ToolManager.set('pointer'); PropertiesManager.close(); ContextMenu.hide(); PortPicker.hide(); }
             if ((e.key === 'Delete' || e.key === 'Backspace') && document.activeElement.tagName !== 'INPUT') ToolManager.set('delete');
             if (e.key.toLowerCase() === 'c' && document.activeElement.tagName !== 'INPUT') ToolManager.set('cable');
             if (e.key.toLowerCase() === 'p' && document.activeElement.tagName !== 'INPUT') ToolManager.set('ping');
+            if (e.key.toLowerCase() === 'z' && document.activeElement.tagName !== 'INPUT') ToolManager.set('zone');
             if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); ToolManager.set('pan'); }
         });
 
-        // Interação com o Workspace (Clique, Pan, Drag, Zoom)
+        // Interação com o Workspace
         const workspaceEl = document.getElementById('workspace');
 
         workspaceEl.addEventListener('wheel', e => {
@@ -2123,7 +2637,26 @@
 
         workspaceEl.addEventListener('click', e => {
             ContextMenu.hide();
+            PortPicker.hide();
             if (e.target.closest('.device') || e.target.closest('.link-group')) return;
+
+            if (State.selectedTool === 'zone') {
+                let { x, y } = Utils.screenToCanvas(e.clientX, e.clientY);
+                const newZone = {
+                    id: 'zone_' + Date.now(),
+                    title: 'Sub-rede 192.168.X.0/24 (Duplo clique p/ editar)',
+                    x: Math.max(20, x - 140),
+                    y: Math.max(20, y - 100),
+                    w: 280,
+                    h: 200
+                };
+                State.zones.push(newZone);
+                NetworkEngine.renderZone(newZone);
+                HistoryManager.push();
+                SoundFX.play('click');
+                ToolManager.set('pointer');
+                return;
+            }
 
             if (State.itemToPlace) {
                 let { x, y } = Utils.screenToCanvas(e.clientX, e.clientY);
@@ -2141,6 +2674,7 @@
                 if (newDev) {
                     State.devices.push(newDev);
                     NetworkEngine.renderDevice(newDev);
+                    HistoryManager.push();
                     SoundFX.play('click');
                 }
                 ToolManager.set('pointer');
@@ -2150,6 +2684,7 @@
             } else if (State.selectedTool === 'cable' && State.cableSourceDevice) {
                 document.getElementById(State.cableSourceDevice.id)?.classList.remove('cable-src');
                 State.cableSourceDevice = null;
+                State.cableSourcePortIdx = null;
                 document.getElementById('drawing-cable').classList.add('hidden');
             } else if (State.selectedTool === 'ping' && State.pingSourceDevice) {
                 State.pingSourceDevice = null;
@@ -2166,6 +2701,19 @@
             }
 
             let { x: mx, y: my } = Utils.screenToCanvas(clientX, clientY);
+
+            if (State.draggingZone && State.selectedTool === 'pointer') {
+                let zx = mx - State.dragOffset.x;
+                let zy = my - State.dragOffset.y;
+                if (State.viewport.snap) {
+                    zx = Math.round(zx / 40) * 40;
+                    zy = Math.round(zy / 40) * 40;
+                }
+                State.draggingZone.x = Math.max(10, Math.min(zx, 3700));
+                State.draggingZone.y = Math.max(10, Math.min(zy, 3700));
+                const zEl = document.getElementById(State.draggingZone.id);
+                if (zEl) { zEl.style.left = State.draggingZone.x + 'px'; zEl.style.top = State.draggingZone.y + 'px'; }
+            }
 
             if (State.draggingDevice && State.selectedTool === 'pointer') {
                 if (State.viewport.snap) {
@@ -2191,7 +2739,11 @@
         }, { passive: true });
 
         const endPointerActions = () => {
-            State.draggingDevice = null;
+            if (State.draggingDevice || State.draggingZone) {
+                State.draggingDevice = null;
+                State.draggingZone = null;
+                HistoryManager.push();
+            }
             if (State.viewport.isPanning) {
                 State.viewport.isPanning = false;
                 workspaceEl.style.cursor = State.selectedTool === 'pan' ? 'grab' : 'default';
