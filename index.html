@@ -27,11 +27,12 @@
     <meta name="theme-color" content="#030306">
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <!-- Fontes: Inter & JetBrains Mono -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Ícones: Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.2"></script>
+    <script src="workspace.js"></script>
 
     <script>
         tailwind.config = {
@@ -368,6 +369,9 @@
             <button onclick="TopologyManager.load()" class="text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Carregar do Navegador">
                 <i class="ph ph-folder-open text-base text-sky-400"></i> <span class="hidden lg:inline">Carregar</span>
             </button>
+            <button type="button" onclick="TopologyManager.showSummary()" aria-haspopup="dialog" class="text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
+                <i class="ph ph-graph" aria-hidden="true"></i> Resumo
+            </button>
             <button onclick="TopologyManager.exportJSON()" class="text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Exportar Arquivo JSON">
                 <i class="ph ph-download-simple text-base text-purple-400"></i> <span class="hidden xl:inline">Exportar</span>
             </button>
@@ -634,6 +638,25 @@
         </div>
         <div class="flex-1 px-4 md:px-6 py-3 flex gap-3.5 md:gap-5 overflow-x-auto items-center bg-transparent relative z-10" id="equipment-list"></div>
     </footer>
+
+    <dialog id="topology-summary" aria-labelledby="topology-summary-title" aria-describedby="topology-summary-help"
+            class="fixed inset-0 m-auto w-[min(90vw,34rem)] max-h-[85vh] overflow-y-auto rounded-2xl border border-slate-600 bg-slate-900 p-6 text-slate-100 backdrop:bg-black/70">
+        <h2 id="topology-summary-title" class="text-lg font-bold">Resumo da topologia</h2>
+        <p id="topology-summary-help" class="mt-2 text-sm text-slate-300">
+            Grupos indicam quais dispositivos estão ligados por cabos, não validam endereços, roteamento ou conectividade IP.
+        </p>
+        <dl class="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-slate-800 p-3 text-sm">
+            <div><dt>Dispositivos</dt><dd id="topology-device-total" class="font-bold"></dd></div>
+            <div><dt>Cabos</dt><dd id="topology-cable-total" class="font-bold"></dd></div>
+            <div><dt>Grupos físicos</dt><dd id="topology-group-total" class="font-bold"></dd></div>
+            <div><dt>Sem cabo</dt><dd id="topology-isolated-total" class="font-bold"></dd></div>
+        </dl>
+        <ul id="topology-group-list" aria-label="Dispositivos por grupo físico" class="mt-4 grid gap-2 break-words text-sm"></ul>
+        <p id="topology-summary-empty" class="mt-4 text-sm text-slate-300" hidden>Adicione dispositivos à matriz para ver os grupos.</p>
+        <form method="dialog" class="mt-5">
+            <button type="submit" class="rounded-lg bg-sky-700 px-5 py-2 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2" autofocus>Fechar</button>
+        </form>
+    </dialog>
 
     <script>
         'use strict';
@@ -2380,6 +2403,26 @@
         // 16. PERSISTÊNCIA, EXPORTAÇÃO E PRESETS
         // ==========================================
         const TopologyManager = {
+            showSummary() {
+                const summary = summarizeTopology(State.devices, State.links);
+                document.getElementById('topology-device-total').textContent = summary.devices;
+                document.getElementById('topology-cable-total').textContent = summary.cables;
+                document.getElementById('topology-group-total').textContent = summary.groups.length;
+                document.getElementById('topology-isolated-total').textContent = summary.isolated;
+                const list = document.getElementById('topology-group-list');
+                list.replaceChildren();
+                document.getElementById('topology-summary-empty').hidden = summary.devices > 0;
+                summary.groups.forEach((group, index) => {
+                    const row = document.createElement('li');
+                    row.className = 'rounded-lg border border-slate-700 p-2';
+                    const names = group.map(device => device.name || device.id);
+                    row.textContent = group.length === 1
+                        ? `Sem cabo: ${names[0]}`
+                        : `Grupo ${index + 1}: ${names.join(', ')}`;
+                    list.append(row);
+                });
+                document.getElementById('topology-summary').showModal();
+            },
             serialize() {
                 return JSON.stringify({
                     version: '3.0',
@@ -2426,15 +2469,24 @@
                 if (recordHistory) HistoryManager.push();
             },
             save() {
-                localStorage.setItem('wpt_switchlab_enterprise_v3', this.serialize());
-                Toast.show('Topologia salva no armazenamento local.', 'success');
+                try {
+                    WorkspaceStorage.save(localStorage, this.serialize());
+                    Toast.show('Topologia salva no armazenamento local.', 'success');
+                } catch {
+                    Toast.show('Não foi possível salvar. Exporte a topologia como JSON.', 'error');
+                }
             },
             load() {
-                const dataStr = localStorage.getItem('wpt_switchlab_enterprise_v3');
-                if (!dataStr) return Toast.show('Nenhuma topologia salva encontrada.', 'warning');
+                let topology;
+                try {
+                    topology = WorkspaceStorage.load(localStorage);
+                } catch {
+                    return Toast.show('Não foi possível ler a topologia salva.', 'error');
+                }
+                if (!topology) return Toast.show('Nenhuma topologia salva encontrada.', 'warning');
                 showModal('Carregar Topologia', 'Isso substituirá a topologia atual na tela. Deseja continuar?', 'confirm', () => {
                     try {
-                        this.restoreFromObject(JSON.parse(dataStr), true);
+                        this.restoreFromObject(topology, true);
                         Toast.show('Topologia restaurada com sucesso.', 'success');
                     } catch (e) {
                         Toast.show('Falha ao ler dados salvos.', 'error');
@@ -2457,8 +2509,7 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
-                        const data = JSON.parse(e.target.result);
-                        if (!data.devices || !data.links) throw new Error('Formato inválido');
+                        const data = WorkspaceStorage.parse(e.target.result);
                         this.restoreFromObject(data, true);
                         Toast.show(`Topologia "${file.name}" importada!`, 'success');
                     } catch (err) {

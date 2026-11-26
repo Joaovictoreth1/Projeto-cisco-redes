@@ -1,43 +1,24 @@
-# 🌐 Web Packet Tracer Pro | SwitchLab Ultra Enterprise
+# SwitchLab
 
-> Simulador interativo avançado de redes Cisco (Packet Tracer Web) com interface gráfica moderna, emulação de dispositivos em tempo real, console CLI Cisco IOS, animação de pacotes e gestão de topologias.
+Simulador didático de topologias de rede, sem alterar redes reais. Monte uma topologia, salve-a no navegador ou exporte um backup JSON. Os recursos visuais usam CDNs.
 
-[![GitHub Pages Deploy](https://img.shields.io/badge/demo-live%20online-0ea5e9?style=for-the-badge&logo=google-chrome&logoColor=white)](https://joaovictoreth1.github.io/Projeto-cisco-redes/)
-[![License](https://img.shields.io/badge/license-MIT-purple?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Web%20Browser-10b981?style=for-the-badge&logo=html5&logoColor=white)](https://joaovictoreth1.github.io/Projeto-cisco-redes/)
-[![Stack](https://img.shields.io/badge/stack-Tailwind%20%7C%20SVG%20%7C%20JS%20OOP-8b5cf6?style=for-the-badge)](https://joaovictoreth1.github.io/Projeto-cisco-redes/)
+## Rodar localmente
 
----
+Na raiz do repositório, execute:
 
-## 🚀 Demonstração Rápida
+```sh
+python3 -m http.server 8000 --bind 127.0.0.1
+```
 
-Acesse o simulador diretamente pelo navegador sem instalar nada:  
-👉 **[https://joaovictoreth1.github.io/Projeto-cisco-redes/](https://joaovictoreth1.github.io/Projeto-cisco-redes/)**
+Abra <http://localhost:8000/>.
 
----
+## Estrutura
 
-## 📋 Sumário
+`index.html`: simulador. `workspace.js`: leitura e validação dos dados de topologia. `workspace.test.mjs`: testes (`node --test`, Node 24). `.github/workflows/deploy.yml`: publicação da branch `main`.
 
-- [Visão Geral](#-visão-geral)
-- [Funcionalidades Principais](#-funcionalidades-principais)
-- [Dispositivos Suportados](#-dispositivos-suportados)
-- [Tipos de Cabeamento](#-tipos-de-cabeamento)
-- [Terminal CLI Cisco IOS Emulado](#-terminal-cli-cisco-ios-emulado)
-- [Motor de Simulação de Tráfego](#-motor-de-simulação-de-tráfego)
-- [Como Executar Localmente](#-como-executar-localmente)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Atalhos e Controles](#-atalhos-e-controles)
-- [Licença](#-licença)
+Para publicar, o mantenedor deve verificar em **Settings → Pages** que a origem é **GitHub Actions**; se necessário, habilite-a e rode o deploy a partir de `main`. A validação das branches não publica a aplicação.
 
----
-
-## 🎯 Visão Geral
-
-O **Web Packet Tracer Pro** é uma solução completa para estudantes e profissionais de Redes de Computadores (preparação para certificações como **Cisco CCNA**, Network+, etc.). Ele recria a experiência do Cisco Packet Tracer diretamente no navegador, eliminando a necessidade de máquinas virtuais pesadas ou dependências Java.
-
-O projeto utiliza **Canvas SVG de alto desempenho**, **Tailwind CSS**, **Phosphor Icons** e um motor de estado reativo escrito em **JavaScript Orientado a Objetos (OOP)** puro.
-
----
+A CI valida o HTML e verifica arquivos e âncoras locais. Links e serviços externos não são consultados pela CI.
 
 ## ✨ Funcionalidades Principais
 
@@ -99,12 +80,12 @@ O terminal suporta uma ampla variedade de comandos Cisco IOS autênticos:
 ```bash
 # Modo Privilegiado
 Router> enable
-Router# 
+Router#
 
 # Modo de Configuração
 Router# configure terminal
 Router(config)# hostname R1-Borda
-R1-Borda(config)# 
+R1-Borda(config)#
 
 # Configuração de Interface
 R1-Borda(config)# interface gigabitEthernet 0/0
@@ -140,45 +121,6 @@ Ao disparar um teste de ping via ferramenta gráfica ou linha de comando:
 
 ---
 
-## 🛠️ Como Executar Localmente
-
-Como o projeto é construído em tecnologias web puras (Vanilla HTML5 + JS), você não precisa compilar nada.
-
-### Opção 1: Abrir diretamente no navegador
-Basta dar um duplo clique no arquivo `index.html` ou arrastá-lo para dentro de qualquer navegador moderno (Chrome, Firefox, Edge, Opera).
-
-### Opção 2: Servidor local com Python
-```bash
-# Clone o repositório
-git clone https://github.com/Joaovictoreth1/Projeto-cisco-redes.git
-cd Projeto-cisco-redes
-
-# Inicie o servidor HTTP nativo do Python
-python -m http.server 8080
-```
-Abra em seu navegador: `http://localhost:8080`
-
-### Opção 3: Servidor com Node.js (npx)
-```bash
-npx serve .
-```
-
----
-
-## 📁 Estrutura do Projeto
-
-```
-Projeto-cisco-redes/
-├── index.html                  # Aplicação completa (SPA autossuficiente)
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # Pipeline CI/CD de deploy no GitHub Pages
-├── .gitignore                  # Arquivos ignorados pelo Git
-└── README.md                   # Documentação detalhada do projeto
-```
-
----
-
 ## 🎮 Atalhos e Controles
 
 | Ação | Atalho / Gesto |
@@ -192,14 +134,3 @@ Projeto-cisco-redes/
 | **Deletar Elemento** | Selecionar ferramenta Lixeira ou pressionar `Delete` |
 
 ---
-
-## 📄 Licença
-
-Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` ou consulte os termos abertos para uso educacional e profissional.
-
----
-
-<p align="center">
-  Desenvolvido com foco em alta performance e excelência em Redes de Computadores.<br>
-  <b><a href="https://github.com/Joaovictoreth1">João Victor</a></b>
-</p>
