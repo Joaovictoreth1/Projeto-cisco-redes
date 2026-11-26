@@ -103,7 +103,10 @@ export function removeDevice(topology: Topology, deviceId: string): boolean {
 // ---------------------------------------------------------------------------
 
 export class TopologyValidationError extends Error {
-  constructor(public readonly path: string, detail: string) {
+  constructor(
+    public readonly path: string,
+    detail: string,
+  ) {
     super(`${path}: ${detail}`);
     this.name = 'TopologyValidationError';
   }
@@ -137,7 +140,7 @@ function str(value: unknown, path: string, max: number, fallback?: string): stri
 
 function ipOrEmpty(value: unknown, path: string, fallback = ''): string {
   const s = str(value, path, 15, fallback).trim();
-  if (s !== '' && !isValidIP(s)) fail(path, `invalid IPv4 address "${s}"`);
+  if (s !== '' && !isValidIP(s)) fail(path, `invalid IPv4 address "${String(s)}"`);
   return s;
 }
 
@@ -170,7 +173,12 @@ function mac(value: unknown, path: string): string {
   return s.toUpperCase();
 }
 
-function stringMap(value: unknown, path: string, key: (k: string, p: string) => string, val: (v: unknown, p: string) => string): Record<string, string> {
+function stringMap(
+  value: unknown,
+  path: string,
+  key: (k: string, p: string) => string,
+  val: (v: unknown, p: string) => string,
+): Record<string, string> {
   if (value === undefined) return {};
   const entries = Object.entries(obj(value, path));
   if (entries.length > LIMITS.tableEntries) fail(path, `too many entries (max ${LIMITS.tableEntries})`);
@@ -208,7 +216,10 @@ function parseDevice(raw: unknown, path: string): Device {
     x: coord(d.x, `${path}.x`),
     y: coord(d.y, `${path}.y`),
     cliMode,
-    selectedIfIndex: Math.min(int(d.selectedIfIndex, `${path}.selectedIfIndex`, 0, LIMITS.interfaces, 0), interfaces.length - 1),
+    selectedIfIndex: Math.min(
+      int(d.selectedIfIndex, `${path}.selectedIfIndex`, 0, LIMITS.interfaces, 0),
+      interfaces.length - 1,
+    ),
     staticRoutes: arr(d.staticRoutes ?? [], `${path}.staticRoutes`, LIMITS.routes).map((rr, i) => {
       const p = `${path}.staticRoutes[${i}]`;
       const r = obj(rr, p);
@@ -226,7 +237,10 @@ function parseDevice(raw: unknown, path: string): Device {
     ),
     macTable: arr(d.macTable ?? [], `${path}.macTable`, LIMITS.tableEntries).map((re, i) => {
       const e = obj(re, `${path}.macTable[${i}]`);
-      return { mac: mac(e.mac, `${path}.macTable[${i}].mac`), port: str(e.port, `${path}.macTable[${i}].port`, LIMITS.name) };
+      return {
+        mac: mac(e.mac, `${path}.macTable[${i}].mac`),
+        port: str(e.port, `${path}.macTable[${i}].port`, LIMITS.name),
+      };
     }),
     dhcpServer: {
       enabled: dhcpRaw.enabled === true,
@@ -309,7 +323,10 @@ export function parseTopology(input: unknown): Topology {
     };
   });
 
-  const deviceCounter = Math.max(int(root.deviceCounter, 'deviceCounter', 1, Number.MAX_SAFE_INTEGER, 1), devices.length + 1);
+  const deviceCounter = Math.max(
+    int(root.deviceCounter, 'deviceCounter', 1, Number.MAX_SAFE_INTEGER, 1),
+    devices.length + 1,
+  );
   return { devices, links, zones, deviceCounter };
 }
 

@@ -29,7 +29,14 @@ export function buildPreset(key: PresetKey, viewportWidth: number, viewportHeigh
   };
 
   if (key === 'default') {
-    t.zones.push({ id: 'zone_1', title: 'LAN Corporativa — 192.168.1.0/24', x: cx - 30, y: h * 0.36, w: 410, h: h * 0.52 });
+    t.zones.push({
+      id: 'zone_1',
+      title: 'LAN Corporativa — 192.168.1.0/24',
+      x: cx - 30,
+      y: h * 0.36,
+      w: 410,
+      h: h * 0.52,
+    });
     const cloud = add('cloud', 'WAN-Internet', cx - 220, h * 0.24);
     const r1 = add('router', 'R1-Core', cx, h * 0.24);
     setIp(r1, 0, '8.8.8.1');

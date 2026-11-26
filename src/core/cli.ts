@@ -208,7 +208,8 @@ function iosCommand(dev: Device, tokens: string[], raw: string[]): CliResult {
     return mode === 'priv' ? setMode('config') : { lines: [INVALID] };
   }
   if (base === 'end') return setMode(mode === 'user' ? 'user' : 'priv');
-  if (base === 'exit') return setMode({ if: 'config', config: 'priv', priv: 'user', user: 'user' }[mode] as Device['cliMode']);
+  if (base === 'exit')
+    return setMode({ if: 'config', config: 'priv', priv: 'user', user: 'user' }[mode] as Device['cliMode']);
   if (tokens[0] === 'show' || abbrev(tokens.slice(0, 1), ['show'])) {
     return showCommand(dev, tokens) ?? { lines: ["% Unknown command or incomplete syntax. Digite 'help'."] };
   }
@@ -260,7 +261,8 @@ function iosCommand(dev: Device, tokens: string[], raw: string[]): CliResult {
   if (abbrev(tokens.slice(0, 2), ['ip', 'route'], 2)) {
     if (mode !== 'config' || dev.typeStr !== 'router') return { lines: [INVALID] };
     const [, , dest, mask, nextHop] = raw;
-    if (!isValidIP(dest) || !isValidMask(mask) || !isValidIP(nextHop)) return { lines: ['% Inconsistent address and mask'] };
+    if (!isValidIP(dest) || !isValidMask(mask) || !isValidIP(nextHop))
+      return { lines: ['% Inconsistent address and mask'] };
     if (!dev.staticRoutes.some((r) => r.dest === dest && r.mask === mask && r.nextHop === nextHop)) {
       dev.staticRoutes.push({ dest, mask, nextHop });
     }

@@ -1,4 +1,13 @@
-import { broadcastAddress, ipMatchesNetwork, ipToLong, isSameSubnet, isValidIP, longToIp, maskToPrefix, networkAddress } from './ip';
+import {
+  broadcastAddress,
+  ipMatchesNetwork,
+  ipToLong,
+  isSameSubnet,
+  isValidIP,
+  longToIp,
+  maskToPrefix,
+  networkAddress,
+} from './ip';
 import { isHost, type Device, type Link, type Topology } from './types';
 
 export interface Neighbor {
@@ -106,7 +115,8 @@ export function lookupRoute(dev: Device, targetIp: string): NextHopDecision | nu
   }
   if (dev.typeStr === 'router') {
     for (const r of dev.staticRoutes) {
-      if (ipMatchesNetwork(targetIp, r.dest, r.mask)) consider(maskToPrefix(r.mask), { connected: false, nextHop: r.nextHop });
+      if (ipMatchesNetwork(targetIp, r.dest, r.mask))
+        consider(maskToPrefix(r.mask), { connected: false, nextHop: r.nextHop });
     }
   } else if (isHost(dev) && isValidIP(dev.gateway)) {
     consider(-1, { connected: false, nextHop: dev.gateway });
@@ -117,7 +127,8 @@ export function lookupRoute(dev: Device, targetIp: string): NextHopDecision | nu
 const firstIp = (dev: Device): string => dev.interfaces.find((i) => i.ip)?.ip ?? dev.name;
 
 export function traceRoute(topology: Topology, src: Device, targetIp: string): RouteResult {
-  if (!isValidIP(targetIp)) return { success: false, error: `Invalid IP address: ${targetIp}`, path: [src], hops: [] };
+  if (!isValidIP(targetIp))
+    return { success: false, error: `Invalid IP address: ${String(targetIp)}`, path: [src], hops: [] };
   const target = findDeviceByActiveIp(topology, targetIp);
   if (!target) return { success: false, error: 'Destination host unreachable.', path: [src], hops: [] };
   if (target.id === src.id) return { success: true, path: [src], hops: [src] };
@@ -179,7 +190,11 @@ export function allocateFromPool(server: Device, clientMac: string, inUse: Reado
   };
   const existing = pool.leases[clientMac];
   if (existing && inPool(existing)) return existing;
-  const leased = new Set(Object.entries(pool.leases).filter(([mac]) => mac !== clientMac).map(([, ip]) => ip));
+  const leased = new Set(
+    Object.entries(pool.leases)
+      .filter(([mac]) => mac !== clientMac)
+      .map(([, ip]) => ip),
+  );
   for (let v = Math.max(start, net + 1); v < bcast; v++) {
     const candidate = longToIp(v);
     if (!leased.has(candidate) && !inUse.has(candidate) && candidate !== pool.gateway) {
