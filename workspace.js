@@ -1,3 +1,42 @@
+function summarizeTopology(devices, links) {
+    const byId = new Map(devices.map(device => [device.id, device]));
+    const neighbors = new Map(devices.map(device => [device.id, new Set()]));
+    let cables = 0;
+
+    for (const { sourceId, targetId } of links) {
+        if (sourceId === targetId || !byId.has(sourceId) || !byId.has(targetId)) continue;
+        cables++;
+        neighbors.get(sourceId).add(targetId);
+        neighbors.get(targetId).add(sourceId);
+    }
+
+    const visited = new Set();
+    const groups = [];
+    for (const id of byId.keys()) {
+        if (visited.has(id)) continue;
+        const group = [];
+        const pending = [id];
+        visited.add(id);
+        while (pending.length) {
+            const next = pending.pop();
+            group.push(byId.get(next));
+            for (const neighbor of neighbors.get(next)) {
+                if (visited.has(neighbor)) continue;
+                visited.add(neighbor);
+                pending.push(neighbor);
+            }
+        }
+        groups.push(group);
+    }
+
+    return {
+        devices: byId.size,
+        cables,
+        groups,
+        isolated: groups.filter(group => group.length === 1).length,
+    };
+}
+
 const WorkspaceStorage = {
     key: 'wpt_switchlab_enterprise_v3',
 
