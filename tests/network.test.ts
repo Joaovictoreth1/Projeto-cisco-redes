@@ -190,7 +190,13 @@ describe('dhcp', () => {
   it('re-leases when a stored lease is outside the current pool', () => {
     const t = emptyTopology();
     const r = device(t, 'router', 'R', '10.0.0.1');
-    r.dhcpServer = { enabled: true, startIp: '10.0.0.10', mask: '255.255.255.0', gateway: '', leases: { 'AA:AA:AA:AA:AA:01': '192.168.0.5' } };
+    r.dhcpServer = {
+      enabled: true,
+      startIp: '10.0.0.10',
+      mask: '255.255.255.0',
+      gateway: '',
+      leases: { 'AA:AA:AA:AA:AA:01': '192.168.0.5' },
+    };
     expect(allocateFromPool(r, 'AA:AA:AA:AA:AA:01', new Set())).toBe('10.0.0.10');
   });
 

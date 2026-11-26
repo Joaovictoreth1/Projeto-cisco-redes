@@ -104,7 +104,9 @@ describe('IOS configuration', () => {
     expect(resolveInterface(sw.interfaces, '0/1')).toBe(-1);
     expect(resolveInterface(device(t, 'pc', 'PC').interfaces, 'eth0')).toBe(0);
     expect(resolveInterface(device(t, 'cloud', 'C').interfaces, 'wan1')).toBe(1);
-    expect(resolveInterface([{ name: 'Weird', ip: '', mask: '', mac: '', connectedTo: null, adminUp: true }], 'w0')).toBe(-1);
+    expect(
+      resolveInterface([{ name: 'Weird', ip: '', mask: '', mac: '', connectedTo: null, adminUp: true }], 'w0'),
+    ).toBe(-1);
   });
 
   it('validates interface commands', () => {
@@ -138,7 +140,9 @@ describe('IOS configuration', () => {
     expect(executeCommand(dev, 'ip route 10.2.0.0 255.255.255.0 10.0.12.2').mutated).toBe(true);
     run(dev, 'ip route 10.2.0.0 255.255.255.0 10.0.12.2');
     expect(dev.staticRoutes).toHaveLength(1);
-    expect(executeCommand(dev, 'ip route 10.2.0.0 255.0.255.0 10.0.12.2').lines).toEqual(['% Inconsistent address and mask']);
+    expect(executeCommand(dev, 'ip route 10.2.0.0 255.0.255.0 10.0.12.2').lines).toEqual([
+      '% Inconsistent address and mask',
+    ]);
     expect(executeCommand(router(), 'ip route 10.2.0.0 255.255.255.0 10.0.12.2').lines[0]).toMatch(/Invalid input/);
   });
 
@@ -203,7 +207,9 @@ describe('IOS show commands', () => {
     const { sw, r1 } = twoRouterLab();
     expect(executeCommand(sw, 'sh mac').lines.at(-1)).toBe('  (Tabela vazia)');
     sw.macTable.push({ mac: 'AA:AA:AA:AA:AA:AA', port: 'FastEthernet0/1' });
-    expect(executeCommand(sw, 'show mac address-table').lines.at(-1)).toContain('AA:AA:AA:AA:AA:AA    DYNAMIC     FastEthernet0/1');
+    expect(executeCommand(sw, 'show mac address-table').lines.at(-1)).toContain(
+      'AA:AA:AA:AA:AA:AA    DYNAMIC     FastEthernet0/1',
+    );
     expect(executeCommand(r1, 'show arp').lines).toEqual(['Tabela ARP vazia.']);
   });
 });

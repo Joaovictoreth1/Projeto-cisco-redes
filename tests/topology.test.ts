@@ -15,10 +15,11 @@ import { buildPreset, PRESET_KEYS } from '../src/core/presets';
 import { device, twoRouterLab } from './helpers';
 
 const roundTrip = (json: string) => parseTopologyJson(json);
-const base = () => JSON.parse(serialize(twoRouterLab().t)) as Record<string, unknown> & {
-  devices: Record<string, unknown>[];
-  links: Record<string, unknown>[];
-};
+const base = () =>
+  JSON.parse(serialize(twoRouterLab().t)) as Record<string, unknown> & {
+    devices: Record<string, unknown>[];
+    links: Record<string, unknown>[];
+  };
 const expectInvalid = (data: unknown, pattern: RegExp) => {
   expect(() => parseTopology(data)).toThrow(TopologyValidationError);
   expect(() => parseTopology(data)).toThrow(pattern);
@@ -30,7 +31,12 @@ describe('device factory', () => {
     const a = createDevice(t, 'router', 'R', 10, 20);
     const b = createDevice(t, 'switch', 'SW', 0, 0);
     expect([a.name, b.name, t.deviceCounter]).toEqual(['R1', 'SW2', 3]);
-    expect(a.interfaces.map((i) => i.name)).toEqual(['GigabitEthernet0/0', 'GigabitEthernet0/1', 'GigabitEthernet0/2', 'GigabitEthernet0/3']);
+    expect(a.interfaces.map((i) => i.name)).toEqual([
+      'GigabitEthernet0/0',
+      'GigabitEthernet0/1',
+      'GigabitEthernet0/2',
+      'GigabitEthernet0/3',
+    ]);
     expect(b.interfaces).toHaveLength(8);
     expect(createDevice(t, 'cloud', 'C', 0, 0).interfaces.map((i) => i.ip)).toEqual(['8.8.8.8', '1.1.1.1']);
     expect(createDevice(t, 'server', 'S', 0, 0).prompt).toBe('user@s4:~$ ');
@@ -95,7 +101,13 @@ describe('serialization', () => {
     const t = parseTopology(data);
     expect(t.zones).toEqual([]);
     expect(t.deviceCounter).toBe(t.devices.length + 1);
-    expect(t.devices[0]?.dhcpServer).toEqual({ enabled: false, startIp: '', mask: '255.255.255.0', gateway: '', leases: {} });
+    expect(t.devices[0]?.dhcpServer).toEqual({
+      enabled: false,
+      startIp: '',
+      mask: '255.255.255.0',
+      gateway: '',
+      leases: {},
+    });
   });
 
   it('rebuilds port occupancy from links instead of trusting connectedTo', () => {
@@ -107,7 +119,10 @@ describe('serialization', () => {
   });
 
   it('drops unknown keys and never pollutes prototypes', () => {
-    const json = serialize(twoRouterLab().t).replace('"typeStr"', '"__proto__": {"polluted": true}, "onclick": "alert(1)", "typeStr"');
+    const json = serialize(twoRouterLab().t).replace(
+      '"typeStr"',
+      '"__proto__": {"polluted": true}, "onclick": "alert(1)", "typeStr"',
+    );
     const t = roundTrip(json);
     expect(({} as Record<string, unknown>).polluted).toBeUndefined();
     expect(Object.keys(t.devices[0] ?? {})).not.toContain('onclick');
@@ -158,26 +173,55 @@ describe('serialization', () => {
     ['bad mac', (d) => ((d.devices[0]!.interfaces as Record<string, unknown>[])[0]!.mac = 'zz'), /invalid MAC/],
     ['bad mode', (d) => (d.devices[0]!.cliMode = 'root'), /cliMode/],
     ['bad index', (d) => (d.devices[0]!.selectedIfIndex = -1), /selectedIfIndex/],
-    ['incomplete route', (d) => (d.devices[0]!.staticRoutes = [{ dest: '10.0.0.0', mask: '', nextHop: '' }]), /route requires/],
+    [
+      'incomplete route',
+      (d) => (d.devices[0]!.staticRoutes = [{ dest: '10.0.0.0', mask: '', nextHop: '' }]),
+      /route requires/,
+    ],
     ['bad arp key', (d) => (d.devices[0]!.arpTable = { nope: 'AA:BB:CC:DD:EE:FF' }), /invalid IPv4 key/],
     ['bad lease key', (d) => (d.devices[0]!.dhcpServer = { leases: { nope: '10.0.0.1' } }), /invalid MAC key/],
     ['bad mac table', (d) => (d.devices[0]!.macTable = [{ mac: 'x', port: 'Fa0/1' }]), /invalid MAC/],
     ['non-string cli', (d) => (d.devices[0]!.cliOutput = [42]), /expected a string/],
-    ['too many devices', (d) => (d.devices = Array.from({ length: LIMITS.devices + 1 }, () => d.devices[0]!)), /too many entries/],
+    [
+      'too many devices',
+      (d) => (d.devices = Array.from({ length: LIMITS.devices + 1 }, () => d.devices[0]!)),
+      /too many entries/,
+    ],
     ['dangling link', (d) => (d.links[0]!.targetId = 'ghost'), /does not exist/],
     ['self link', (d) => (d.links[0]!.targetId = d.links[0]!.sourceId), /to itself/],
     ['duplicate link id', (d) => (d.links[1]!.id = d.links[0]!.id), /duplicate link id/],
     ['port reuse', (d) => (d.links[1]!.srcIntf = 0), /already in use/],
     ['bad cable', (d) => (d.links[0]!.type = 'wifi'), /type: expected one of/],
     ['fractional port', (d) => (d.links[0]!.srcIntf = 0.5), /expected an integer/],
-    ['bad zone size', (d) => ((d as Record<string, unknown>).zones = [{ id: 'z', title: 't', x: 0, y: 0, w: 0, h: 10 }]), /size must be positive/],
-    ['long zone title', (d) => ((d as Record<string, unknown>).zones = [{ id: 'z', title: 'x'.repeat(200), x: 0, y: 0, w: 5, h: 5 }]), /longer than 120/],
-    ['too many arp entries', (d) => (d.devices[0]!.arpTable = Object.fromEntries(Array.from({ length: LIMITS.tableEntries + 1 }, (_, i) => [`10.0.${Math.floor(i / 250)}.${i % 250}`, 'AA:BB:CC:DD:EE:FF']))), /too many entries/],
+    [
+      'bad zone size',
+      (d) => ((d as Record<string, unknown>).zones = [{ id: 'z', title: 't', x: 0, y: 0, w: 0, h: 10 }]),
+      /size must be positive/,
+    ],
+    [
+      'long zone title',
+      (d) => ((d as Record<string, unknown>).zones = [{ id: 'z', title: 'x'.repeat(200), x: 0, y: 0, w: 5, h: 5 }]),
+      /longer than 120/,
+    ],
+    [
+      'too many arp entries',
+      (d) =>
+        (d.devices[0]!.arpTable = Object.fromEntries(
+          Array.from({ length: LIMITS.tableEntries + 1 }, (_, i) => [
+            `10.0.${Math.floor(i / 250)}.${i % 250}`,
+            'AA:BB:CC:DD:EE:FF',
+          ]),
+        )),
+      /too many entries/,
+    ],
   ])('rejects %s', (_label, mutate, pattern) => {
-    if (_label === 'non-object root') return expectInvalid([], pattern);
+    if (_label === 'non-object root') {
+      expectInvalid([], pattern);
+      return;
+    }
     const data = base();
     mutate(data);
-    return expectInvalid(data, pattern);
+    expectInvalid(data, pattern);
   });
 
   it('rejects malformed JSON text', () => {
