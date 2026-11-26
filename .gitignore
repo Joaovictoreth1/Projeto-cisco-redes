@@ -28,3 +28,9 @@ dist/
 build/
 _site/
 .cache/
+node_modules/
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
