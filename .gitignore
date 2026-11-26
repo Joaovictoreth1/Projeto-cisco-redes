@@ -28,3 +28,10 @@ dist/
 build/
 _site/
 .cache/
+
+# Node / tooling
+node_modules/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
