@@ -27,11 +27,12 @@
     <meta name="theme-color" content="#030306">
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <!-- Fontes: Inter & JetBrains Mono -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Ícones: Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.2"></script>
+    <script src="workspace.js"></script>
 
     <script>
         tailwind.config = {
@@ -2426,15 +2427,24 @@
                 if (recordHistory) HistoryManager.push();
             },
             save() {
-                localStorage.setItem('wpt_switchlab_enterprise_v3', this.serialize());
-                Toast.show('Topologia salva no armazenamento local.', 'success');
+                try {
+                    WorkspaceStorage.save(localStorage, this.serialize());
+                    Toast.show('Topologia salva no armazenamento local.', 'success');
+                } catch {
+                    Toast.show('Não foi possível salvar. Exporte a topologia como JSON.', 'error');
+                }
             },
             load() {
-                const dataStr = localStorage.getItem('wpt_switchlab_enterprise_v3');
-                if (!dataStr) return Toast.show('Nenhuma topologia salva encontrada.', 'warning');
+                let topology;
+                try {
+                    topology = WorkspaceStorage.load(localStorage);
+                } catch {
+                    return Toast.show('Não foi possível ler a topologia salva.', 'error');
+                }
+                if (!topology) return Toast.show('Nenhuma topologia salva encontrada.', 'warning');
                 showModal('Carregar Topologia', 'Isso substituirá a topologia atual na tela. Deseja continuar?', 'confirm', () => {
                     try {
-                        this.restoreFromObject(JSON.parse(dataStr), true);
+                        this.restoreFromObject(topology, true);
                         Toast.show('Topologia restaurada com sucesso.', 'success');
                     } catch (e) {
                         Toast.show('Falha ao ler dados salvos.', 'error');
@@ -2457,8 +2467,7 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
-                        const data = JSON.parse(e.target.result);
-                        if (!data.devices || !data.links) throw new Error('Formato inválido');
+                        const data = WorkspaceStorage.parse(e.target.result);
                         this.restoreFromObject(data, true);
                         Toast.show(`Topologia "${file.name}" importada!`, 'success');
                     } catch (err) {
