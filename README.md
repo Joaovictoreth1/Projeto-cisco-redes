@@ -1,205 +1,112 @@
-# 🌐 Web Packet Tracer Pro | SwitchLab Ultra Enterprise
+# Web Packet Tracer Pro — SwitchLab
 
-> Simulador interativo avançado de redes Cisco (Packet Tracer Web) com interface gráfica moderna, emulação de dispositivos em tempo real, console CLI Cisco IOS, animação de pacotes e gestão de topologias.
+Simulador de redes Cisco que roda inteiramente no navegador: monte topologias com roteadores, switches, hosts e nuvem WAN, configure-os por um console no estilo IOS e observe ARP, ICMP e DHCP animados no canvas.
 
-[![GitHub Pages Deploy](https://img.shields.io/badge/demo-live%20online-0ea5e9?style=for-the-badge&logo=google-chrome&logoColor=white)](https://joaovictoreth1.github.io/Projeto-cisco-redes/)
-[![License](https://img.shields.io/badge/license-MIT-purple?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Web%20Browser-10b981?style=for-the-badge&logo=html5&logoColor=white)](https://joaovictoreth1.github.io/Projeto-cisco-redes/)
-[![Stack](https://img.shields.io/badge/stack-Tailwind%20%7C%20SVG%20%7C%20JS%20OOP-8b5cf6?style=for-the-badge)](https://joaovictoreth1.github.io/Projeto-cisco-redes/)
+**Demo:** https://joaovictoreth1.github.io/Projeto-cisco-redes/
 
----
+## Funcionalidades
 
-## 🚀 Demonstração Rápida
+- Canvas com arrastar, pan, zoom, alinhamento à grade e zonas de sub-rede editáveis.
+- Cabos direto, cross-over e fibra, com seletor de porta física e LEDs de estado por porta.
+- Console por dispositivo:
+  - **Hosts:** `ping`, `traceroute`, `ipconfig`, `arp -a`, `dhcp`.
+  - **IOS:** `enable`, `conf t`, `interface gi0/1`, `ip address`, `[no] shutdown`, `ip route`, `hostname`, `show ip int brief`, `show ip route`, `show run` e `show mac`.
+  - Abreviações aceitas, histórico com ↑/↓ e autocompletar com Tab.
+- Roteamento estático por prefixo mais longo, aprendizado de MAC nos switches e servidor DHCP com pool limitado à sub-rede.
+- Log de PDUs com inspetor de cabeçalhos OSI (L1–L4).
+- Desfazer/refazer, salvar no `localStorage` e importar/exportar JSON validado.
+- Quatro laboratórios prontos: Core/WAN, Dual-LAN, Backbone multi-hop e DHCP.
 
-Acesse o simulador diretamente pelo navegador sem instalar nada:  
-👉 **[https://joaovictoreth1.github.io/Projeto-cisco-redes/](https://joaovictoreth1.github.io/Projeto-cisco-redes/)**
+## Arquitetura
 
----
+```
+index.html            marcação estática (sem scripts ou handlers inline)
+src/main.ts           bootstrap, delegação de eventos (data-action / data-change), teclado e ponteiro
+src/core/             domínio puro, sem DOM, 100% coberto por testes
+  types.ts            modelo: Device, NetInterface, Link, Zone, Topology
+  ip.ts               IPv4, máscaras contíguas, rede/broadcast, MAC
+  devices.ts          fábrica de dispositivos (contador só avança na criação)
+  network.ts          caminho L2, tabela MAC, roteamento LPM, traceroute, DHCP
+  cli.ts              interpretador IOS/host puro, que retorna linhas e ações
+  topology.ts         enlaces, remoção, serialização e validação estrita de importação
+  presets.ts          laboratórios prontos
+  history.ts          pilha de snapshots para desfazer/refazer
+src/ui/               camada de apresentação: renderiza o estado com DOM seguro
+  dom.ts              h()/svg(), que sempre atribuem texto via textContent
+  engine.ts           dispositivos, cabos, animação de pacotes, ping/traceroute/DHCP
+  properties.ts       painel de propriedades e serviços
+  cli-panel.ts        terminal
+  persistence.ts      histórico, localStorage, importação/exportação e presets
+  ...                 toast, modal, menu de contexto, catálogo, viewport e som
+```
 
-## 📋 Sumário
+A regra de negócio fica em `src/core`, que é determinístico e testável em Node. A UI só traduz eventos em chamadas ao core e redesenha.
 
-- [Visão Geral](#-visão-geral)
-- [Funcionalidades Principais](#-funcionalidades-principais)
-- [Dispositivos Suportados](#-dispositivos-suportados)
-- [Tipos de Cabeamento](#-tipos-de-cabeamento)
-- [Terminal CLI Cisco IOS Emulado](#-terminal-cli-cisco-ios-emulado)
-- [Motor de Simulação de Tráfego](#-motor-de-simulação-de-tráfego)
-- [Como Executar Localmente](#-como-executar-localmente)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Atalhos e Controles](#-atalhos-e-controles)
-- [Licença](#-licença)
+## Segurança
 
----
+- **Sem HTML a partir de dados:** todo texto vindo do usuário ou de arquivos é inserido com `textContent`. O ESLint proíbe `innerHTML`, `outerHTML`, `insertAdjacentHTML` e `eval`.
+- **Importação validada antes de mexer no estado:** `parseTopology` reconstrói cada campo e valida IPs, máscaras, MACs, portas, referências de enlace e limites (500 dispositivos, 2.000 enlaces). Chaves desconhecidas, incluindo `__proto__`, são descartadas, e arquivos acima de 5 MB são recusados. O mesmo caminho vale para o `localStorage` e para os snapshots de desfazer.
+- **CSP estrita no build:** `default-src 'self'`, sem `unsafe-inline` ou `unsafe-eval`. Fontes e ícones são empacotados no build, sem CDN em tempo de execução.
+- **Imagem Docker:** nginx sem root, com CSP, `frame-ancestors 'none'`, `nosniff`, `Referrer-Policy` e `Permissions-Policy`.
 
-## 🎯 Visão Geral
+## Desenvolvimento
 
-O **Web Packet Tracer Pro** é uma solução completa para estudantes e profissionais de Redes de Computadores (preparação para certificações como **Cisco CCNA**, Network+, etc.). Ele recria a experiência do Cisco Packet Tracer diretamente no navegador, eliminando a necessidade de máquinas virtuais pesadas ou dependências Java.
-
-O projeto utiliza **Canvas SVG de alto desempenho**, **Tailwind CSS**, **Phosphor Icons** e um motor de estado reativo escrito em **JavaScript Orientado a Objetos (OOP)** puro.
-
----
-
-## ✨ Funcionalidades Principais
-
-- 🖧 **Workspace Infinito com Grade Magnética (Snap to Grid):**
-  - Área de trabalho de 4000x4000px com zoom dinâmico e pan suave.
-  - Alinhamento automático à grade modular de 40px.
-- 🔌 **Cabeamento Dinâmico Inteligente:**
-  - Traçado de cabos com curvas gravitacionais (Bézier).
-  - Luzes de enlace (Link Lights) verde (UP) e vermelho (DOWN) em tempo real.
-  - Verificação de portas compatíveis e seletor de interface por dispositivo.
-- 💻 **Terminal CLI Cisco IOS Realista:**
-  - Modos de execução: Usuário (`>`), Privilegiado (`#`), e Configuração Global (`(config)#`).
-  - Navegação de histórico com setas `↑` e `↓`.
-  - Auto-completar com tecla `Tab`.
-  - Suporte a `?` para listar comandos disponíveis contextualmente.
-- 📦 **Simulador de Pacotes em Tempo Real:**
-  - Animação visual de pacotes ICMP (Ping) trafegando pelos enlaces.
-  - Resolução ARP automática e visualização de pacotes de retorno.
-  - Modos de simulação: Tempo Real e Passo a Passo (Event List).
-- 🏷️ **Zonas e Anotações de Sub-rede:**
-  - Criação de áreas visuais delimitadoras para sub-redes e VLANs.
-  - Nomenclatura customizada e identificação visual por cores.
-- 💾 **Persistência e Presets:**
-  - Salve e exporte a topologia completa em formato JSON.
-  - Importe topologias salvas.
-  - Laboratórios pré-configurados prontos para estudo.
-
----
-
-## 🖥️ Dispositivos Suportados
-
-| Categoria | Dispositivo | Portas / Interfaces |
-|---|---|---|
-| **Roteadores** | Cisco 2911 / 1941 Router | GigabitEthernet 0/0, GigabitEthernet 0/1, Serial |
-| **Switches** | Catalyst 2960 (Layer 2) | FastEthernet 0/1 a 0/24, Gigabit 0/1 a 0/2 |
-| **Switches L3** | Catalyst 3560 (Multilayer) | FastEthernet 0/1 a 0/24, SVIs (Interface VLAN) |
-| **End Devices** | PC Desktop | FastEthernet0 (Configuração IP estática ou DHCP) |
-| **End Devices** | Laptop | FastEthernet0 / Wireless |
-| **End Devices** | Server | HTTP, DNS, DHCP Server |
-| **WAN / Nuvem** | Cloud (Internet) | Ethernet, Serial |
-
----
-
-## 🔗 Tipos de Cabeamento
-
-| Tipo de Cabo | Indicador Visual | Aplicação Típica |
-|---|---|---|
-| **Auto-Detect** | Traço cinza suave | Conecta automaticamente a melhor porta disponível |
-| **Direto (Straight-Through)** | Linha sólida escura | Conexão entre dispositivos de camadas diferentes (ex: PC ↔ Switch) |
-| **Cruzado (Crossover)** | Linha tracejada | Conexão entre dispositivos da mesma camada (ex: Switch ↔ Switch, PC ↔ PC) |
-| **Fibra Óptica** | Linha âmbar pulsante | Conexões de alta velocidade e uplinks de roteadores |
-
----
-
-## ⌨️ Terminal CLI Cisco IOS Emulado
-
-O terminal suporta uma ampla variedade de comandos Cisco IOS autênticos:
+Requisitos: Node 22 (veja `.nvmrc`; mínimo 20.19).
 
 ```bash
-# Modo Privilegiado
-Router> enable
-Router# 
-
-# Modo de Configuração
-Router# configure terminal
-Router(config)# hostname R1-Borda
-R1-Borda(config)# 
-
-# Configuração de Interface
-R1-Borda(config)# interface gigabitEthernet 0/0
-R1-Borda(config-if)# ip address 192.168.1.1 255.255.255.0
-R1-Borda(config-if)# no shutdown
-R1-Borda(config-if)# exit
-
-# Comandos de Diagnóstico e Visualização
-R1-Borda# show ip interface brief
-R1-Borda# show running-config
-R1-Borda# show vlan brief
-R1-Borda# ping 192.168.1.10
+npm ci
+npm run dev          # http://localhost:5173
 ```
 
----
+| Comando                 | O que faz                                                        |
+| ----------------------- | ---------------------------------------------------------------- |
+| `npm run build`         | typecheck + build de produção em `dist/`                         |
+| `npm run preview`       | serve `dist/` em http://localhost:4173                           |
+| `npm run lint`          | ESLint (typescript-eslint strict), zero warnings                 |
+| `npm run format:check`  | Prettier                                                         |
+| `npm run typecheck`     | `tsc --noEmit` (app e testes)                                    |
+| `npm test`              | testes unitários (Vitest)                                        |
+| `npm run test:coverage` | cobertura do core, com mínimo de 95% de linhas e 90% de branches |
+| `npm run test:e2e`      | Playwright contra o build de produção                            |
+| `npm run check`         | todos os gates acima, exceto e2e                                 |
 
-## ⚡ Motor de Simulação de Tráfego
+O `Makefile` expõe os mesmos alvos (`make check`, `make e2e`, `make docker-run`).
 
-```
-[ PC-A (192.168.1.10) ]
-        │ (Cabo Direto)
-        ▼
-[ Switch Catalyst 2960 ] ──── Link Trunk ──── [ Router Cisco 2911 ]
-        │ (Cabo Direto)
-        ▼
-[ PC-B (192.168.1.20) ]
-```
+Não há variáveis de ambiente: a aplicação é 100% estática e não tem backend.
 
-Ao disparar um teste de ping via ferramenta gráfica ou linha de comando:
-1. O dispositivo de origem verifica sua tabela ARP e tabela de roteamento.
-2. Um pacote visual com efeito de brilho neon percorre o cabo conectado até o próximo hop.
-3. Se o destino responder, o pacote de retorno verde (Echo Reply) é gerado e o tempo de ida e volta (RTT) é exibido no log de eventos.
+## Formato do arquivo de topologia
 
----
+Os arquivos exportados usam `version: "4.0"`. Arquivos `3.0` de versões anteriores continuam sendo aceitos.
 
-## 🛠️ Como Executar Localmente
-
-Como o projeto é construído em tecnologias web puras (Vanilla HTML5 + JS), você não precisa compilar nada.
-
-### Opção 1: Abrir diretamente no navegador
-Basta dar um duplo clique no arquivo `index.html` ou arrastá-lo para dentro de qualquer navegador moderno (Chrome, Firefox, Edge, Opera).
-
-### Opção 2: Servidor local com Python
-```bash
-# Clone o repositório
-git clone https://github.com/Joaovictoreth1/Projeto-cisco-redes.git
-cd Projeto-cisco-redes
-
-# Inicie o servidor HTTP nativo do Python
-python -m http.server 8080
-```
-Abra em seu navegador: `http://localhost:8080`
-
-### Opção 3: Servidor com Node.js (npx)
-```bash
-npx serve .
+```json
+{
+  "version": "4.0",
+  "deviceCounter": 6,
+  "devices": [{ "id": "dev_1_x", "typeStr": "router", "name": "R1", "x": 400, "y": 200, "interfaces": [] }],
+  "links": [
+    { "id": "link_x", "sourceId": "dev_1_x", "srcIntf": 0, "targetId": "dev_2_y", "tgtIntf": 0, "type": "straight" }
+  ],
+  "zones": []
+}
 ```
 
----
+## Deploy
 
-## 📁 Estrutura do Projeto
+- **GitHub Pages:** `.github/workflows/deploy.yml` roda o CI completo, gera `dist/` e publica somente o build.
+- **Docker:**
+  ```bash
+  docker build -t projeto-cisco-redes .
+  docker run --rm -p 8080:8080 projeto-cisco-redes   # http://localhost:8080, health em /healthz
+  ```
 
-```
-Projeto-cisco-redes/
-├── index.html                  # Aplicação completa (SPA autossuficiente)
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # Pipeline CI/CD de deploy no GitHub Pages
-├── .gitignore                  # Arquivos ignorados pelo Git
-└── README.md                   # Documentação detalhada do projeto
-```
+## CI
 
----
+`.github/workflows/ci.yml` roda em todo push e PR:
 
-## 🎮 Atalhos e Controles
+- formatação, lint, typecheck e testes com cobertura;
+- `npm audit` das dependências de produção;
+- build de produção, e2e no Chromium e build da imagem Docker.
 
-| Ação | Atalho / Gesto |
-|---|---|
-| **Mover Workspace (Pan)** | Arrastar com botão do meio do mouse ou selecionar ferramenta Mão |
-| **Zoom In / Zoom Out** | Rodinha do mouse (Scroll Wheel) |
-| **Selecionar Dispositivo** | Clique com botão esquerdo |
-| **Menu de Contexto / Configuração** | Clique com botão direito no dispositivo |
-| **Conectar Cabo** | Selecionar ferramenta Cabo, clicar na origem e depois no destino |
-| **Disparar Ping Rápido** | Selecionar ferramenta Ping, clicar na origem e depois no destino |
-| **Deletar Elemento** | Selecionar ferramenta Lixeira ou pressionar `Delete` |
+## Licença
 
----
-
-## 📄 Licença
-
-Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` ou consulte os termos abertos para uso educacional e profissional.
-
----
-
-<p align="center">
-  Desenvolvido com foco em alta performance e excelência em Redes de Computadores.<br>
-  <b><a href="https://github.com/Joaovictoreth1">João Victor</a></b>
-</p>
+Distribuído sob a licença MIT. Veja [LICENSE](LICENSE).
