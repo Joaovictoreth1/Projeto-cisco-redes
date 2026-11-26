@@ -44,6 +44,13 @@ test('boots the default lab offline under a strict CSP', async ({ page }) => {
   expect(csp).toContain("script-src 'self'");
   await expect(page.locator('#cables-layer .link-group')).toHaveCount(4);
   await expect(page.locator('#zoom-level')).toHaveText('100%');
+  for (const selector of ['.ph-bold', '.ph-fill', '.ph']) {
+    const glyph = await page
+      .locator(selector)
+      .first()
+      .evaluate((el) => getComputedStyle(el, '::before').content);
+    expect(glyph, `${selector} icon glyph`).not.toBe('none');
+  }
 });
 
 test('pings across the switch from the host CLI', async ({ page }) => {

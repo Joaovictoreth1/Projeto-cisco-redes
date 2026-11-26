@@ -9,6 +9,7 @@ import '@fontsource/jetbrains-mono/500.css';
 import '@fontsource/jetbrains-mono/700.css';
 import '@phosphor-icons/web/regular';
 import '@phosphor-icons/web/fill';
+import '@phosphor-icons/web/bold';
 import { createDevice } from './core/devices';
 import type { CableType, DeviceType } from './core/types';
 import { CATEGORIES, type CategoryKey } from './ui/catalog';
